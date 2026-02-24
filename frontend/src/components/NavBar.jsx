@@ -1,4 +1,6 @@
-const Navbar = () => {
+import React from "react";
+
+const NavBar = () => {
   return (
     <nav className="flex items-center justify-between px-10 py-4 bg-white shadow">
       {/* Logo */}
@@ -24,4 +26,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default NavBar;

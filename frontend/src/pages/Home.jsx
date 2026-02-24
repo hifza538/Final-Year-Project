@@ -5,6 +5,7 @@ import Popular from "../components/Popular";
 import VendorCTA from "../components/VendorCTA";
 import Footer from "../components/Footer";
 
+
 const Home = () => {
   return (
     <>
