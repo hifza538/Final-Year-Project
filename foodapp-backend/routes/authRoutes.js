@@ -1,34 +1,35 @@
+// routes/authRoutes.js
 import express from "express";
 import {
   registerUser,
   loginUser,
   getProfile,
+  updateProfile,
+  changePassword,
   forgotPassword,
   verifyOtp,
   resetPassword,
 } from "../controllers/authController.js";
-import { protect } from "../middleware/authMiddleware.js";
+import { protect, authorize } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-/* === AUTH ROUTES+== */
-
-// Register new user
+// ===== PUBLIC ROUTES =====
 router.post("/register", registerUser);
-
-// Login existing user
 router.post("/login", loginUser);
-
-// Get logged-in user profile
-router.get("/me", protect, getProfile);
-
-// Forgot password - send OTP
 router.post("/forgot-password", forgotPassword);
-
-// Verify OTP
 router.post("/verify-otp", verifyOtp);
-
-// Reset password
 router.post("/reset-password", resetPassword);
+
+// ===== PROTECTED ROUTES (Login zaroori) =====
+router.get("/me", protect, getProfile);
+router.put("/update-profile", protect, updateProfile);
+router.put("/change-password", protect, changePassword);
+
+// ===== VENDOR ONLY ROUTES (example) =====
+// router.get("/vendor/dashboard", protect, authorize("vendor"), vendorDashboard);
+
+// ===== ADMIN ONLY ROUTES (example) =====
+// router.get("/admin/users", protect, authorize("admin"), getAllUsers);
 
 export default router;
