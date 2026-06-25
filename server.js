@@ -2,6 +2,8 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
+import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
+import authRoutes from "./routes/authRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -23,6 +25,12 @@ app.get("/", (req, res) => {
   res.json({ message: "LocalBites API is running..." });
 });
 
+// auth routes
+app.use("/api/auth", authRoutes);
+
+// error handling middleware
+app.use(notFound);
+app.use(errorHandler);
 
 // start the server
 const PORT = process.env.PORT || 5000;
