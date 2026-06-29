@@ -53,8 +53,10 @@ const userSchema = new mongoose.Schema(
     city: { type: String, trim: true, default: "" },
     zone: { type: String, trim: true, default: "" },
     cuisine: { type: String, trim: true, default: "" },
+
     coverPhoto: { type: String, default: "" },
     logo: { type: String, default: "" },
+
     minPrepTime: { type: Number, default: 15 },
     maxPrepTime: { type: Number, default: 45 },
     coordinates: {
@@ -74,14 +76,17 @@ const userSchema = new mongoose.Schema(
     cnicNumber: { type: String, trim: true, default: "" },
     ntnNumber: { type: String, trim: true, default: "" },
     hasFoodLicense: { type: Boolean, default: false },
-    cnicFront: { type: String, default: "" },
-    cnicBack: { type: String, default: "" },
-    signature: { type: String, default: "" },
 
-    // Payment & Withdrawal Fields
-    withdrawalMethod: { type: String, default: "" },
-    bankDetails: { type: String, default: "" },
-
+    // cnic images
+    cnicFront: {
+      url: { type: String, default: "" },
+      publicId: { type: String, default: "" },
+    },
+    cnicBack: {
+      url: { type: String, default: "" },
+      publicId: { type: String, default: "" },
+    },
+    
     // Account Status Fields
     isApproved: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
