@@ -53,8 +53,10 @@ const userSchema = new mongoose.Schema(
     city: { type: String, trim: true, default: "" },
     zone: { type: String, trim: true, default: "" },
     cuisine: { type: String, trim: true, default: "" },
+
     coverPhoto: { type: String, default: "" },
     logo: { type: String, default: "" },
+
     minPrepTime: { type: Number, default: 15 },
     maxPrepTime: { type: Number, default: 45 },
     coordinates: {
@@ -74,14 +76,17 @@ const userSchema = new mongoose.Schema(
     cnicNumber: { type: String, trim: true, default: "" },
     ntnNumber: { type: String, trim: true, default: "" },
     hasFoodLicense: { type: Boolean, default: false },
-    cnicFront: { type: String, default: "" },
-    cnicBack: { type: String, default: "" },
-    signature: { type: String, default: "" },
 
-    // Payment & Withdrawal Fields
-    withdrawalMethod: { type: String, default: "" },
-    bankDetails: { type: String, default: "" },
-
+    // cnic images
+    cnicFront: {
+      url: { type: String, default: "" },
+      publicId: { type: String, default: "" },
+    },
+    cnicBack: {
+      url: { type: String, default: "" },
+      publicId: { type: String, default: "" },
+    },
+    
     // Account Status Fields
     isApproved: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
@@ -91,11 +96,10 @@ const userSchema = new mongoose.Schema(
 );
 
 // hash the password before saving the user document
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function () {
   if (!this.isModified("password")) return next();
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  next();
 });
 
 // method to compare entered password with hashed password in the database
