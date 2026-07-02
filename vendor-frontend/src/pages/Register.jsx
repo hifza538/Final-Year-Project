@@ -3,10 +3,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { ChefHat, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
 import api from "../services/api";
 import InputField from "../components/common/InputField";
-import {
-  fetchPakistanCities,
-  fetchZonesByCity,
-} from "../services/locationService";
+import MapPicker from "../components/common/MapPicker";
+import { reverseGeocode } from "../services/locationService";
 
 // Cuisine types static list
 const CUISINE_TYPES = [
@@ -66,12 +64,6 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // Cities & Zones states
-  const [cities, setCities] = useState([]);
-  const [zones, setZones] = useState([]);
-  const [loadingCities, setLoadingCities] = useState(false);
-  const [loadingZones, setLoadingZones] = useState(false);
-
   const [form, setForm] = useState({
     // Step 1 - Owner Info
     firstName: "",
@@ -85,6 +77,7 @@ const Register = () => {
     cuisine: "",
     city: "",
     zone: "",
+    coordinates: { lat: null, lng: null },
     shopAddress: "",
     minPrepTime: "",
     maxPrepTime: "",
@@ -96,34 +89,6 @@ const Register = () => {
     cnicFront: null,
     cnicBack: null,
   });
-
-  // Page load par cities fetch karo
-  useEffect(() => {
-    const loadCities = async () => {
-      setLoadingCities(true);
-      const data = await fetchPakistanCities();
-      setCities(data);
-      setLoadingCities(false);
-    };
-    loadCities();
-  }, []);
-
-  // Jab city change ho, automatically zones fetch karo
-  useEffect(() => {
-    if (!form.city) {
-      setZones([]);
-      return;
-    }
-
-    const loadZones = async () => {
-      setLoadingZones(true);
-      const data = await fetchZonesByCity(form.city);
-      setZones(data);
-      setLoadingZones(false);
-    };
-
-    loadZones();
-  }, [form.city]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -148,6 +113,17 @@ const Register = () => {
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+  // Map location select handler
+  const handleMapLocationSelect = async (lat, lng) => {
+    const geo = await reverseGeocode(lat, lng);
+    setForm((prev) => ({
+      ...prev,
+      city: geo.city,
+      zone: geo.zone,
+      shopAddress: geo.fullAddress || prev.shopAddress,
+      coordinates: { lat, lng },
     }));
   };
   // CNIC images upload handler
@@ -291,6 +267,13 @@ const Register = () => {
       const fd = new FormData();
       Object.entries(form).forEach(([key, val]) => {
         if (val === null || val === undefined) return;
+
+        // convert coordinates object to JSON string before appending
+        if (key === "coordinates") {
+          fd.append(key, JSON.stringify(val));
+          return;
+        }
+
         fd.append(key, val);
       });
 
@@ -523,82 +506,34 @@ const Register = () => {
                     </p>
                   )}
                 </div>
+                {/* Map Location Picker */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Shop Location <span className="text-red-500">*</span>
+                  </label>
+                  <MapPicker onLocationSelect={handleMapLocationSelect} />
+                </div>
 
-                {/* City & Zone Dropdowns */}
+                {/* City & Zone  */}
                 <div className="grid grid-cols-2 gap-3">
-                  {/* City Dropdown */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      City <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      name="city"
-                      value={form.city}
-                      onChange={handleChange}
-                      disabled={loadingCities}
-                      className={`w-full px-4 py-2.5 rounded-lg border text-sm bg-white
-                        focus:outline-none focus:ring-2 focus:ring-pink-500 transition
-                        disabled:bg-gray-100 ${
-                          fieldErrors.city
-                            ? "border-red-400 bg-red-50"
-                            : "border-gray-200"
-                        }`}
-                    >
-                      <option value="">
-                        {loadingCities ? "Loading..." : "Select City"}
-                      </option>
-                      {cities.map((city) => (
-                        <option key={city} value={city}>
-                          {city}
-                        </option>
-                      ))}
-                    </select>
-                    {fieldErrors.city && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {fieldErrors.city}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Zone Dropdown - API se auto-load */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      Zone <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      name="zone"
-                      value={form.zone}
-                      onChange={handleChange}
-                      disabled={!form.city || loadingZones}
-                      className={`w-full px-4 py-2.5 rounded-lg border text-sm bg-white
-                        focus:outline-none focus:ring-2 focus:ring-pink-500 transition
-                        disabled:bg-gray-100 disabled:cursor-not-allowed ${
-                          fieldErrors.zone
-                            ? "border-red-400 bg-red-50"
-                            : "border-gray-200"
-                        }`}
-                    >
-                      <option value="">
-                        {!form.city
-                          ? "Select City First"
-                          : loadingZones
-                            ? "Loading zones..."
-                            : zones.length === 0
-                              ? "No zones found"
-                              : "Select Zone"}
-                      </option>
-                      {zones.map((zone) => (
-                        <option key={zone} value={zone}>
-                          {zone}
-                        </option>
-                      ))}
-                    </select>
-                    {fieldErrors.zone && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {fieldErrors.zone}
-                      </p>
-                    )}
-                  </div>
+                  <InputField
+                    label="City"
+                    name="city"
+                    value={form.city}
+                    onChange={handleChange}
+                    placeholder="selected from map"
+                    required
+                    error={fieldErrors.city}
+                  />
+                  <InputField
+                    label="Zone/Area"
+                    name="zone"
+                    value={form.zone}
+                    onChange={handleChange}
+                    placeholder="selected from map"
+                    required
+                    error={fieldErrors.zone}
+                  />
                 </div>
 
                 <InputField
