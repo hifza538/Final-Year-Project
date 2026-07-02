@@ -28,11 +28,7 @@ const userResponse = (user) => ({
   isActive: user.isActive,
 });
 
-/* ─────────────────────────────────────────────────────────
-   @desc    Register new vendor
-   @route   POST /api/auth/register
-   @access  Public
-───────────────────────────────────────────────────────── */
+//register vendor
 export const registerVendor = asyncHandler(async (req, res) => {
   const {
     // Owner info
@@ -59,7 +55,15 @@ export const registerVendor = asyncHandler(async (req, res) => {
     ntnNumber,
     hasFoodLicense,
   } = req.body;
-  
+
+  // parse coordinates if provided
+  let parsedCoordinates = { lat: null, lng: null };
+  try {
+    if (coordinates) parsedCoordinates = JSON.parse(coordinates);
+  } catch (e) {
+    parsedCoordinates = { lat: null, lng: null };
+  }
+
   // Extract uploaded files from request
   const cnicFrontFile = req.files?.cnicFront?.[0];
   const cnicBackFile = req.files?.cnicBack?.[0];
@@ -71,7 +75,7 @@ export const registerVendor = asyncHandler(async (req, res) => {
     if (cnicBackFile?.filename)
       await deleteFromCloudinary(cnicBackFile.filename);
   };
-    const fail = async (message) => {
+  const fail = async (message) => {
     await cleanupImages();
     res.status(400);
     throw new Error(message);
@@ -98,8 +102,8 @@ export const registerVendor = asyncHandler(async (req, res) => {
   if (!cnicFrontFile) await fail("CNIC front image is required");
   if (!cnicBackFile) await fail("CNIC back image is required");
 
-  // Format Validation 
-if (firstName.trim().length < 2 || firstName.trim().length > 50)
+  // Format Validation
+  if (firstName.trim().length < 2 || firstName.trim().length > 50)
     await fail("First name must be between 2 and 50 characters");
   if (!nameRegex.test(firstName.trim()))
     await fail("First name can only contain letters and spaces");
@@ -109,7 +113,8 @@ if (firstName.trim().length < 2 || firstName.trim().length > 50)
   if (!nameRegex.test(lastName.trim()))
     await fail("Last name can only contain letters and spaces");
 
-  if (!emailRegex.test(email.trim())) await fail("Please enter a valid email address");
+  if (!emailRegex.test(email.trim()))
+    await fail("Please enter a valid email address");
   if (!phoneRegex.test(phone.trim()))
     await fail("Please enter a valid Pakistani phone number e.g. 03001234567");
   if (password.length < 6 || password.length > 50)
@@ -120,7 +125,6 @@ if (firstName.trim().length < 2 || firstName.trim().length > 50)
     await fail("Please provide a complete address (minimum 10 characters)");
   if (!cnicRegex.test(cnicNumber.trim()))
     await fail("CNIC must be in format: XXXXX-XXXXXXX-X");
-
 
   // time validation for minPrepTime and maxPrepTime
   if (
@@ -176,8 +180,8 @@ if (firstName.trim().length < 2 || firstName.trim().length > 50)
       coverPhoto: coverPhoto || "",
       logo: logo || "",
       coordinates: {
-        lat: coordinates?.lat || null,
-        lng: coordinates?.lng || null,
+        lat: parsedCoordinates.lat,
+        lng: parsedCoordinates.lng,
       },
       cnicNumber: cnicNumber.trim(),
       ntnNumber: ntnNumber || "",
