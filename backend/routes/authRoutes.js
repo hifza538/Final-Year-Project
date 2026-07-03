@@ -1,6 +1,10 @@
 import express from "express";
-import { registerVendor } from "../controllers/auth/authController.js";
+import { registerVendor,
+  loginUser,
+  getMe
+ } from "../controllers/auth/authController.js";
 import {uploadCnic} from "../config/cloudinary.js";
+import { protect } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 // public route for vendor registration
@@ -12,6 +16,10 @@ router.post(
   ]),
   registerVendor
 );
+router.post("/login", loginUser);
+
+// protected route to get logged-in user details
+router.get("/me", protect, getMe);
 
 
 export default router;

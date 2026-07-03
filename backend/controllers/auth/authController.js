@@ -206,3 +206,85 @@ export const registerVendor = asyncHandler(async (req, res) => {
     token: generateToken(vendor._id),
   });
 });
+
+// login vendor or admin
+export const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  // fields check
+  if (!email?.trim()) {
+    res.status(400);
+    throw new Error("Email is required");
+  }
+  if (!password) {
+    res.status(400);
+    throw new Error("Password is required");
+  }
+
+  // email format validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email.trim())) {
+    res.status(400);
+    throw new Error("Please enter a valid email address");
+  }
+
+  // find user - include password for comparison
+  const user = await User.findOne({
+    email: email.trim().toLowerCase(),
+  }).select("+password");
+
+  // user not found
+  // same error message for both email and password to prevent user enumeration
+  if (!user) {
+    res.status(401);
+    throw new Error("Invalid email or password");
+  }
+
+  // Password Check 
+  const isMatch = await user.matchPassword(password);
+  if (!isMatch) {
+    res.status(401);
+    throw new Error("Invalid email or password");
+  }
+
+  // vendor approval check
+  if (user.role === "vendor" && !user.isApproved) {
+    res.status(403);
+    throw new Error(
+      "Your restaurant is pending admin approval. Please wait."
+    );
+  }
+
+  // account must be active
+  if (!user.isActive) {
+    res.status(403);
+    throw new Error(
+      "Your account has been deactivated. Please contact support."
+    );
+  }
+
+  // vendor and admin access check 
+  if (user.role !== "vendor" && user.role !== "admin") {
+    res.status(403);
+    throw new Error(
+      "This panel is for vendors only. Please use the customer app."
+    );
+  }
+
+  res.status(200).json({
+    user:  userResponse(user),
+    token: generateToken(user._id),
+  });
+});
+
+// get logged-in user details
+export const getMe = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+
+  res.status(200).json({ user: userResponse(user) });
+});
