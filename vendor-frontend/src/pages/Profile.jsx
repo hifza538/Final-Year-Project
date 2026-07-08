@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import {
   Store, Phone, Mail, Clock, Truck,
   ShoppingBag, Pencil, Loader2, CheckCircle2,
-  X, MapPin, User, UtensilsCrossed, Timer,
+  X, MapPin, User, UtensilsCrossed, Timer, Camera,
 } from "lucide-react";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
@@ -23,16 +23,34 @@ const Field = ({ label, value, icon: Icon }) => (
 );
 
 // SectionCard wraps a group of fields in a card with a title
-const SectionCard = ({ title, children }) => (
-  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-    <h3 className="text-sm font-bold text-gray-800 mb-5 pb-3 border-b border-gray-100">
-      {title}
-    </h3>
+const SectionCard = ({ title, icon: Icon, children }) => (
+  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+    <div className="flex items-center gap-2 mb-5 pb-3 border-b border-gray-100">
+      {Icon && (
+        <div className="w-7 h-7 bg-pink-50 rounded-lg flex items-center justify-center">
+          <Icon size={14} className="text-pink-500" />
+        </div>
+      )}
+      <h3 className="text-sm font-bold text-gray-800">{title}</h3>
+    </div>
     <div className="space-y-4">{children}</div>
   </div>
 );
 
-// Toggle switch component for service types
+// StatPill small quick-glance stat used under the cover banner
+const StatPill = ({ label, value, icon: Icon }) => (
+  <div className="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3 flex-1 min-w-[150px]">
+    <div className="w-10 h-10 bg-pink-50 rounded-xl flex items-center justify-center flex-shrink-0">
+      <Icon size={18} className="text-pink-500" />
+    </div>
+    <div className="min-w-0">
+      <p className="text-xs text-gray-400 font-medium">{label}</p>
+      <p className="text-sm font-bold text-gray-900 truncate">{value}</p>
+    </div>
+  </div>
+);
+
+// Toggle on/off switch for service types
 const Toggle = ({ label, checked, onChange }) => (
   <label className="flex items-center justify-between cursor-pointer">
     <span className="text-sm text-gray-700">{label}</span>
@@ -84,6 +102,33 @@ const EditModal = ({ vendor, onClose, onSaved }) => {
       pickup:   vendor?.serviceTypes?.pickup   ?? true,
     },
   });
+
+  // Image Upload State 
+const [coverPreview, setCoverPreview] = useState(vendor?.coverPhoto?.url || "");
+const [logoPreview, setLogoPreview] = useState(vendor?.logo?.url || "");
+const [coverFile, setCoverFile] = useState(null);
+const [logoFile, setLogoFile]   = useState(null);
+
+// image change handler
+const handleImageChange = (e, type) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // Validate file size, max 5MB
+  if (file.size > 5 * 1024 * 1024) {
+    setError("Image size must be less than 5MB");
+    return;
+  }
+
+  const previewUrl = URL.createObjectURL(file);
+  if (type === "cover") {
+    setCoverFile(file);
+    setCoverPreview(previewUrl);
+  } else {
+    setLogoFile(file);
+    setLogoPreview(previewUrl);
+  }
+};
 
   const [loading, setLoading]         = useState(false);
   const [error, setError]             = useState("");
@@ -153,17 +198,40 @@ const EditModal = ({ vendor, onClose, onSaved }) => {
     setError("");
 
     try {
-      const { data } = await api.put("/vendor/profile", form);
-      onSaved(data.vendor);
-      onClose();
-    } catch (err) {
-      setError(
-        err.response?.data?.message || "Failed to update profile."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+      const formData = new FormData();
+      //append text fields
+      Object.entries(form).forEach(([key, value]) => {
+        if (key === "serviceTypes") {
+            formData.append("serviceTypes[delivery]", value.delivery);
+            formData.append("serviceTypes[pickup]", value.pickup);
+        } else {
+            formData.append(key, value);
+        }
+      });
+
+      //append image files
+      if (coverFile) {
+        formData.append("coverPhoto", coverFile);
+      }
+      if (logoFile) {
+        formData.append("logo", logoFile);
+      };
+
+        const { data } = await api.put("/vendor/profile", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        onSaved(data.vendor);
+        onClose();
+      } catch (err) {
+        setError(
+          err.response?.data?.message || "Failed to update profile."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
@@ -187,7 +255,70 @@ const EditModal = ({ vendor, onClose, onSaved }) => {
               {error}
             </div>
           )}
-
+           {/* Cover Photo Upload */}
+           <div>
+             <label className="block text-xs font-medium text-gray-700 mb-2">
+               Cover Photo
+             </label>
+             <div className="relative w-full h-32 bg-gray-100 rounded-xl overflow-hidden border-2 border-dashed border-gray-200 hover:border-pink-300 transition-colors">
+               {coverPreview ? (
+                 <img
+                   src={coverPreview}
+                   alt="Cover"
+                   className="w-full h-full object-cover"
+                 />
+               ) : (
+                 <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                   <Store size={24} className="mb-1" />
+                   <p className="text-xs">Click to upload cover photo</p>
+                 </div>
+               )}
+               <input
+                 type="file"
+                 accept="image/jpeg,image/jpg,image/png"
+                 onChange={(e) => handleImageChange(e, "cover")}
+                 className="absolute inset-0 opacity-0 cursor-pointer"
+               />
+             </div>
+             <p className="text-xs text-gray-400 mt-1">
+               Recommended: 1200x400px, max 5MB
+             </p>
+           </div>
+            {/* Logo Upload */}     
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-2">
+              Restaurant Logo
+            </label>
+            <div className="flex items-center gap-4">
+              <div className="relative w-20 h-20 bg-gray-100 rounded-xl overflow-hidden border-2 border-dashed border-gray-200 hover:border-pink-300 transition-colors flex-shrink-0">
+                {logoPreview ? (
+                  <img
+                    src={logoPreview}
+                    alt="Logo"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-400">
+                    <Store size={20} />
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png"
+                  onChange={(e) => handleImageChange(e, "logo")}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+              </div>
+              <div>
+                <p className="text-xs text-gray-600 font-medium">
+                  Upload your restaurant logo
+                </p>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Square image recommended, max 5MB
+                </p>
+              </div>
+            </div>
+          </div>
           {/* Shop Name */}
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1.5">
@@ -417,6 +548,7 @@ const Profile = () => {
   const [error, setError]         = useState("");
   const [showEdit, setShowEdit]   = useState(false);
   const [saved, setSaved]         = useState(false);
+  const [statusLoading, setStatusLoading] = useState(false);
 
   const fetchProfile = async () => {
     setLoading(true);
@@ -453,29 +585,47 @@ const Profile = () => {
     return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${ampm}`;
   };
 
+  // Check if the shop is currently open based on opening and closing times
+  const isOpenNow = () => {
+    if (!vendor?.openingTime || !vendor?.closingTime) return false;
+    const now = new Date();
+    const current = now.getHours() * 60 + now.getMinutes();
+    const [oh, om] = vendor.openingTime.split(":").map(Number);
+    const [ch, cm] = vendor.closingTime.split(":").map(Number);
+    const open = oh * 60 + om;
+    const close = ch * 60 + cm;
+    return current >= open && current < close;
+  };
+
+    // Manually toggle open/closed status
+    const handleToggleStatus = async () => {
+      if (statusLoading) return;
+      const nextStatus = !isOpenNow();
+      const prevVendor = vendor;
+  
+      // optimistic update
+      setVendor((v) => ({ ...v, isOpen: nextStatus }));
+      setStatusLoading(true);
+  
+      try {
+        const { data } = await api.patch("/vendor/profile/status", {
+          isOpen: nextStatus,
+        });
+        setVendor((v) => ({ ...v, isOpen: data.vendor?.isOpen ?? nextStatus }));
+        login({ ...user, isOpen: nextStatus });
+      } catch (err) {
+        // revert on failure
+        setVendor(prevVendor);
+        setError(
+          err.response?.data?.message || "Failed to update shop status.",
+        );
+      } finally {
+        setStatusLoading(false);
+      }
+    };
+  
   return (
     <div className="space-y-5 max-w-3xl">
-
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-gray-900">
-            Restaurant Profile
-          </h2>
-          <p className="text-xs text-gray-400 mt-0.5">
-            Your public restaurant information
-          </p>
-        </div>
-        <button
-          onClick={() => setShowEdit(true)}
-          className="flex items-center gap-2 bg-pink-500 hover:bg-pink-600 
-            text-white text-sm font-semibold px-4 py-2 rounded-lg 
-            transition-colors shadow-sm"
-        >
-          <Pencil size={14} />
-          Edit Profile
-        </button>
-      </div>
 
       {/* Success Toast */}
       {saved && (
@@ -502,88 +652,175 @@ const Profile = () => {
 
       {/* Skeleton Loading */}
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {Array(4).fill(0).map((_, i) => <SkeletonSection key={i} />)}
+        <div className="space-y-4">
+          <div className="h-64 bg-gray-100 rounded-2xl animate-pulse" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {Array(2)
+              .fill(0)
+              .map((_, i) => (
+                <SkeletonSection key={i} />
+              ))}
+          </div>
         </div>
       ) : vendor ? (
         <>
-          {/* Avatar Banner */}
-          <div className="bg-white rounded-xl border border-gray-100 
-            shadow-sm p-6 flex items-center gap-5">
-            <div className="w-16 h-16 rounded-2xl bg-pink-500 flex items-center 
-              justify-center text-white text-2xl font-bold flex-shrink-0">
-              {vendor.fullName?.[0]?.toUpperCase() || "V"}
+          {/* Cover Banner */}
+          <div className="relative rounded-2xl overflow-hidden shadow-sm">
+            <div
+              className="h-48 sm:h-56 w-full relative bg-gradient-to-br from-pink-500 via-rose-500 to-orange-500 flex items-center justify-center"
+              style={
+                vendor.coverPhoto?.url
+                  ? {
+                      backgroundImage: `url(${vendor.coverPhoto.url})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }
+                  : undefined
+              }
+            >
+              {!vendor.coverPhoto?.url && (
+                <UtensilsCrossed
+                  size={72}
+                  className="text-white/20"
+                  strokeWidth={1.5}
+                />
+              )}
+
+              {/* Open Now / Closed Status Button */}
+              <button
+                type="button"
+                onClick={handleToggleStatus}
+                disabled={statusLoading}
+                title="Click to toggle shop status"
+                className={`absolute top-4 left-4 flex items-center gap-1.5 
+                  text-xs font-semibold px-3 py-1.5 rounded-full text-white 
+                  transition-colors cursor-pointer disabled:opacity-70
+                  ${isOpenNow() ? "bg-green-500 hover:bg-green-600" : "bg-gray-500 hover:bg-gray-600"}`}
+              >
+                {statusLoading ? (
+                  <Loader2 size={12} className="animate-spin" />
+                ) : (
+                  <span className="w-1.5 h-1.5 rounded-full bg-white" />
+                )}
+                {isOpenNow() ? "Open Now" : "Closed"}
+              </button>
+
+              {/* Edit Profile button */}
+              <button
+                onClick={() => setShowEdit(true)}
+                className="absolute top-4 right-4 flex items-center gap-2 
+                  bg-black/40 hover:bg-black/55 backdrop-blur-sm text-white 
+                  text-xs font-semibold px-3.5 py-2 rounded-lg transition-colors"
+              >
+                <Camera size={14} />
+                Change Cover
+              </button>
             </div>
-            <div>
-              <p className="text-lg font-bold text-gray-900">
-                {vendor.fullName || "—"}
-              </p>
-              <p className="text-sm text-gray-500">
-                {vendor.shopName || "Shop name not set"}
-              </p>
-              <span className="inline-block mt-1.5 text-xs font-semibold 
-                text-pink-600 bg-pink-50 px-2 py-0.5 rounded-full capitalize">
-                {vendor.role}
-              </span>
+
+            {/* Logo + name strip */}
+            <div className="bg-white px-6 pb-5 pt-0 flex items-end gap-4 -mt-10 relative">
+              <div
+                className="w-20 h-20 rounded-2xl bg-pink-500 border-4 border-white 
+                  shadow-md flex items-center justify-center text-white text-2xl 
+                  font-bold flex-shrink-0 overflow-hidden"
+              >
+                {vendor.logo?.url ? (
+                  <img
+                    src={vendor.logo.url}
+                    alt="Logo"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  vendor.shopName?.[0]?.toUpperCase() || "V"
+                )}
+              </div>
+              <div className="flex-1 min-w-0 pt-3">
+                <p className="text-lg font-bold text-gray-900 truncate">
+                  {vendor.shopName || "Shop name not set"}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {vendor.fullName}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowEdit(true)}
+                className="hidden sm:flex items-center gap-2 bg-pink-500 hover:bg-pink-600 
+                  text-white text-sm font-semibold px-4 py-2 rounded-lg 
+                  transition-colors shadow-sm flex-shrink-0"
+              >
+                <Pencil size={14} />
+                Edit Profile
+              </button>
             </div>
+          </div>
+
+          {/* Mobile edit button */}
+          <button
+            onClick={() => setShowEdit(true)}
+            className="sm:hidden w-full flex items-center justify-center gap-2 
+              bg-pink-500 hover:bg-pink-600 text-white text-sm font-semibold 
+              px-4 py-2.5 rounded-lg transition-colors shadow-sm"
+          >
+            <Pencil size={14} />
+            Edit Profile
+          </button>
+
+          {/* Quick Stat Pills */}
+          <div className="flex flex-wrap gap-3">
+            <StatPill
+              label="Hours"
+              value={`${fmt12(vendor.openingTime)} - ${fmt12(vendor.closingTime)}`}
+              icon={Clock}
+            />
+            <StatPill
+              label="Prep Time"
+              value={
+                vendor.minPrepTime && vendor.maxPrepTime
+                  ? `${vendor.minPrepTime}-${vendor.maxPrepTime} mins`
+                  : "Not set"
+              }
+              icon={Timer}
+            />
+            <StatPill
+              label="Delivery"
+              value={vendor.serviceTypes?.delivery ? "Available" : "Unavailable"}
+              icon={Truck}
+            />
+            <StatPill
+              label="Pickup"
+              value={vendor.serviceTypes?.pickup ? "Available" : "Unavailable"}
+              icon={ShoppingBag}
+            />
           </div>
 
           {/* Info Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
             {/* Account Info */}
-            <SectionCard title="Account Info">
+            <SectionCard title="Account Info" icon={User}>
               <Field label="Full Name" value={vendor.fullName} icon={User} />
-              <Field label="Email"     value={vendor.email}    icon={Mail} />
-              <Field label="Phone"     value={vendor.phone}    icon={Phone} />
+              <Field label="Email" value={vendor.email} icon={Mail} />
+              <Field label="Phone" value={vendor.phone} icon={Phone} />
             </SectionCard>
 
             {/* Shop Details */}
-            <SectionCard title="Shop Details">
-              <Field label="Shop Name"  value={vendor.shopName}    icon={Store} />
-              <Field label="Cuisine"    value={vendor.cuisine}     icon={UtensilsCrossed} />
-              <Field label="Address"    value={vendor.shopAddress} icon={MapPin} />
-              <Field label="City"       value={vendor.city}        icon={MapPin} />
-            </SectionCard>
-
-            {/* Operating Hours */}
-            <SectionCard title="Operating Hours">
+            <SectionCard title="Shop Details" icon={Store}>
+              <Field label="Shop Name" value={vendor.shopName} icon={Store} />
               <Field
-                label="Opening Time"
-                value={fmt12(vendor.openingTime)}
-                icon={Clock}
+                label="Cuisine"
+                value={vendor.cuisine}
+                icon={UtensilsCrossed}
               />
+              <Field label="Address" value={vendor.shopAddress} icon={MapPin} />
               <Field
-                label="Closing Time"
-                value={fmt12(vendor.closingTime)}
-                icon={Clock}
-              />
-              <Field
-                label="Min Prep Time"
-                value={vendor.minPrepTime ? `${vendor.minPrepTime} mins` : null}
-                icon={Timer}
-              />
-              <Field
-                label="Max Prep Time"
-                value={vendor.maxPrepTime ? `${vendor.maxPrepTime} mins` : null}
-                icon={Timer}
+                label="City / Zone"
+                value={
+                  vendor.zone
+                    ? `${vendor.city} • ${vendor.zone}`
+                    : vendor.city
+                }
+                icon={MapPin}
               />
             </SectionCard>
-
-            {/* Services */}
-            <SectionCard title="Services Offered">
-              <Field
-                label="Delivery"
-                value={vendor.serviceTypes?.delivery ? "Available ✓" : "Not available"}
-                icon={Truck}
-              />
-              <Field
-                label="Pickup"
-                value={vendor.serviceTypes?.pickup ? "Available ✓" : "Not available"}
-                icon={ShoppingBag}
-              />
-            </SectionCard>
-
           </div>
         </>
       ) : null}

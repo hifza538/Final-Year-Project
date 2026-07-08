@@ -1,5 +1,6 @@
 import asyncHandler from "express-async-handler";
 import User from "../../models/User.js";
+import { deleteFromCloudinary } from "../../config/cloudinary.js";
 
 // Safe fields to return in response
 const profileResponse = (vendor) => ({
@@ -61,6 +62,10 @@ export const updateProfile = asyncHandler(async (req, res) => {
     maxPrepTime,
     serviceTypes,
   } = req.body;
+
+  //uploaded files from multer
+  const coverPhotoFile = req.files?.coverPhoto?.[0];
+  const logoFile       = req.files?.logo?.[0];
 
   // validation
   const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
@@ -124,6 +129,30 @@ export const updateProfile = asyncHandler(async (req, res) => {
   if (maxPrepTime  !== undefined) vendor.maxPrepTime = Number(maxPrepTime);
   if (serviceTypes !== undefined) vendor.serviceTypes = serviceTypes;
 
+  // Handle cover photo upload
+  if (coverPhotoFile) {
+    // Delete old cover photo from Cloudinary
+    if (vendor.coverPhoto?.publicId) {
+      await deleteFromCloudinary(vendor.coverPhoto.publicId);
+    }
+    vendor.coverPhoto = {
+      url:      coverPhotoFile.path,
+      publicId: coverPhotoFile.filename,
+    };
+  }
+
+  // Handle logo upload
+  if (logoFile) {
+    // Delete old logo from Cloudinary
+    if (vendor.logo?.publicId) {
+      await deleteFromCloudinary(vendor.logo.publicId);
+    }
+    vendor.logo = {
+      url:      logoFile.path,
+      publicId: logoFile.filename,
+    };
+  }
+
   const updated = await vendor.save();
 
   res.status(200).json({
@@ -131,3 +160,36 @@ export const updateProfile = asyncHandler(async (req, res) => {
     vendor:  profileResponse(updated),
   });
 });
+/*@desc get vendor shop status (open/closed)
+@route GET /api/vendor/profile/status
+@access Private (vendor)*/
+
+export const getShopStatus = async (req, res) => {
+  try {
+    const vendor = await User.findById(req.user._id);
+    if (!vendor) {
+      return res.status(404).json({ message: "Vendor not found" });
+    }
+
+    res.json({ isOpen: vendor.isOpen });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch shop status" });
+  }
+};
+
+/*@desc    Update vendor shop status (open/closed)
+@route   PUT /api/vendor/profile/status
+@access  Private (vendor)*/
+export const updateShopStatus = async (req, res) => {
+  try {
+    const { isOpen } = req.body;
+    const vendor = await Vendor.findByIdAndUpdate(
+      req.user._id,
+      { isActive: isOpen },
+      { new: true }
+    );
+    res.json({ vendor });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update status" });
+  }
+};

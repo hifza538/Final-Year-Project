@@ -54,8 +54,15 @@ const userSchema = new mongoose.Schema(
     zone: { type: String, trim: true, default: "" },
     cuisine: { type: String, trim: true, default: "" },
 
-    coverPhoto: { type: String, default: "" },
-    logo: { type: String, default: "" },
+    coverPhoto: {
+      url: { type: String, default: "" },
+      publicId: { type: String, default: "" },
+    },
+    logo: {
+      url: { type: String, default: "" },
+      publicId: { type: String, default: "" },
+    },
+    isOpen: { type: Boolean, default: false },
 
     minPrepTime: { type: Number, default: 15 },
     maxPrepTime: { type: Number, default: 45 },
@@ -86,18 +93,18 @@ const userSchema = new mongoose.Schema(
       url: { type: String, default: "" },
       publicId: { type: String, default: "" },
     },
-    
+
     // Account Status Fields
     isApproved: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     // Timestamps
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // hash the password before saving the user document
 userSchema.pre("save", async function () {
-  if (!this.isModified("password")) return next();
+  if (!this.isModified("password")) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
