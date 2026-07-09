@@ -193,7 +193,7 @@ export const updateShopStatus = async (req, res) => {
     if (typeof isOpen !== "boolean") {
       return res.status(400).json({ message: "isOpen must be true or false" });
     }
-    const vendor = await Vendor.findByIdAndUpdate(
+    const vendor = await User.findByIdAndUpdate(
       req.user._id,
       { isOpen },
       { new: true },
@@ -201,7 +201,7 @@ export const updateShopStatus = async (req, res) => {
     if (!vendor) {
       return res.status(404).json({ message: "Vendor not found" });
     }
-    res.json({ vendor });
+    res.json({ vendor: profileResponse(vendor) });
   } catch (err) {
     res.status(500).json({ message: "Failed to update status" });
   }

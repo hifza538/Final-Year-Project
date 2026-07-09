@@ -586,21 +586,11 @@ const Profile = () => {
   };
 
   // Check if the shop is currently open based on opening and closing times
-  const isOpenNow = () => {
-    if (!vendor?.openingTime || !vendor?.closingTime) return false;
-    const now = new Date();
-    const current = now.getHours() * 60 + now.getMinutes();
-    const [oh, om] = vendor.openingTime.split(":").map(Number);
-    const [ch, cm] = vendor.closingTime.split(":").map(Number);
-    const open = oh * 60 + om;
-    const close = ch * 60 + cm;
-    return current >= open && current < close;
-  };
-
+const shopIsOpen = vendor?.isOpen ?? false;
     // Manually toggle open/closed status
     const handleToggleStatus = async () => {
       if (statusLoading) return;
-      const nextStatus = !isOpenNow();
+      const nextStatus = !shopIsOpen;
       const prevVendor = vendor;
   
       // optimistic update
@@ -695,14 +685,14 @@ const Profile = () => {
                 className={`absolute top-4 left-4 flex items-center gap-1.5 
                   text-xs font-semibold px-3 py-1.5 rounded-full text-white 
                   transition-colors cursor-pointer disabled:opacity-70
-                  ${isOpenNow() ? "bg-green-500 hover:bg-green-600" : "bg-gray-500 hover:bg-gray-600"}`}
+                  ${shopIsOpen ? "bg-pink-500 hover:bg-green-600" : "bg-gray-500 hover:bg-gray-600"}`}
               >
                 {statusLoading ? (
                   <Loader2 size={12} className="animate-spin" />
                 ) : (
                   <span className="w-1.5 h-1.5 rounded-full bg-white" />
                 )}
-                {isOpenNow() ? "Open Now" : "Closed"}
+                {shopIsOpen ? "Open Now" : "Closed"}
               </button>
 
               {/* Edit Profile button */}
