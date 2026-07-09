@@ -4,25 +4,26 @@ import { deleteFromCloudinary } from "../../config/cloudinary.js";
 
 // Safe fields to return in response
 const profileResponse = (vendor) => ({
-  _id:          vendor._id,
-  fullName:     vendor.fullName,
-  email:        vendor.email,
-  phone:        vendor.phone,
-  role:         vendor.role,
-  shopName:     vendor.shopName,
-  shopAddress:  vendor.shopAddress,
-  city:         vendor.city,
-  zone:         vendor.zone,
-  cuisine:      vendor.cuisine,
-  coverPhoto:   vendor.coverPhoto,
-  logo:         vendor.logo,
-  minPrepTime:  vendor.minPrepTime,
-  maxPrepTime:  vendor.maxPrepTime,
-  openingTime:  vendor.openingTime,
-  closingTime:  vendor.closingTime,
+  _id: vendor._id,
+  fullName: vendor.fullName,
+  email: vendor.email,
+  phone: vendor.phone,
+  role: vendor.role,
+  shopName: vendor.shopName,
+  shopAddress: vendor.shopAddress,
+  city: vendor.city,
+  zone: vendor.zone,
+  cuisine: vendor.cuisine,
+  coverPhoto: vendor.coverPhoto,
+  logo: vendor.logo,
+  isOpen: vendor.isOpen,
+  minPrepTime: vendor.minPrepTime,
+  maxPrepTime: vendor.maxPrepTime,
+  openingTime: vendor.openingTime,
+  closingTime: vendor.closingTime,
   serviceTypes: vendor.serviceTypes,
-  isApproved:   vendor.isApproved,
-  isActive:     vendor.isActive,
+  isApproved: vendor.isApproved,
+  isActive: vendor.isActive,
 });
 
 /* @desc    Get vendor profile
@@ -65,7 +66,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
 
   //uploaded files from multer
   const coverPhotoFile = req.files?.coverPhoto?.[0];
-  const logoFile       = req.files?.logo?.[0];
+  const logoFile = req.files?.logo?.[0];
 
   // validation
   const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
@@ -107,26 +108,32 @@ export const updateProfile = asyncHandler(async (req, res) => {
     throw new Error("Closing time must be after opening time");
   }
 
-  if (minPrepTime !== undefined && (Number(minPrepTime) < 5 || Number(minPrepTime) > 120)) {
+  if (
+    minPrepTime !== undefined &&
+    (Number(minPrepTime) < 5 || Number(minPrepTime) > 120)
+  ) {
     res.status(400);
     throw new Error("Minimum prep time must be between 5 and 120 minutes");
   }
 
-  if (maxPrepTime !== undefined && Number(maxPrepTime) < Number(minPrepTime || vendor.minPrepTime)) {
+  if (
+    maxPrepTime !== undefined &&
+    Number(maxPrepTime) < Number(minPrepTime || vendor.minPrepTime)
+  ) {
     res.status(400);
     throw new Error("Maximum prep time must be greater than minimum prep time");
   }
 
   // update fields if provided
-  if (shopName     !== undefined) vendor.shopName    = shopName.trim();
-  if (shopAddress  !== undefined) vendor.shopAddress = shopAddress.trim();
-  if (city         !== undefined) vendor.city        = city.trim();
-  if (zone         !== undefined) vendor.zone        = zone.trim();
-  if (cuisine      !== undefined) vendor.cuisine     = cuisine.trim();
-  if (openingTime  !== undefined) vendor.openingTime = openingTime;
-  if (closingTime  !== undefined) vendor.closingTime = closingTime;
-  if (minPrepTime  !== undefined) vendor.minPrepTime = Number(minPrepTime);
-  if (maxPrepTime  !== undefined) vendor.maxPrepTime = Number(maxPrepTime);
+  if (shopName !== undefined) vendor.shopName = shopName.trim();
+  if (shopAddress !== undefined) vendor.shopAddress = shopAddress.trim();
+  if (city !== undefined) vendor.city = city.trim();
+  if (zone !== undefined) vendor.zone = zone.trim();
+  if (cuisine !== undefined) vendor.cuisine = cuisine.trim();
+  if (openingTime !== undefined) vendor.openingTime = openingTime;
+  if (closingTime !== undefined) vendor.closingTime = closingTime;
+  if (minPrepTime !== undefined) vendor.minPrepTime = Number(minPrepTime);
+  if (maxPrepTime !== undefined) vendor.maxPrepTime = Number(maxPrepTime);
   if (serviceTypes !== undefined) vendor.serviceTypes = serviceTypes;
 
   // Handle cover photo upload
@@ -136,7 +143,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
       await deleteFromCloudinary(vendor.coverPhoto.publicId);
     }
     vendor.coverPhoto = {
-      url:      coverPhotoFile.path,
+      url: coverPhotoFile.path,
       publicId: coverPhotoFile.filename,
     };
   }
@@ -148,7 +155,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
       await deleteFromCloudinary(vendor.logo.publicId);
     }
     vendor.logo = {
-      url:      logoFile.path,
+      url: logoFile.path,
       publicId: logoFile.filename,
     };
   }
@@ -157,7 +164,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
 
   res.status(200).json({
     message: "Profile updated successfully",
-    vendor:  profileResponse(updated),
+    vendor: profileResponse(updated),
   });
 });
 /*@desc get vendor shop status (open/closed)
@@ -183,11 +190,17 @@ export const getShopStatus = async (req, res) => {
 export const updateShopStatus = async (req, res) => {
   try {
     const { isOpen } = req.body;
+    if (typeof isOpen !== "boolean") {
+      return res.status(400).json({ message: "isOpen must be true or false" });
+    }
     const vendor = await Vendor.findByIdAndUpdate(
       req.user._id,
-      { isActive: isOpen },
-      { new: true }
+      { isOpen },
+      { new: true },
     );
+    if (!vendor) {
+      return res.status(404).json({ message: "Vendor not found" });
+    }
     res.json({ vendor });
   } catch (err) {
     res.status(500).json({ message: "Failed to update status" });

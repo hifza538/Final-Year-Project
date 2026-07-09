@@ -18,5 +18,5 @@ router.post("/profile/cover-photo", uploadRestaurant.single("coverPhoto"), updat
 router.post("/profile/logo", uploadRestaurant.single("logo"), updateProfile);
 router.get("/profile/status", getShopStatus);
 router.put("/profile/status", updateShopStatus);
-
+router.patch("/profile/status", updateShopStatus);
 export default router;
