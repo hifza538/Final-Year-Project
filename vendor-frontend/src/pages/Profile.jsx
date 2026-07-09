@@ -602,7 +602,7 @@ const shopIsOpen = vendor?.isOpen ?? false;
           isOpen: nextStatus,
         });
         setVendor((v) => ({ ...v, isOpen: data.vendor?.isOpen ?? nextStatus }));
-        login({ ...user, isOpen: nextStatus });
+        login({ ...user, isOpen: nextStatus }, token);
       } catch (err) {
         // revert on failure
         setVendor(prevVendor);
