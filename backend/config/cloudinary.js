@@ -62,4 +62,21 @@ export const deleteFromCloudinary = async (publicId) => {
   }
 };
 
+//menu item image storage
+const menuImageStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder:          "localbites/menu",
+    allowed_formats: ["jpg", "jpeg", "png"],
+    transformation:  [{ width: 600, height: 600, crop: "fill", quality: "auto" }],
+  },
+});
+
+// menu item image upload middleware
+export const uploadMenuImage = multer({
+  storage: menuImageStorage,
+  limits:  { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: imageFileFilter,
+}).single("image");
+
 export default cloudinary;
