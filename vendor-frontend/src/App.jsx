@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
+import Menu from "./pages/Menu";
 import "leaflet/dist/leaflet.css";
 
 const App = () => {
@@ -28,6 +29,7 @@ const App = () => {
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="menu"      element={<Menu />} />
           </Route>
 
           {/* Catch All */}
