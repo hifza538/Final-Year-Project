@@ -5,6 +5,7 @@ import connectDB from "./config/db.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import authRoutes from "./routes/authRoutes.js";
 import vendorRoutes from "./routes/vendorRoutes.js";
+import customerRoutes from "./routes/customerRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -15,6 +16,7 @@ const app = express();
 app.use(cors({
   origin: [
     "http://localhost:5173", // vendor frontend
+    "http://localhost:5174", // customer frontend
   ],
   credentials: true,
 }));
@@ -29,6 +31,8 @@ app.get("/", (req, res) => {
 // auth routes
 app.use("/api/auth", authRoutes);
 app.use("/api/vendor", vendorRoutes);
+
+app.use("/api/customer", customerRoutes);
 
 // error handling middleware
 app.use(notFound);
