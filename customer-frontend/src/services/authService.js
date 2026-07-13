@@ -5,7 +5,7 @@ import api from "./api";
 // Registers a new customer account
 export const registerCustomer = async (formData) => {
   const { confirmPassword, ...payload } = formData; // confirmPassword is not needed for backend registration
-  const response = await api.post("/customer/gitregister", payload);
+  const response = await api.post("/customer/register", payload);
   return response.data;
 };
 
