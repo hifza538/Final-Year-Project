@@ -1,13 +1,24 @@
 // customer-frontend/src/components/layout/Navbar.jsx
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, ShoppingCart, User, Menu, X } from "lucide-react";
+import {
+  Search,
+  ShoppingCart,
+  User,
+  Menu,
+  X,
+  ChevronDown,
+  LogOut,
+  Package,
+} from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
   const { user, isAuthenticated, logout } = useAuth();
   const { cartCount } = useCart();
   const navigate = useNavigate();
@@ -15,8 +26,19 @@ const Navbar = () => {
   const handleLogout = () => {
     logout();
     navigate("/");
+    setProfileDropdownOpen(false);
     setMobileMenuOpen(false);
   };
+  // Close dropdown when clicking anywhere outside of it
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <nav className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
@@ -64,26 +86,59 @@ const Navbar = () => {
                 </span>
               )}
             </Link>
-
             {isAuthenticated ? (
-              <div className="flex items-center gap-3">
-                <Link
-                  to="/profile"
+              // Profile dropdown — replaces the old plain name + separate logout button
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setProfileDropdownOpen((prev) => !prev)}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-full
                              text-gray-700 hover:bg-primary-light hover:text-primary
                              transition-colors duration-200"
                 >
                   <User size={20} />
                   <span className="text-sm font-medium">
-                    {user?.name?.split(" ")[0]}
+                    {user?.fullName?.split(" ")[0]}
                   </span>
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="text-sm font-medium text-gray-500 hover:text-primary transition-colors duration-200"
-                >
-                  Logout
+                  <ChevronDown
+                    size={16}
+                    className={`transition-transform duration-200 ${profileDropdownOpen ? "rotate-180" : ""}`}
+                  />
                 </button>
+
+                {profileDropdownOpen && (
+                  <div
+                    className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg
+                               border border-gray-100 py-2 z-50"
+                  >
+                    <Link
+                      to="/profile"
+                      onClick={() => setProfileDropdownOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700
+                                 hover:bg-primary-light hover:text-primary transition-colors"
+                    >
+                      <User size={16} />
+                      My Profile
+                    </Link>
+                    <Link
+                      to="/orders"
+                      onClick={() => setProfileDropdownOpen(false)}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700
+                                 hover:bg-primary-light hover:text-primary transition-colors"
+                    >
+                      <Package size={16} />
+                      My Orders
+                    </Link>
+                    <div className="border-t border-gray-100 my-1" />
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-500
+                                 hover:bg-red-50 transition-colors"
+                    >
+                      <LogOut size={16} />
+                      Logout
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <Link
