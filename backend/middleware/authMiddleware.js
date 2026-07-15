@@ -67,3 +67,12 @@ export const adminOnly = (req, res, next) => {
   }
   next();
 };
+
+// customer only middleware to ensure user is a customer
+export const customerOnly = (req, res, next) => {
+  if (req.user?.role !== "customer") {
+    res.status(403);
+    throw new Error("Access denied, customers only");
+  }
+  next();
+};
