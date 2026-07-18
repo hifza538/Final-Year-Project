@@ -6,6 +6,7 @@ import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import authRoutes from "./routes/authRoutes.js";
 import vendorRoutes from "./routes/vendorRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -17,6 +18,7 @@ app.use(cors({
   origin: [
     "http://localhost:5173", // vendor frontend
     "http://localhost:5174", // customer frontend
+    "http://localhost:5176", // admin frontend
   ],
   credentials: true,
 }));
@@ -33,6 +35,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/vendor", vendorRoutes);
 
 app.use("/api/customer", customerRoutes);
+// admin routes
+app.use("/api/admin", adminRoutes);
 
 // error handling middleware
 app.use(notFound);
@@ -43,5 +47,4 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
-
 export default app;
