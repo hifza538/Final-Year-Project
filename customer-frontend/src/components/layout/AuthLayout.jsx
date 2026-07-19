@@ -1,13 +1,17 @@
 // customer-frontend/src/components/layout/AuthLayout.jsx
 
 import { Clock, MapPin, UtensilsCrossed } from "lucide-react";
+import Logo from "../common/Logo";
 
 /* Two-sided layout for Login/Signup
 left panel is branding and feature list,
 right panel holds the form*/
 const AuthLayout = ({ children }) => {
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-col md:flex-row">
+      <div className="md:hidden flex items-center justify-center py-8 bg-secondary">
+        <Logo size="md" variant="light" layout="column" showTagline />
+      </div>
       {/* Left panel - hidden on mobile, shown from md breakpoint up */}
       <div className="hidden md:flex md:w-1/2 bg-secondary text-white flex-col p-12 relative overflow-hidden">
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
@@ -20,14 +24,14 @@ const AuthLayout = ({ children }) => {
         </div>
 
         <div className="relative z-10 flex-1 flex flex-col justify-top mt-16">
-
           <h2 className="text-4xl font-bold leading-tight mb-4">
             Delicious food,
             <br />
             delivered to your door.
           </h2>
           <p className="text-gray-300 text-lg mb-8 max-w-md">
-            Order from your favorite local restaurants and track your delivery in real time.
+            Order from your favorite local restaurants and track your delivery
+            in real time.
           </p>
 
           {/* Feature list*/}
@@ -36,19 +40,25 @@ const AuthLayout = ({ children }) => {
               <div className="bg-primary/20 p-2 rounded-lg shrink-0">
                 <UtensilsCrossed size={20} className="text-primary" />
               </div>
-              <span className="text-gray-200">500+ restaurants across 10+ cities</span>
+              <span className="text-gray-200">
+                500+ restaurants across 10+ cities
+              </span>
             </div>
             <div className="flex items-center gap-3">
               <div className="bg-primary/20 p-2 rounded-lg shrink-0">
                 <Clock size={20} className="text-primary" />
               </div>
-              <span className="text-gray-200">Average delivery time of 30 minutes</span>
+              <span className="text-gray-200">
+                Average delivery time of 30 minutes
+              </span>
             </div>
             <div className="flex items-center gap-3">
               <div className="bg-primary/20 p-2 rounded-lg shrink-0">
                 <MapPin size={20} className="text-primary" />
               </div>
-              <span className="text-gray-200">Live order tracking from kitchen to door</span>
+              <span className="text-gray-200">
+                Live order tracking from kitchen to door
+              </span>
             </div>
           </div>
         </div>
