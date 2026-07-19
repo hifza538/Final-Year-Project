@@ -11,11 +11,13 @@ import NotFound from "../pages/NotFound";
 const AppRoutes = () => {
   return (
     <Routes>
+      //login/signup outside of the main layout
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+
       {/* Layout route - Navbar/Footer will wrap all child routes */}
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="*" element={<NotFound />} />
       </Route>
