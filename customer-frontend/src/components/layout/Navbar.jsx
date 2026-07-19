@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Logo from "../common/Logo";
 import {
   Search,
   ShoppingCart,
@@ -45,9 +46,8 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 shrink-0">
-            <span className="text-2xl font-bold text-primary">Local</span>
-            <span className="text-2xl font-bold text-gray-900">Bites</span>
+          <Link to="/" className="shrink-0">
+            <Logo size="md" variant="dark" />
           </Link>
 
           {/* Search bar — desktop only */}

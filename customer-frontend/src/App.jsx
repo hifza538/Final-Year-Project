@@ -14,19 +14,7 @@ function App() {
         <CartProvider>
           <AppRoutes />
           {/* Global toast notifications for success and error messages */}
-<Toaster
-  position="top-center"
-  toastOptions={{
-    duration: 3000,
-    style: {
-      background: "#333",
-      color: "#fff",
-    },
-    success: {
-      iconTheme: { primary: "#E8590C", secondary: "#fff" },
-    },
-  }}
-/>
+          <Toaster position="top-center" />
         </CartProvider>
       </AuthProvider>
     </BrowserRouter>
