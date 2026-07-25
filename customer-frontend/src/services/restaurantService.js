@@ -19,3 +19,9 @@ export const getAvailableCuisines = async () => {
   const response = await api.get("/customer/restaurants/cuisines");
   return response.data;
 };
+
+// fetches restauarnt menu
+export const getRestaurantMenu = async (id) => {
+  const response = await api.get(`/customer/restaurants/${id}/menu`);
+  return response.data;
+};
