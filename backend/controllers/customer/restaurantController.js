@@ -2,6 +2,7 @@
 
 import asyncHandler from "express-async-handler";
 import User from "../../models/User.js";
+import MenuItem from "../../models/MenuItem.js";
 
 // Helper function to format restaurant response for the customer frontend
 const restaurantResponse = (vendor) => ({
@@ -82,4 +83,28 @@ export const getAvailableCuisines = asyncHandler(async (req, res) => {
   });
 
   res.status(200).json({ cuisines });
+});
+
+/* @desc   Get menu items for a specific restaurant
+@route  GET /api/customer/restaurants/:id/menu */
+export const getRestaurantMenu = asyncHandler(async (req, res) => {
+  // First confirm the restaurant exists and is a valid, approved vendor
+  const vendor = await User.findOne({
+    _id: req.params.id,
+    role: "vendor",
+    isApproved: true,
+    isActive: true,
+  });
+  if (!vendor) {
+    res.status(404);
+    throw new Error("Restaurant not found");
+  }
+
+  // Return all menu items 
+  const items = await MenuItem.find({ vendor: req.params.id }).sort({ category: 1, createdAt: -1 });
+
+  res.status(200).json({
+    restaurant: restaurantResponse(vendor),
+    items,
+  });
 });
