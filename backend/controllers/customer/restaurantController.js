@@ -40,13 +40,8 @@ export const getAllRestaurants = asyncHandler(async (req, res) => {
     filter.shopName = { $regex: search.trim(), $options: "i" };
   }
 
-  // Optional filter by city
-  if (city?.trim()) {
-    filter.city = { $regex: `^${city.trim()}$`, $options: "i" };
-  }
-
   // Optional filter by cuisine
-  if (cuisine?.trim()) {
+  if (cuisine?.trim() && cuisine.trim() !== "All") {
     filter.cuisine = { $regex: `^${cuisine.trim()}$`, $options: "i" };
   }
 
@@ -74,4 +69,17 @@ export const getRestaurantById = asyncHandler(async (req, res) => {
   }
 
   res.status(200).json({ restaurant: restaurantResponse(vendor) });
+});
+
+/* @desc   Get distinct cuisine types from approved restaurants (for filter chips)
+ @route  GET /api/customer/restaurants/cuisines*/
+export const getAvailableCuisines = asyncHandler(async (req, res) => {
+  const cuisines = await User.distinct("cuisine", {
+    role: "vendor",
+    isApproved: true,
+    isActive: true,
+    cuisine: { $ne: "" },
+  });
+
+  res.status(200).json({ cuisines });
 });

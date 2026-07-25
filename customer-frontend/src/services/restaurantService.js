@@ -13,3 +13,9 @@ export const getRestaurantById = async (id) => {
   const response = await api.get(`/customer/restaurants/${id}`);
   return response.data;
 };
+
+// Fetches available cuisines for filtering restaurants
+export const getAvailableCuisines = async () => {
+  const response = await api.get("/customer/restaurants/cuisines");
+  return response.data;
+};
