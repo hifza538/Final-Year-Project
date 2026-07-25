@@ -18,6 +18,7 @@ const AppRoutes = () => {
       {/* Layout route - Navbar/Footer will wrap all child routes */}
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />
+        <Route path="/restaurant/:id" element={<div className="p-10 text-center text-gray-500">Restaurant detail page coming soon</div>} />
         <Route path="/cart" element={<Cart />} />
         <Route path="*" element={<NotFound />} />
       </Route>
