@@ -16,6 +16,7 @@ const restaurantResponse = (vendor) => ({
   isOpen: vendor.isOpen,
   minPrepTime: vendor.minPrepTime,
   maxPrepTime: vendor.maxPrepTime,
+  deliveryFee: vendor.deliveryFee,
   openingTime: vendor.openingTime,
   closingTime: vendor.closingTime,
 });

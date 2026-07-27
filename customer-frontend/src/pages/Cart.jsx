@@ -1,20 +1,36 @@
 // customer-frontend/src/pages/Cart.jsx
-
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ShoppingBag, ArrowRight } from "lucide-react";
 import { useCart } from "../context/CartContext";
+import { getRestaurantById } from "../services/restaurantService";
 import CartItemRow from "../components/cart/CartItemRow";
 import EmptyState from "../components/common/EmptyState";
 
-/* Flat delivery fee - will move to per-restaurant config once that's part of the vendor model.
- Kept as a simple constant for now so the cart total is realistic without inventing backend data*/
-const DELIVERY_FEE = 50;
-
 const Cart = () => {
-  const { cartItems, cartTotal, clearCart } = useCart();
+  const { cartItems, cartTotal, clearCart, restaurantId } = useCart();
   const navigate = useNavigate();
 
-  const grandTotal = cartItems.length > 0 ? cartTotal + DELIVERY_FEE : 0;
+    // Delivery fee now comes from the actual restaurant the cart belongs to(not a flat number)
+  const [deliveryFee, setDeliveryFee] = useState(0);
+
+    useEffect(() => {
+    if (!restaurantId) return;
+        const fetchDeliveryFee = async () => {
+      try {
+        const data = await getRestaurantById(restaurantId);
+        setDeliveryFee(data.restaurant.deliveryFee ?? 50);
+      } catch (err) {
+        console.error("Failed to fetch restaurant delivery fee:", err);
+        setDeliveryFee(50); // Fallback so checkout math still works even if this fetch fails
+      }
+    };
+
+    fetchDeliveryFee();
+  }, [restaurantId]);
+
+
+  const grandTotal = cartItems.length > 0 ? cartTotal + deliveryFee : 0;
 
   if (cartItems.length === 0) {
     return (
@@ -66,7 +82,7 @@ const Cart = () => {
         </div>
         <div className="flex justify-between text-sm text-gray-600">
           <span>Delivery Fee</span>
-          <span>Rs. {DELIVERY_FEE}</span>
+          <span>Rs. {deliveryFee}</span>
         </div>
         <div className="border-t border-gray-100 pt-2 mt-2 flex justify-between font-semibold text-gray-900">
           <span>Total</span>
