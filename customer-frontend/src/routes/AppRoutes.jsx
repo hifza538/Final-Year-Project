@@ -21,6 +21,7 @@ const AppRoutes = () => {
         <Route path="/" element={<Home />} />
         <Route path="/restaurant/:id" element={<RestaurantDetail/>} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<div className="p-10 text-center text-gray-500">Checkout page coming soon</div>} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

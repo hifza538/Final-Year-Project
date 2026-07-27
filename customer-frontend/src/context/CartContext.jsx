@@ -1,7 +1,7 @@
 // customer-frontend/src/context/CartContext.jsx
 
 import { createContext, useContext, useState, useEffect } from "react";
-import toast from "react-hot-toast";
+import { showSuccessToast, showErrorToast } from "../utils/toast";
 
 const CartContext = createContext(null);
 
@@ -26,7 +26,7 @@ export const CartProvider = ({ children }) => {
   const addToCart = (item, itemRestaurantId) => {
     // warn user if they are trying to add items from a different restaurant
     if (restaurantId && restaurantId !== itemRestaurantId && cartItems.length > 0) {
-      toast.error("Aap dusre restaurant se item add kar rahe hain. Pehle cart clear karein.");
+      showErrorToast("you already have items from another restaurant in your cart. please clear it first");
       return;
     }
 
@@ -45,7 +45,7 @@ export const CartProvider = ({ children }) => {
       return [...prev, { ...item, quantity: 1 }];
     });
 
-    toast.success(`${item.name} cart mein add ho gaya`);
+    showSuccessToast(`${item.name} added to cart`);
   };
 
   // update item quantity in cart

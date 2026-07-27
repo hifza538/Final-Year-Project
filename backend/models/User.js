@@ -66,6 +66,9 @@ const userSchema = new mongoose.Schema(
 
     minPrepTime: { type: Number, default: 15 },
     maxPrepTime: { type: Number, default: 45 },
+    deliveryFee: { type: Number, default: 50,
+      min: [0, "Delivery fee cannot be negative"],
+    },
     coordinates: {
       lat: { type: Number, default: null },
       lng: { type: Number, default: null },
