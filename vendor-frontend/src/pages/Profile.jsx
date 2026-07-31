@@ -1,8 +1,21 @@
 import { useEffect, useState } from "react";
 import {
-  Store, Phone, Mail, Clock, Truck,
-  ShoppingBag, Pencil, Loader2, CheckCircle2,
-  X, MapPin, User, UtensilsCrossed, Timer, Camera,
+  Store,
+  Phone,
+  Mail,
+  Clock,
+  Truck,
+  ShoppingBag,
+  Pencil,
+  Loader2,
+  CheckCircle2,
+  X,
+  MapPin,
+  User,
+  UtensilsCrossed,
+  Timer,
+  Camera,
+  Wallet,
 } from "lucide-react";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
@@ -73,65 +86,70 @@ const Toggle = ({ label, checked, onChange }) => (
 const SkeletonSection = () => (
   <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 animate-pulse space-y-4">
     <div className="h-4 bg-gray-200 rounded w-1/3 mb-5" />
-    {Array(3).fill(0).map((_, i) => (
-      <div key={i} className="flex items-start gap-3">
-        <div className="w-8 h-8 bg-gray-100 rounded-lg" />
-        <div className="space-y-1.5 flex-1">
-          <div className="h-3 bg-gray-100 rounded w-1/4" />
-          <div className="h-4 bg-gray-200 rounded w-1/2" />
+    {Array(3)
+      .fill(0)
+      .map((_, i) => (
+        <div key={i} className="flex items-start gap-3">
+          <div className="w-8 h-8 bg-gray-100 rounded-lg" />
+          <div className="space-y-1.5 flex-1">
+            <div className="h-3 bg-gray-100 rounded w-1/4" />
+            <div className="h-4 bg-gray-200 rounded w-1/2" />
+          </div>
         </div>
-      </div>
-    ))}
+      ))}
   </div>
 );
 
 // edit modal for updating vendor profile
 const EditModal = ({ vendor, onClose, onSaved }) => {
   const [form, setForm] = useState({
-    shopName:     vendor?.shopName     || "",
-    shopAddress:  vendor?.shopAddress  || "",
-    city:         vendor?.city         || "",
-    zone:         vendor?.zone         || "",
-    cuisine:      vendor?.cuisine      || "",
-    openingTime:  vendor?.openingTime  || "09:00",
-    closingTime:  vendor?.closingTime  || "22:00",
-    minPrepTime:  vendor?.minPrepTime  || 15,
-    maxPrepTime:  vendor?.maxPrepTime  || 45,
+    shopName: vendor?.shopName || "",
+    shopAddress: vendor?.shopAddress || "",
+    city: vendor?.city || "",
+    zone: vendor?.zone || "",
+    cuisine: vendor?.cuisine || "",
+    openingTime: vendor?.openingTime || "09:00",
+    closingTime: vendor?.closingTime || "22:00",
+    minPrepTime: vendor?.minPrepTime || 15,
+    maxPrepTime: vendor?.maxPrepTime || 45,
+    deliveryFee: vendor?.deliveryFee ?? 50,
     serviceTypes: {
       delivery: vendor?.serviceTypes?.delivery ?? true,
-      pickup:   vendor?.serviceTypes?.pickup   ?? true,
+      pickup: vendor?.serviceTypes?.pickup ?? true,
     },
   });
 
-  // Image Upload State 
-const [coverPreview, setCoverPreview] = useState(vendor?.coverPhoto?.url || "");
-const [logoPreview, setLogoPreview] = useState(vendor?.logo?.url || "");
-const [coverFile, setCoverFile] = useState(null);
-const [logoFile, setLogoFile]   = useState(null);
+  // Image Upload State
+  const [coverPreview, setCoverPreview] = useState(
+    vendor?.coverPhoto?.url || "",
+  );
+  const [logoPreview, setLogoPreview] = useState(vendor?.logo?.url || "");
+  const [coverFile, setCoverFile] = useState(null);
+  const [logoFile, setLogoFile] = useState(null);
 
-// image change handler
-const handleImageChange = (e, type) => {
-  const file = e.target.files[0];
-  if (!file) return;
+  // image change handler
+  const handleImageChange = (e, type) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-  // Validate file size, max 5MB
-  if (file.size > 5 * 1024 * 1024) {
-    setError("Image size must be less than 5MB");
-    return;
-  }
+    // Validate file size, max 5MB
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Image size must be less than 5MB");
+      return;
+    }
 
-  const previewUrl = URL.createObjectURL(file);
-  if (type === "cover") {
-    setCoverFile(file);
-    setCoverPreview(previewUrl);
-  } else {
-    setLogoFile(file);
-    setLogoPreview(previewUrl);
-  }
-};
+    const previewUrl = URL.createObjectURL(file);
+    if (type === "cover") {
+      setCoverFile(file);
+      setCoverPreview(previewUrl);
+    } else {
+      setLogoFile(file);
+      setLogoPreview(previewUrl);
+    }
+  };
 
-  const [loading, setLoading]         = useState(false);
-  const [error, setError]             = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
 
   const handleChange = (e) => {
@@ -154,8 +172,7 @@ const handleImageChange = (e, type) => {
     const errors = {};
     const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
 
-    if (!form.shopName.trim())
-      errors.shopName = "Shop name is required";
+    if (!form.shopName.trim()) errors.shopName = "Shop name is required";
     else if (form.shopName.trim().length < 3)
       errors.shopName = "Shop name must be at least 3 characters";
 
@@ -164,8 +181,7 @@ const handleImageChange = (e, type) => {
     else if (form.shopAddress.trim().length < 10)
       errors.shopAddress = "Please provide a complete address";
 
-    if (!form.city.trim())
-      errors.city = "City is required";
+    if (!form.city.trim()) errors.city = "City is required";
 
     if (!timeRegex.test(form.openingTime))
       errors.openingTime = "Invalid time format";
@@ -181,6 +197,8 @@ const handleImageChange = (e, type) => {
 
     if (Number(form.maxPrepTime) < Number(form.minPrepTime))
       errors.maxPrepTime = "Must be greater than minimum prep time";
+    if (form.deliveryFee === "" || Number(form.deliveryFee) < 0)
+      errors.deliveryFee = "Delivery fee cannot be negative";
 
     return errors;
   };
@@ -202,10 +220,10 @@ const handleImageChange = (e, type) => {
       //append text fields
       Object.entries(form).forEach(([key, value]) => {
         if (key === "serviceTypes") {
-            formData.append("serviceTypes[delivery]", value.delivery);
-            formData.append("serviceTypes[pickup]", value.pickup);
+          formData.append("serviceTypes[delivery]", value.delivery);
+          formData.append("serviceTypes[pickup]", value.pickup);
         } else {
-            formData.append(key, value);
+          formData.append(key, value);
         }
       });
 
@@ -215,28 +233,25 @@ const handleImageChange = (e, type) => {
       }
       if (logoFile) {
         formData.append("logo", logoFile);
-      };
-
-        const { data } = await api.put("/vendor/profile", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-        onSaved(data.vendor);
-        onClose();
-      } catch (err) {
-        setError(
-          err.response?.data?.message || "Failed to update profile."
-        );
-      } finally {
-        setLoading(false);
       }
-    };
+
+      const { data } = await api.put("/vendor/profile", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      onSaved(data.vendor);
+      onClose();
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to update profile.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 sticky top-0 bg-white rounded-t-2xl">
           <h3 className="font-bold text-gray-900">Edit Profile</h3>
@@ -249,42 +264,41 @@ const handleImageChange = (e, type) => {
         </div>
 
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
-
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 text-xs px-3 py-2 rounded-lg">
               {error}
             </div>
           )}
-           {/* Cover Photo Upload */}
-           <div>
-             <label className="block text-xs font-medium text-gray-700 mb-2">
-               Cover Photo
-             </label>
-             <div className="relative w-full h-32 bg-gray-100 rounded-xl overflow-hidden border-2 border-dashed border-gray-200 hover:border-pink-300 transition-colors">
-               {coverPreview ? (
-                 <img
-                   src={coverPreview}
-                   alt="Cover"
-                   className="w-full h-full object-cover"
-                 />
-               ) : (
-                 <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
-                   <Store size={24} className="mb-1" />
-                   <p className="text-xs">Click to upload cover photo</p>
-                 </div>
-               )}
-               <input
-                 type="file"
-                 accept="image/jpeg,image/jpg,image/png"
-                 onChange={(e) => handleImageChange(e, "cover")}
-                 className="absolute inset-0 opacity-0 cursor-pointer"
-               />
-             </div>
-             <p className="text-xs text-gray-400 mt-1">
-               Recommended: 1200x400px, max 5MB
-             </p>
-           </div>
-            {/* Logo Upload */}     
+          {/* Cover Photo Upload */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-2">
+              Cover Photo
+            </label>
+            <div className="relative w-full h-32 bg-gray-100 rounded-xl overflow-hidden border-2 border-dashed border-gray-200 hover:border-pink-300 transition-colors">
+              {coverPreview ? (
+                <img
+                  src={coverPreview}
+                  alt="Cover"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                  <Store size={24} className="mb-1" />
+                  <p className="text-xs">Click to upload cover photo</p>
+                </div>
+              )}
+              <input
+                type="file"
+                accept="image/jpeg,image/jpg,image/png"
+                onChange={(e) => handleImageChange(e, "cover")}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+              />
+            </div>
+            <p className="text-xs text-gray-400 mt-1">
+              Recommended: 1200x400px, max 5MB
+            </p>
+          </div>
+          {/* Logo Upload */}
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-2">
               Restaurant Logo
@@ -335,7 +349,9 @@ const handleImageChange = (e, type) => {
                 ${fieldErrors.shopName ? "border-red-400 bg-red-50" : "border-gray-200"}`}
             />
             {fieldErrors.shopName && (
-              <p className="text-red-500 text-xs mt-1">{fieldErrors.shopName}</p>
+              <p className="text-red-500 text-xs mt-1">
+                {fieldErrors.shopName}
+              </p>
             )}
           </div>
 
@@ -355,7 +371,9 @@ const handleImageChange = (e, type) => {
                 ${fieldErrors.shopAddress ? "border-red-400 bg-red-50" : "border-gray-200"}`}
             />
             {fieldErrors.shopAddress && (
-              <p className="text-red-500 text-xs mt-1">{fieldErrors.shopAddress}</p>
+              <p className="text-red-500 text-xs mt-1">
+                {fieldErrors.shopAddress}
+              </p>
             )}
           </div>
 
@@ -424,7 +442,9 @@ const handleImageChange = (e, type) => {
                   ${fieldErrors.openingTime ? "border-red-400 bg-red-50" : "border-gray-200"}`}
               />
               {fieldErrors.openingTime && (
-                <p className="text-red-500 text-xs mt-1">{fieldErrors.openingTime}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {fieldErrors.openingTime}
+                </p>
               )}
             </div>
             <div>
@@ -441,7 +461,9 @@ const handleImageChange = (e, type) => {
                   ${fieldErrors.closingTime ? "border-red-400 bg-red-50" : "border-gray-200"}`}
               />
               {fieldErrors.closingTime && (
-                <p className="text-red-500 text-xs mt-1">{fieldErrors.closingTime}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {fieldErrors.closingTime}
+                </p>
               )}
             </div>
           </div>
@@ -464,7 +486,9 @@ const handleImageChange = (e, type) => {
                   ${fieldErrors.minPrepTime ? "border-red-400 bg-red-50" : "border-gray-200"}`}
               />
               {fieldErrors.minPrepTime && (
-                <p className="text-red-500 text-xs mt-1">{fieldErrors.minPrepTime}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {fieldErrors.minPrepTime}
+                </p>
               )}
             </div>
             <div>
@@ -483,9 +507,37 @@ const handleImageChange = (e, type) => {
                   ${fieldErrors.maxPrepTime ? "border-red-400 bg-red-50" : "border-gray-200"}`}
               />
               {fieldErrors.maxPrepTime && (
-                <p className="text-red-500 text-xs mt-1">{fieldErrors.maxPrepTime}</p>
+                <p className="text-red-500 text-xs mt-1">
+                  {fieldErrors.maxPrepTime}
+                </p>
               )}
             </div>
+          </div>
+          {/* Delivery Fee */}
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1.5">
+              Delivery Fee (Rs.)
+            </label>
+            <input
+              name="deliveryFee"
+              value={form.deliveryFee}
+              onChange={handleChange}
+              type="number"
+              min="0"
+              placeholder="50"
+              className={`w-full px-3 py-2.5 text-sm rounded-lg border 
+                focus:outline-none focus:ring-2 focus:ring-pink-500 transition
+                ${fieldErrors.deliveryFee ? "border-red-400 bg-red-50" : "border-gray-200"}`}
+            />
+            {fieldErrors.deliveryFee && (
+              <p className="text-red-500 text-xs mt-1">
+                {fieldErrors.deliveryFee}
+              </p>
+            )}
+            <p className="text-xs text-gray-400 mt-1">
+              This is the flat fee customers pay for delivery from your
+              restaurant.
+            </p>
           </div>
 
           {/* Service Types */}
@@ -543,11 +595,11 @@ const handleImageChange = (e, type) => {
 // Main Profile Page
 const Profile = () => {
   const { user, login, token } = useAuth();
-  const [vendor, setVendor]       = useState(null);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState("");
-  const [showEdit, setShowEdit]   = useState(false);
-  const [saved, setSaved]         = useState(false);
+  const [vendor, setVendor] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [showEdit, setShowEdit] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
 
   const fetchProfile = async () => {
@@ -557,9 +609,7 @@ const Profile = () => {
       const { data } = await api.get("/vendor/profile");
       setVendor(data.vendor);
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Failed to load profile."
-      );
+      setError(err.response?.data?.message || "Failed to load profile.");
     } finally {
       setLoading(false);
     }
@@ -586,41 +636,40 @@ const Profile = () => {
   };
 
   // Check if the shop is currently open based on opening and closing times
-const shopIsOpen = vendor?.isOpen ?? false;
-    // Manually toggle open/closed status
-    const handleToggleStatus = async () => {
-      if (statusLoading) return;
-      const nextStatus = !shopIsOpen;
-      const prevVendor = vendor;
-  
-      // optimistic update
-      setVendor((v) => ({ ...v, isOpen: nextStatus }));
-      setStatusLoading(true);
-  
-      try {
-        const { data } = await api.patch("/vendor/profile/status", {
-          isOpen: nextStatus,
-        });
-        setVendor((v) => ({ ...v, isOpen: data.vendor?.isOpen ?? nextStatus }));
-        login({ ...user, isOpen: nextStatus }, token);
-      } catch (err) {
-        // revert on failure
-        setVendor(prevVendor);
-        setError(
-          err.response?.data?.message || "Failed to update shop status.",
-        );
-      } finally {
-        setStatusLoading(false);
-      }
-    };
-  
+  const shopIsOpen = vendor?.isOpen ?? false;
+  // Manually toggle open/closed status
+  const handleToggleStatus = async () => {
+    if (statusLoading) return;
+    const nextStatus = !shopIsOpen;
+    const prevVendor = vendor;
+
+    // optimistic update
+    setVendor((v) => ({ ...v, isOpen: nextStatus }));
+    setStatusLoading(true);
+
+    try {
+      const { data } = await api.patch("/vendor/profile/status", {
+        isOpen: nextStatus,
+      });
+      setVendor((v) => ({ ...v, isOpen: data.vendor?.isOpen ?? nextStatus }));
+      login({ ...user, isOpen: nextStatus }, token);
+    } catch (err) {
+      // revert on failure
+      setVendor(prevVendor);
+      setError(err.response?.data?.message || "Failed to update shop status.");
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-5 max-w-3xl">
-
       {/* Success Toast */}
       {saved && (
-        <div className="flex items-center gap-2 bg-green-50 border 
-          border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg">
+        <div
+          className="flex items-center gap-2 bg-green-50 border 
+          border-green-200 text-green-700 text-sm px-4 py-3 rounded-lg"
+        >
           <CheckCircle2 size={16} />
           Profile updated successfully!
         </div>
@@ -628,8 +677,10 @@ const shopIsOpen = vendor?.isOpen ?? false;
 
       {/* Error State */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 
-          text-sm px-4 py-3 rounded-lg flex items-center justify-between">
+        <div
+          className="bg-red-50 border border-red-200 text-red-700 
+          text-sm px-4 py-3 rounded-lg flex items-center justify-between"
+        >
           <span>{error}</span>
           <button
             onClick={fetchProfile}
@@ -728,9 +779,7 @@ const shopIsOpen = vendor?.isOpen ?? false;
                 <p className="text-lg font-bold text-gray-900 truncate">
                   {vendor.shopName || "Shop name not set"}
                 </p>
-                <p className="text-sm text-gray-500">
-                  {vendor.fullName}
-                </p>
+                <p className="text-sm text-gray-500">{vendor.fullName}</p>
               </div>
               <button
                 onClick={() => setShowEdit(true)}
@@ -773,13 +822,20 @@ const shopIsOpen = vendor?.isOpen ?? false;
             />
             <StatPill
               label="Delivery"
-              value={vendor.serviceTypes?.delivery ? "Available" : "Unavailable"}
+              value={
+                vendor.serviceTypes?.delivery ? "Available" : "Unavailable"
+              }
               icon={Truck}
             />
             <StatPill
               label="Pickup"
               value={vendor.serviceTypes?.pickup ? "Available" : "Unavailable"}
               icon={ShoppingBag}
+            />
+            <StatPill
+              label="Delivery Fee"
+              value={`Rs. ${vendor.deliveryFee ?? 50}`}
+              icon={Wallet}
             />
           </div>
 
@@ -804,9 +860,7 @@ const shopIsOpen = vendor?.isOpen ?? false;
               <Field
                 label="City / Zone"
                 value={
-                  vendor.zone
-                    ? `${vendor.city} • ${vendor.zone}`
-                    : vendor.city
+                  vendor.zone ? `${vendor.city} • ${vendor.zone}` : vendor.city
                 }
                 icon={MapPin}
               />

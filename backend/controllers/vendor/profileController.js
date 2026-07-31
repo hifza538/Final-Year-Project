@@ -19,6 +19,7 @@ const profileResponse = (vendor) => ({
   isOpen: vendor.isOpen,
   minPrepTime: vendor.minPrepTime,
   maxPrepTime: vendor.maxPrepTime,
+  deliveryFee: vendor.deliveryFee,
   openingTime: vendor.openingTime,
   closingTime: vendor.closingTime,
   serviceTypes: vendor.serviceTypes,
@@ -61,6 +62,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
     closingTime,
     minPrepTime,
     maxPrepTime,
+    deliveryFee,
     serviceTypes,
   } = req.body;
 
@@ -123,6 +125,10 @@ export const updateProfile = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error("Maximum prep time must be greater than minimum prep time");
   }
+  if (deliveryFee !== undefined && Number(deliveryFee) < 0) {
+  res.status(400);
+  throw new Error("Delivery fee cannot be negative");
+}
 
   // update fields if provided
   if (shopName !== undefined) vendor.shopName = shopName.trim();
@@ -134,6 +140,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
   if (closingTime !== undefined) vendor.closingTime = closingTime;
   if (minPrepTime !== undefined) vendor.minPrepTime = Number(minPrepTime);
   if (maxPrepTime !== undefined) vendor.maxPrepTime = Number(maxPrepTime);
+  if (deliveryFee !== undefined) vendor.deliveryFee = Number(deliveryFee); 
   if (serviceTypes !== undefined) vendor.serviceTypes = serviceTypes;
 
   // Handle cover photo upload

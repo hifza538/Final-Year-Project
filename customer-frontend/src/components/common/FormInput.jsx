@@ -4,7 +4,7 @@ import { Eye, EyeOff } from "lucide-react";
 
 // Reusable input field with built-in error message display
 // Used across Login, Signup and future forms (Checkout, Profile etc.)
-const FormInput = ({ label, type = "text", error, registration, placeholder }) => {
+const FormInput = ({ label, type = "text", error, registration, placeholder, required = true }) => {
   const [showPassword, setShowPassword] = useState(false);
   const isPasswordField = type === "password";
 
@@ -15,6 +15,7 @@ const FormInput = ({ label, type = "text", error, registration, placeholder }) =
     <div className="mb-4">
       <label className="block text-sm font-medium text-gray-700 mb-1.5">
         {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
       </label>
 
       <div className="relative">
