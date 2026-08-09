@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { CheckCircle2, Clock } from "lucide-react";
 import { getMyOrderById } from "../services/orderService";
+import OrderStatusBadge from "../components/orders/OrderStatusBadge";
 import ErrorState from "../components/common/ErrorState";
 
 const OrderConfirmation = () => {
@@ -53,7 +54,7 @@ const OrderConfirmation = () => {
       <div className="bg-white rounded-xl border border-gray-100 p-5 mt-6 text-left">
         <div className="flex items-center gap-2 text-sm text-gray-500 mb-3">
           <Clock size={16} />
-          Status: <span className="font-medium text-gray-800">{order.orderStatus}</span>
+          <OrderStatusBadge status={order.orderStatus} />
         </div>
         <div className="space-y-1.5">
           {order.orderItems.map((item, i) => (
