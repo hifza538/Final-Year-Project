@@ -1,3 +1,4 @@
+// backend/server.js
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -13,48 +14,56 @@ connectDB();
 
 const app = express();
 
+// CORS configuration
 const allowedOrigins = [
   "http://localhost:5173", // vendor-frontend
   "http://localhost:5174", // customer-frontend
+  "http://localhost:5175", // admin-frontend
+  "http://localhost:5176", // currently running frontend
 ];
 
-// frontend cors configuration
+// updated CORS configuration
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (like Postman, mobile apps, curl)
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
+      // Allow requests with no origin (Postman etc.)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        console.log("Blocked by CORS:", origin);
+        return callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// check if the server is running
+// Test route
 app.get("/", (req, res) => {
   res.json({ message: "LocalBites API is running..." });
 });
 
-// auth routes
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/vendor", vendorRoutes);
-
 app.use("/api/customer", customerRoutes);
-// admin routes
 app.use("/api/admin", adminRoutes);
 
-// error handling middleware
+// Error handling
 app.use(notFound);
 app.use(errorHandler);
 
-// start the server
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
 export default app;
