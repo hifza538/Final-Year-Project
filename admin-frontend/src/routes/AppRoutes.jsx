@@ -3,23 +3,28 @@
 import { Routes, Route } from "react-router-dom";
 import Dashboard from "../pages/Dashboard";
 import Login from "../pages/Login";
+import VendorApprovals from "../pages/VendorApprovals";
 import NotFound from "../pages/NotFound";
 import PrivateRoute from "./PrivateRoute";
+import AdminLayout from "../components/layout/AdminLayout";
 
 const AppRoutes = () => {
   return (
+  
     <Routes>
+      <Route path="/login" element={<Login />} />
+
       <Route
-        path="/"
         element={
-          // Private route for dashboard
           <PrivateRoute>
-            <Dashboard />
+            <AdminLayout />
           </PrivateRoute>
         }
-      />
-      // Public route for login
-      <Route path="/login" element={<Login />} />
+      >
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/vendor-approvals" element={<VendorApprovals />} />
+      </Route>
+
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
