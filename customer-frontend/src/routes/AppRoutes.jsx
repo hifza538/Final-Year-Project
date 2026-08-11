@@ -10,6 +10,7 @@ import Cart from "../pages/Cart";
 import Checkout from "../pages/Checkout";
 import OrderConfirmation from "../pages/OrderConfirmation";
 import Orders from "../pages/Orders";
+import Profile from "../pages/Profile";
 import NotFound from "../pages/NotFound";
 
 const AppRoutes = () => {
@@ -26,6 +27,7 @@ const AppRoutes = () => {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
         <Route path="/orders" element={<Orders />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>

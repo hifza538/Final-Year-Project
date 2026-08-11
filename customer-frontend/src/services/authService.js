@@ -14,3 +14,9 @@ export const loginCustomer = async (formData) => {
   const response = await api.post("/customer/login", formData);
   return response.data;
 };
+
+// updates the profile of the logged-in customer
+export const updateProfile = async (formData) => {
+  const response = await api.put("/customer/profile", formData);
+  return response.data;
+};

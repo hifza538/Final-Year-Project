@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { MapPin, Truck } from "lucide-react";
+import { MapPin, Truck, Plus } from "lucide-react";
 import { checkoutSchema } from "../utils/validationSchemas";
 import { placeOrder } from "../services/orderService";
+import { getAddresses } from "../services/addressService";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { getRestaurantById } from "../services/restaurantService";
@@ -20,15 +21,18 @@ const Checkout = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deliveryFee, setDeliveryFee] = useState(0);
+  const [savedAddresses, setSavedAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [useNewAddress, setUseNewAddress] = useState(false);
 
-    useEffect(() => {
+  useEffect(() => {
     if (!isAuthenticated) {
       showErrorToast("Please log in to place an order");
       navigate("/login");
     }
   }, [isAuthenticated, navigate]);
 
-  // Fetch the actual delivery fee
+  // Fetch the actual delivery fee for this cart's restaurant
   useEffect(() => {
     if (!restaurantId) return;
     const fetchFee = async () => {
@@ -43,6 +47,27 @@ const Checkout = () => {
     fetchFee();
   }, [restaurantId]);
 
+  // Load saved addresses — pre-select the default one, or fall back to manual entry
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const fetchAddresses = async () => {
+      try {
+        const data = await getAddresses();
+        setSavedAddresses(data.addresses);
+        const defaultAddr = data.addresses.find((a) => a.isDefault);
+        if (defaultAddr) {
+          setSelectedAddressId(defaultAddr._id);
+        } else if (data.addresses.length === 0) {
+          setUseNewAddress(true);
+        }
+      } catch (err) {
+        console.error("Failed to fetch addresses:", err);
+        setUseNewAddress(true);
+      }
+    };
+    fetchAddresses();
+  }, [isAuthenticated]);
+
   const {
     register,
     handleSubmit,
@@ -53,13 +78,13 @@ const Checkout = () => {
       fullName: user?.fullName || "",
       phone: user?.phone || "",
       address: "",
-      notes: "",
       city: "",
+      notes: "",
     },
   });
 
   const grandTotal = cartTotal + deliveryFee;
-  // Redirect to login if not authenticated
+
   if (!isAuthenticated) {
     return null;
   }
@@ -82,6 +107,18 @@ const Checkout = () => {
   const onSubmit = async (formData) => {
     setIsSubmitting(true);
     try {
+      // Use the selected saved address if one is picked, otherwise use the manually typed form
+      const selectedSaved = savedAddresses.find((a) => a._id === selectedAddressId);
+      const deliveryAddress = !useNewAddress && selectedSaved
+        ? {
+            fullName: selectedSaved.fullName,
+            phone: selectedSaved.phone,
+            address: selectedSaved.address,
+            city: selectedSaved.city,
+            notes: selectedSaved.notes,
+          }
+        : formData;
+
       const orderData = {
         vendorId: restaurantId,
         items: cartItems.map((item) => ({
@@ -89,7 +126,7 @@ const Checkout = () => {
           name: item.name,
           quantity: item.quantity,
         })),
-        deliveryAddress: formData,
+        deliveryAddress,
       };
 
       const data = await placeOrder(orderData);
@@ -119,42 +156,89 @@ const Checkout = () => {
       <form onSubmit={handleSubmit(onSubmit)} noValidate>
         {/* Delivery address section */}
         <div className="bg-white rounded-xl border border-gray-100 p-5 mb-4">
-          <div className="flex items-center gap-2 mb-4">
-            <MapPin size={18} className="text-primary" />
-            <h2 className="font-semibold text-gray-900">Delivery Address</h2>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <MapPin size={18} className="text-primary" />
+              <h2 className="font-semibold text-gray-900">Delivery Address</h2>
+            </div>
+            {savedAddresses.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setUseNewAddress((prev) => !prev)}
+                className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+              >
+                {useNewAddress ? "Use saved address" : (
+                  <>
+                    <Plus size={12} />
+                    New address
+                  </>
+                )}
+              </button>
+            )}
           </div>
 
-          <FormInput
-            label="Full Name"
-            placeholder="Your full name"
-            registration={register("fullName")}
-            error={errors.fullName}
-          />
-          <FormInput
-            label="Phone Number"
-            placeholder="enter your phone number"
-            registration={register("phone")}
-            error={errors.phone}
-          />
-          <FormInput
-            label="Address"
-            placeholder="House number, street, area"
-            registration={register("address")}
-            error={errors.address}
-          />
-          <FormInput
-            label="City"
-            placeholder="enter your city"
-            registration={register("city")}
-            error={errors.city}
-          />
-          <FormInput
-            label="Delivery Notes"
-            placeholder="Any specific instructions for the delivery"
-            registration={register("notes")}
-            error={errors.notes}
-            required={false}
-          />
+          {/* Saved address picker */}
+          {!useNewAddress && savedAddresses.length > 0 && (
+            <div className="space-y-2">
+              {savedAddresses.map((addr) => (
+                <label
+                  key={addr._id}
+                  className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors duration-200
+                    ${selectedAddressId === addr._id ? "border-primary bg-primary-light" : "border-gray-200 hover:bg-gray-50"}`}
+                >
+                  <input
+                    type="radio"
+                    name="savedAddress"
+                    checked={selectedAddressId === addr._id}
+                    onChange={() => setSelectedAddressId(addr._id)}
+                    className="mt-1 accent-primary"
+                  />
+                  <div className="text-sm">
+                    <span className="font-semibold text-gray-900">{addr.label}</span>
+                    <p className="text-gray-600 mt-0.5">{addr.fullName} — {addr.phone}</p>
+                    <p className="text-gray-500">{addr.address}, {addr.city}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+          )}
+
+          {/* Manual entry form — shown when no saved addresses exist, or user chose "New address" */}
+          {(useNewAddress || savedAddresses.length === 0) && (
+            <div className={savedAddresses.length > 0 ? "mt-4 pt-4 border-t border-gray-100" : ""}>
+              <FormInput
+                label="Full Name"
+                placeholder="Your full name"
+                registration={register("fullName")}
+                error={errors.fullName}
+              />
+              <FormInput
+                label="Phone Number"
+                placeholder="Enter your phone number"
+                registration={register("phone")}
+                error={errors.phone}
+              />
+              <FormInput
+                label="Address"
+                placeholder="House number, street, area"
+                registration={register("address")}
+                error={errors.address}
+              />
+              <FormInput
+                label="City"
+                placeholder="Enter your city"
+                registration={register("city")}
+                error={errors.city}
+              />
+              <FormInput
+                label="Delivery Notes"
+                placeholder="Any specific instructions for the delivery"
+                registration={register("notes")}
+                error={errors.notes}
+                required={false}
+              />
+            </div>
+          )}
         </div>
 
         {/* Order summary */}
@@ -189,7 +273,7 @@ const Checkout = () => {
           </div>
         </div>
 
-        {/* Payment method - Cash on Delivery*/}
+        {/* Payment method - Cash on Delivery */}
         <div className="bg-white rounded-xl border border-gray-100 p-5 mb-6">
           <h2 className="font-semibold text-gray-900 mb-2">Payment Method</h2>
           <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 rounded-lg px-3 py-2.5">

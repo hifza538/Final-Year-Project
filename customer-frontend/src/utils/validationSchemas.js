@@ -41,6 +41,20 @@ export const signupSchema = z.object({
   confirmPassword: z.string().min(1, "Please confirm your password"),
 });
 
+export const profileUpdateSchema =
+  z.object({
+    fullName: z
+      .string()
+      .trim()
+      .min(3, "Full name must be at least 3 characters")
+      .max(100, "Full name must not exceed 100 characters"),
+    phone: z
+      .string()
+      .trim()
+      .min(1, "Phone number is required")
+      .regex(phoneRegex, "Enter a valid Pakistani number"),
+  });
+
 export const checkoutSchema = z
   .object({
     fullName: z
@@ -60,8 +74,8 @@ export const checkoutSchema = z
       .string()
       .trim()
       .min(10, "Please provide a complete address (minimum 10 characters)"),
-        city: z
-        .string().trim().min(1, "City is required"),
+    city: z
+      .string().trim().min(1, "City is required"),
     notes: z
       .string()
       .trim()
@@ -70,5 +84,15 @@ export const checkoutSchema = z
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
-    path: ["confirmPassword"], // Error shows under the confirmPassword field
+    path: ["confirmPassword"],
   });
+
+// Schema for adding or updating a delivery address
+export const addressSchema = z.object({
+  label: z.string().trim().min(1, "Label is required").max(30, "Label must not exceed 30 characters"),
+  fullName: z.string().trim().min(3, "Full name must be at least 3 characters").max(100, "Full name must not exceed 100 characters"),
+  phone: z.string().trim().min(1, "Phone number is required").regex(phoneRegex, "Enter a valid Pakistani number"),
+  address: z.string().trim().min(10, "Please provide a complete address"),
+  city: z.string().trim().min(1, "City is required"),
+  notes: z.string().trim().max(200, "Notes must not exceed 200 characters").optional(),
+});
