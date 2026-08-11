@@ -46,6 +46,18 @@ const userSchema = new mongoose.Schema(
       default: "customer",
     },
 
+    //delivery address for customers
+    addresses: [
+      {
+        label: { type: String, default: "Home" }, // home, work, etc.
+        fullName: { type: String, required: true, trim: true },
+        phone: { type: String, required: true, trim: true },
+        address: { type: String, required: true, trim: true },
+        notes: { type: String, default: "", trim: true },
+        isDefault: { type: Boolean, default: false },
+      },
+    ],
+
     // Vendor Specific Fields
     shopName: { type: String, trim: true, default: "" },
     shopLocation: { type: String, trim: true, default: "" },

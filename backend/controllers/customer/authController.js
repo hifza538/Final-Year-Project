@@ -1,4 +1,4 @@
-// server/src/controllers/customer/authController.js
+// server/controllers/customer/authController.js
 
 import asyncHandler from "express-async-handler";
 import jwt from "jsonwebtoken";
@@ -16,7 +16,7 @@ const customerResponse = (user) => ({
 });
 
 /* @desc   Register a new customer
-@route  POST /api/customer/auth/register*/
+@route  POST /api/customer/register*/
 export const registerCustomer = asyncHandler(async (req, res) => {
   const { fullName, email, password, phone } = req.body;
 
@@ -93,7 +93,7 @@ export const registerCustomer = asyncHandler(async (req, res) => {
 });
 
 /* @desc   Login customer
-@route  POST /api/customer/auth/login */
+@route  POST /api/customer/login */
 export const loginCustomer = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -146,7 +146,7 @@ export const loginCustomer = asyncHandler(async (req, res) => {
 });
 
 /* @desc   Get logged-in customer details
-@route  GET /api/customer/auth/me */
+@route  GET /api/customer/me */
 export const getMe = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
@@ -156,4 +156,49 @@ export const getMe = asyncHandler(async (req, res) => {
   }
 
   res.status(200).json({ user: customerResponse(user) });
+});
+
+/* @desc   Update logged-in customer's profile
+@route  PUT /api/customer/profile */
+export const updateProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
+  const { fullName, phone } = req.body;
+
+  const phoneRegex = /^(\+92|0)?3\d{9}$/;
+
+  if (fullName !== undefined) {
+    if (!fullName.trim()) {
+      res.status(400);
+      throw new Error("Full name cannot be empty");
+    }
+    if (fullName.trim().length < 3 || fullName.trim().length > 100) {
+      res.status(400);
+      throw new Error("Full name must be between 3 and 100 characters");
+    }
+  }
+  if (phone !== undefined) {
+    if (!phone.trim()) {
+      res.status(400);
+      throw new Error("Phone number cannot be empty");
+    }
+    if (!phoneRegex.test(phone.trim())) {
+      res.status(400);
+      throw new Error("Please enter a valid Pakistani phone number");
+    }
+  }
+
+  if (fullName !== undefined) user.fullName = fullName.trim();
+  if (phone !== undefined) user.phone = phone.trim();
+
+  const updated = await user.save();
+
+  res.status(200).json({
+    message: "Profile updated successfully",
+    user: customerResponse(updated),
+  });
 });
