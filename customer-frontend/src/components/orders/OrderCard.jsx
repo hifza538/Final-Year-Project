@@ -1,7 +1,7 @@
 // customer-frontend/src/components/orders/OrderCard.jsx
 
 import { Link } from "react-router-dom";
-import { UtensilsCrossed, ChevronRight } from "lucide-react";
+import { UtensilsCrossed, ChevronRight, Star } from "lucide-react";
 import OrderStatusBadge from "./OrderStatusBadge";
 
 // Formats an ISO date string into a more readable format (e.g., "12 Jan, 3:45 PM")
@@ -16,16 +16,17 @@ const formatDate = (isoString) => {
   });
 };
 
-const OrderCard = ({ order }) => {
+const OrderCard = ({ order, onWriteReview }) => {
   const itemsSummary = order.orderItems
     .map((item) => `${item.name} × ${item.qty}`)
     .join(", ");
+    const canReview = order.orderStatus === "Completed" && !order.hasReview;
 
   return (
+    <div className="bg-white rounded-xl border border-gray-100 p-4 hover:shadow-sm transition-shadow duration-200">
     <Link
       to={`/order-confirmation/${order._id}`}
-      className="block bg-white rounded-xl border border-gray-100 p-4 hover:shadow-sm transition-shadow duration-200"
-    >
+      className="block">
       <div className="flex items-start gap-3">
         {/* Vendor logo */}
         <div className="w-12 h-12 rounded-lg bg-gray-100 shrink-0 overflow-hidden">
@@ -55,6 +56,24 @@ const OrderCard = ({ order }) => {
         <ChevronRight size={18} className="text-gray-300 shrink-0 mt-1" />
       </div>
     </Link>
+    
+    {canReview && (
+        <button
+          onClick={() => onWriteReview(order)}
+          className="w-full mt-3 pt-3 border-t border-gray-100 flex items-center justify-center gap-1.5
+                     text-sm font-medium text-primary hover:text-primary-dark transition-colors duration-200"
+        >
+          <Star size={14} />
+          Write a Review
+        </button>
+        )}
+      {order.orderStatus === "Completed" && order.hasReview && (
+        <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-center gap-1.5 text-sm text-gray-400">
+          <Star size={14} className="fill-gray-300 text-gray-300" />
+          Reviewed
+        </div>
+      )}
+    </div>
   );
 };
 

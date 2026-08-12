@@ -1,7 +1,7 @@
 // customer-frontend/src/components/restaurant/RestaurantCard.jsx
 
 import { Link } from "react-router-dom";
-import { Clock, MapPin, UtensilsCrossed } from "lucide-react";
+import { Clock, MapPin, UtensilsCrossed, Star } from "lucide-react";
 
 /* Shows one restaurant's summary - used on the Home page listing grid.
 Rating is intentionally not shown yet since no review system exists yet */
@@ -17,6 +17,8 @@ const RestaurantCard = ({ restaurant }) => {
     isOpen,
     minPrepTime,
     maxPrepTime,
+    averageRating,
+    reviewCount,
   } = restaurant;
 
   return (
@@ -60,6 +62,13 @@ const RestaurantCard = ({ restaurant }) => {
       <div className="p-4 pt-6">
         <h3 className="font-semibold text-gray-900 truncate">{shopName}</h3>
         <p className="text-sm text-gray-500 mt-0.5 truncate">{cuisine}</p>
+
+        {averageRating && (
+          <span className="flex items-center gap-1 text-xs font-medium text-gray-700 shrink-0">
+            <Star size={12} className="fill-primary text-primary" />
+            {averageRating} <span className="text-gray-400">({reviewCount})</span>
+          </span>
+        )}
 
         <div className="flex items-center gap-3 mt-3 text-xs text-gray-500">
           <span className="flex items-center gap-1">
