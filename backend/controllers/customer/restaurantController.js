@@ -3,6 +3,7 @@
 import asyncHandler from "express-async-handler";
 import User from "../../models/User.js";
 import MenuItem from "../../models/MenuItem.js";
+import Review from "../../models/Review.js";
 
 // Helper function to format restaurant response for the customer frontend
 const restaurantResponse = (vendor) => ({
@@ -25,7 +26,7 @@ const restaurantResponse = (vendor) => ({
 /* @desc   Get all approved, active restaurants (public, no login required)
 @route  GET /api/customer/restaurants*/
 export const getAllRestaurants = asyncHandler(async (req, res) => {
-  const { search, city, cuisine } = req.query;
+  const { search, cuisine } = req.query;
 
   /* Base filter, only show vendors that are approved by admin and not deactivated.
    intentionally do NOT filter out isOpen:false 
@@ -49,9 +50,29 @@ export const getAllRestaurants = asyncHandler(async (req, res) => {
 
   const vendors = await User.find(filter).sort({ createdAt: -1 });
 
+// Aggregate reviews to compute average rating and review count for each restaurant
+  const vendorIds = vendors.map((v) => v._id);
+  const ratingAggregates = await Review.aggregate([
+    { $match: { vendor: { $in: vendorIds } } },
+    { $group: { _id: "$vendor", avgRating: { $avg: "$rating" }, count: { $sum: 1 } } },
+  ]);
+  const ratingMap = {};
+  ratingAggregates.forEach((r) => {
+    ratingMap[r._id.toString()] = { avgRating: r.avgRating.toFixed(1), count: r.count };
+  });
+
+  const restaurants = vendors.map((vendor) => {
+    const ratingInfo = ratingMap[vendor._id.toString()];
+    return {
+      ...restaurantResponse(vendor),
+      averageRating: ratingInfo?.avgRating || null,
+      reviewCount: ratingInfo?.count || 0,
+    };
+  });
+
   res.status(200).json({
     count: vendors.length,
-    restaurants: vendors.map(restaurantResponse),
+    restaurants,
   });
 });
 
@@ -70,7 +91,12 @@ export const getRestaurantById = asyncHandler(async (req, res) => {
     throw new Error("Restaurant not found");
   }
 
-  res.status(200).json({ restaurant: restaurantResponse(vendor) });
+  const reviews = await Review.find({ vendor: vendor._id });
+  const averageRating = reviews.length > 0
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : null;
+
+  res.status(200).json({ restaurant: restaurantResponse(vendor), averageRating, reviewCount: reviews.length });
 });
 
 /* @desc   Get distinct cuisine types from approved restaurants (for filter chips)

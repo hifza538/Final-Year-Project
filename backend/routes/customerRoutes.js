@@ -5,6 +5,7 @@ import { registerCustomer, loginCustomer, getMe, updateProfile } from "../contro
 import { getAddresses, addAddress, updateAddress, deleteAddress } from "../controllers/customer/addressController.js";
 import { getAllRestaurants, getRestaurantById, getAvailableCuisines, getRestaurantMenu } from "../controllers/customer/restaurantController.js";
 import { placeOrder, getMyOrders, getMyOrderById } from "../controllers/customer/orderController.js";
+import { addReview, getRestaurantReviews } from "../controllers/customer/reviewController.js";
 import { protect, customerOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -31,5 +32,9 @@ router.get("/restaurants/:id/menu", getRestaurantMenu);
 router.post("/orders", protect, customerOnly, placeOrder);
 router.get("/orders", protect, customerOnly, getMyOrders);
 router.get("/orders/:id", protect, customerOnly, getMyOrderById);
+
+// review routes
+router.post("/reviews", protect, customerOnly, addReview);
+router.get("/restaurants/:id/reviews", getRestaurantReviews);
 
 export default router;
