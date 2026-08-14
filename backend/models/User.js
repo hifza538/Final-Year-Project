@@ -65,6 +65,13 @@ const userSchema = new mongoose.Schema(
     city: { type: String, trim: true, default: "" },
     zone: { type: String, trim: true, default: "" },
     cuisine: { type: String, trim: true, default: "" },
+    // Delivery Specific Fields
+    vehicleType: {
+      type: String,
+      enum: ["bike", "car", "bicycle", ""],
+      default: "",
+    },
+    vehicleNumber: { type: String, trim: true, default: "" },
 
     coverPhoto: {
       url: { type: String, default: "" },

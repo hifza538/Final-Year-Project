@@ -7,6 +7,7 @@ import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import authRoutes from "./routes/authRoutes.js";
 import vendorRoutes from "./routes/vendorRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
+import deliveryRoutes from "./routes/deliveryRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 
 dotenv.config();
@@ -18,11 +19,11 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:5173", // vendor-frontend
   "http://localhost:5174", // customer-frontend
-  "http://localhost:5175", // admin-frontend
-  "http://localhost:5176", // currently running frontend
+  "http://localhost:5175", // delivery-frontend
+  "http://localhost:5176", // admin-frontend
 ];
 
-// updated CORS configuration
+// CORS configuration
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -55,8 +56,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/vendor", vendorRoutes);
 app.use("/api/customer", customerRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/delivery", deliveryRoutes);
 
-// Error handling
+// Error handling middleware
 app.use(notFound);
 app.use(errorHandler);
 

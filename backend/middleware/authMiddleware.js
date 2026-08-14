@@ -76,3 +76,18 @@ export const customerOnly = (req, res, next) => {
   }
   next();
 };
+
+// delivery only middleware to ensure user is a delivery rider and approved
+export const deliveryOnly = (req, res, next) => {
+  if (req.user?.role !== "delivery") {
+    res.status(403);
+    throw new Error("Access denied, delivery riders only");
+  }
+
+  if (!req.user?.isApproved) {
+    res.status(403);
+    throw new Error("Your account is pending admin approval");
+  }
+
+  next();
+};
