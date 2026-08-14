@@ -1,3 +1,4 @@
+// backend/routes/vendorRoutes.js
 import express from "express";
 import { protect, vendorOnly } from "../middleware/authMiddleware.js";
 import { getDashboardStats } from "../controllers/vendor/vendorController.js";
