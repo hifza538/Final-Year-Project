@@ -6,6 +6,10 @@ import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import authRoutes from "./routes/authRoutes.js";
 import vendorRoutes from "./routes/vendorRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
+import deliveryRoutes from "./routes/deliveryRoutes.js";
+
+import dns from 'dns';
+dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 dotenv.config();
 connectDB();
@@ -17,6 +21,7 @@ app.use(cors({
   origin: [
     "http://localhost:5173", // vendor frontend
     "http://localhost:5174", // customer frontend
+    "http://localhost:5175", // delivery frontend
   ],
   credentials: true,
 }));
@@ -34,6 +39,8 @@ app.use("/api/vendor", vendorRoutes);
 
 app.use("/api/customer", customerRoutes);
 
+// delivery routes
+app.use("/api/delivery", deliveryRoutes);
 // error handling middleware
 app.use(notFound);
 app.use(errorHandler);
