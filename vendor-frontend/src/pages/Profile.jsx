@@ -40,8 +40,8 @@ const SectionCard = ({ title, icon: Icon, children }) => (
   <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
     <div className="flex items-center gap-2 mb-5 pb-3 border-b border-gray-100">
       {Icon && (
-        <div className="w-7 h-7 bg-pink-50 rounded-lg flex items-center justify-center">
-          <Icon size={14} className="text-pink-500" />
+        <div className="w-7 h-7 bg-primary-50 rounded-lg flex items-center justify-center">
+          <Icon size={14} className="text-primary-500" />
         </div>
       )}
       <h3 className="text-sm font-bold text-gray-800">{title}</h3>
@@ -53,8 +53,8 @@ const SectionCard = ({ title, icon: Icon, children }) => (
 // StatPill small quick-glance stat used under the cover banner
 const StatPill = ({ label, value, icon: Icon }) => (
   <div className="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3 flex-1 min-w-[150px]">
-    <div className="w-10 h-10 bg-pink-50 rounded-xl flex items-center justify-center flex-shrink-0">
-      <Icon size={18} className="text-pink-500" />
+    <div className="w-10 h-10 bg-primary-50 rounded-xl flex items-center justify-center flex-shrink-0">
+      <Icon size={18} className="text-primary-500" />
     </div>
     <div className="min-w-0">
       <p className="text-xs text-gray-400 font-medium">{label}</p>
@@ -71,7 +71,7 @@ const Toggle = ({ label, checked, onChange }) => (
       type="button"
       onClick={onChange}
       className={`relative w-10 h-5 rounded-full transition-colors duration-200 
-        focus:outline-none ${checked ? "bg-pink-500" : "bg-gray-200"}`}
+        focus:outline-none ${checked ? "bg-primary" : "bg-gray-200"}`}
     >
       <span
         className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full 
@@ -274,7 +274,7 @@ const EditModal = ({ vendor, onClose, onSaved }) => {
             <label className="block text-xs font-medium text-gray-700 mb-2">
               Cover Photo
             </label>
-            <div className="relative w-full h-32 bg-gray-100 rounded-xl overflow-hidden border-2 border-dashed border-gray-200 hover:border-pink-300 transition-colors">
+            <div className="relative w-full h-32 bg-gray-100 rounded-xl overflow-hidden border-2 border-dashed border-gray-200 hover:border-primary/40 transition-colors">
               {coverPreview ? (
                 <img
                   src={coverPreview}
@@ -304,7 +304,7 @@ const EditModal = ({ vendor, onClose, onSaved }) => {
               Restaurant Logo
             </label>
             <div className="flex items-center gap-4">
-              <div className="relative w-20 h-20 bg-gray-100 rounded-xl overflow-hidden border-2 border-dashed border-gray-200 hover:border-pink-300 transition-colors flex-shrink-0">
+              <div className="relative w-20 h-20 bg-gray-100 rounded-xl overflow-hidden border-2 border-dashed border-gray-200 hover:border-primary/40 transition-colors flex-shrink-0">
                 {logoPreview ? (
                   <img
                     src={logoPreview}
@@ -344,7 +344,7 @@ const EditModal = ({ vendor, onClose, onSaved }) => {
               onChange={handleChange}
               placeholder="My Restaurant"
               className={`w-full px-3 py-2.5 text-sm rounded-lg border 
-                focus:outline-none focus:ring-2 focus:ring-pink-500 
+                focus:outline-none focus:ring-2 focus:ring-primary 
                 focus:border-transparent transition
                 ${fieldErrors.shopName ? "border-red-400 bg-red-50" : "border-gray-200"}`}
             />
@@ -366,7 +366,7 @@ const EditModal = ({ vendor, onClose, onSaved }) => {
               onChange={handleChange}
               placeholder="Block 5, Gulshan-e-Iqbal, Karachi"
               className={`w-full px-3 py-2.5 text-sm rounded-lg border 
-                focus:outline-none focus:ring-2 focus:ring-pink-500 
+                focus:outline-none focus:ring-2 focus:ring-primary 
                 focus:border-transparent transition
                 ${fieldErrors.shopAddress ? "border-red-400 bg-red-50" : "border-gray-200"}`}
             />
@@ -389,7 +389,7 @@ const EditModal = ({ vendor, onClose, onSaved }) => {
                 onChange={handleChange}
                 placeholder="Karachi"
                 className={`w-full px-3 py-2.5 text-sm rounded-lg border 
-                  focus:outline-none focus:ring-2 focus:ring-pink-500 transition
+                  focus:outline-none focus:ring-2 focus:ring-primary transition
                   ${fieldErrors.city ? "border-red-400 bg-red-50" : "border-gray-200"}`}
               />
               {fieldErrors.city && (
@@ -406,7 +406,7 @@ const EditModal = ({ vendor, onClose, onSaved }) => {
                 onChange={handleChange}
                 placeholder="Gulshan"
                 className="w-full px-3 py-2.5 text-sm rounded-lg border border-gray-200 
-                  focus:outline-none focus:ring-2 focus:ring-pink-500 transition"
+                  focus:outline-none focus:ring-2 focus:ring-primary transition"
               />
             </div>
           </div>
@@ -422,7 +422,7 @@ const EditModal = ({ vendor, onClose, onSaved }) => {
               onChange={handleChange}
               placeholder="e.g. Pakistani, Chinese"
               className="w-full px-3 py-2.5 text-sm rounded-lg border border-gray-200 
-                focus:outline-none focus:ring-2 focus:ring-pink-500 transition"
+                focus:outline-none focus:ring-2 focus:ring-primary transition"
             />
           </div>
 
@@ -438,7 +438,7 @@ const EditModal = ({ vendor, onClose, onSaved }) => {
                 onChange={handleChange}
                 type="time"
                 className={`w-full px-3 py-2.5 text-sm rounded-lg border 
-                  focus:outline-none focus:ring-2 focus:ring-pink-500 transition
+                  focus:outline-none focus:ring-2 focus:ring-primary transition
                   ${fieldErrors.openingTime ? "border-red-400 bg-red-50" : "border-gray-200"}`}
               />
               {fieldErrors.openingTime && (
@@ -457,7 +457,7 @@ const EditModal = ({ vendor, onClose, onSaved }) => {
                 onChange={handleChange}
                 type="time"
                 className={`w-full px-3 py-2.5 text-sm rounded-lg border 
-                  focus:outline-none focus:ring-2 focus:ring-pink-500 transition
+                  focus:outline-none focus:ring-2 focus:ring-primary transition
                   ${fieldErrors.closingTime ? "border-red-400 bg-red-50" : "border-gray-200"}`}
               />
               {fieldErrors.closingTime && (
@@ -482,7 +482,7 @@ const EditModal = ({ vendor, onClose, onSaved }) => {
                 min="5"
                 max="120"
                 className={`w-full px-3 py-2.5 text-sm rounded-lg border 
-                  focus:outline-none focus:ring-2 focus:ring-pink-500 transition
+                  focus:outline-none focus:ring-2 focus:ring-primary transition
                   ${fieldErrors.minPrepTime ? "border-red-400 bg-red-50" : "border-gray-200"}`}
               />
               {fieldErrors.minPrepTime && (
@@ -503,7 +503,7 @@ const EditModal = ({ vendor, onClose, onSaved }) => {
                 min="5"
                 max="120"
                 className={`w-full px-3 py-2.5 text-sm rounded-lg border 
-                  focus:outline-none focus:ring-2 focus:ring-pink-500 transition
+                  focus:outline-none focus:ring-2 focus:ring-primary transition
                   ${fieldErrors.maxPrepTime ? "border-red-400 bg-red-50" : "border-gray-200"}`}
               />
               {fieldErrors.maxPrepTime && (
@@ -526,7 +526,7 @@ const EditModal = ({ vendor, onClose, onSaved }) => {
               min="0"
               placeholder="50"
               className={`w-full px-3 py-2.5 text-sm rounded-lg border 
-                focus:outline-none focus:ring-2 focus:ring-pink-500 transition
+                focus:outline-none focus:ring-2 focus:ring-primary transition
                 ${fieldErrors.deliveryFee ? "border-red-400 bg-red-50" : "border-gray-200"}`}
             />
             {fieldErrors.deliveryFee && (
@@ -573,7 +573,7 @@ const EditModal = ({ vendor, onClose, onSaved }) => {
               type="submit"
               disabled={loading}
               className="flex-1 flex items-center justify-center gap-2 py-2.5 
-                rounded-lg bg-pink-500 hover:bg-pink-600 disabled:bg-pink-300 
+                rounded-lg bg-primary hover:bg-primary/80 disabled:bg-primary/50 
                 text-white text-sm font-semibold transition-colors"
             >
               {loading ? (
@@ -708,7 +708,7 @@ const Profile = () => {
           {/* Cover Banner */}
           <div className="relative rounded-2xl overflow-hidden shadow-sm">
             <div
-              className="h-48 sm:h-56 w-full relative bg-gradient-to-br from-pink-500 via-rose-500 to-orange-500 flex items-center justify-center"
+              className="h-48 sm:h-56 w-full relative bg-gradient-to-br from-primary-500 via-rose-500 to-orange-500 flex items-center justify-center"
               style={
                 vendor.coverPhoto?.url
                   ? {
@@ -736,7 +736,7 @@ const Profile = () => {
                 className={`absolute top-4 left-4 flex items-center gap-1.5 
                   text-xs font-semibold px-3 py-1.5 rounded-full text-white 
                   transition-colors cursor-pointer disabled:opacity-70
-                  ${shopIsOpen ? "bg-pink-500 hover:bg-green-600" : "bg-gray-500 hover:bg-gray-600"}`}
+                  ${shopIsOpen ? "bg-primary hover:bg-primary/80" : "bg-gray-500 hover:bg-gray-600"}`}
               >
                 {statusLoading ? (
                   <Loader2 size={12} className="animate-spin" />
@@ -761,7 +761,7 @@ const Profile = () => {
             {/* Logo + name strip */}
             <div className="bg-white px-6 pb-5 pt-0 flex items-end gap-4 -mt-10 relative">
               <div
-                className="w-20 h-20 rounded-2xl bg-pink-500 border-4 border-white 
+                className="w-20 h-20 rounded-2xl bg-primary-500 border-4 border-white 
                   shadow-md flex items-center justify-center text-white text-2xl 
                   font-bold flex-shrink-0 overflow-hidden"
               >
@@ -783,7 +783,7 @@ const Profile = () => {
               </div>
               <button
                 onClick={() => setShowEdit(true)}
-                className="hidden sm:flex items-center gap-2 bg-pink-500 hover:bg-pink-600 
+                className="hidden sm:flex items-center gap-2 bg-primary hover:bg-primary/80 
                   text-white text-sm font-semibold px-4 py-2 rounded-lg 
                   transition-colors shadow-sm flex-shrink-0"
               >
@@ -797,7 +797,7 @@ const Profile = () => {
           <button
             onClick={() => setShowEdit(true)}
             className="sm:hidden w-full flex items-center justify-center gap-2 
-              bg-pink-500 hover:bg-pink-600 text-white text-sm font-semibold 
+              bg-primary hover:bg-primary/80 text-white text-sm font-semibold 
               px-4 py-2.5 rounded-lg transition-colors shadow-sm"
           >
             <Pencil size={14} />

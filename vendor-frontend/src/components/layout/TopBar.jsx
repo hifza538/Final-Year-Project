@@ -1,3 +1,5 @@
+// vendor-frontend/src/components/layout/TopBar.jsx
+
 import { useLocation } from "react-router-dom";
 import { Bell } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
@@ -32,8 +34,8 @@ const TopBar = () => {
         </button>
 
         {/* Avatar */}
-        <div className="w-9 h-9 rounded-full bg-pink-100 flex items-center 
-          justify-center text-pink-600 font-bold text-sm">
+        <div className="w-9 h-9 rounded-full bg-primary-light flex items-center 
+          justify-center text-primary-dark font-bold text-sm">
           {user?.fullName?.[0]?.toUpperCase() || "V"}
         </div>
       </div>

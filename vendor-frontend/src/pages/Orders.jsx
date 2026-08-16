@@ -1,3 +1,4 @@
+// vendor-frontend/src/pages/Orders.jsx
 import { useEffect, useState, useCallback } from "react";
 import {
   ShoppingBag, Clock, CheckCircle2, XCircle,
@@ -6,49 +7,49 @@ import {
 } from "lucide-react";
 import api from "../services/api";
 
-// constants for order status filters, labels, and colors
+// constants for order status filters, labels and colors
 const STATUS_FILTERS = [
   "All", "Pending", "Accepted", "Preparing",
   "Ready", "OutForDelivery", "Completed", "Rejected",
 ];
 
 const STATUS_CONFIG = {
-  Pending:        { color: "bg-amber-100 text-amber-700",  label: "Pending"          },
-  Accepted:       { color: "bg-blue-100 text-blue-700",    label: "Accepted"         },
-  Preparing:      { color: "bg-purple-100 text-purple-700",label: "Preparing"        },
-  Ready:          { color: "bg-indigo-100 text-indigo-700",label: "Ready"            },
-  OutForDelivery: { color: "bg-orange-100 text-orange-700",label: "Out for Delivery" },
-  Completed:      { color: "bg-green-100 text-green-700",  label: "Completed"        },
-  Rejected:       { color: "bg-red-100 text-red-700",      label: "Rejected"         },
+  Pending: { color: "bg-amber-100 text-amber-700", label: "Pending" },
+  Accepted: { color: "bg-blue-100 text-blue-700", label: "Accepted" },
+  Preparing: { color: "bg-purple-100 text-purple-700", label: "Preparing" },
+  Ready: { color: "bg-indigo-100 text-indigo-700", label: "Ready" },
+  OutForDelivery: { color: "bg-orange-100 text-orange-700", label: "Out for Delivery" },
+  Completed: { color: "bg-green-100 text-green-700", label: "Completed" },
+  Rejected: { color: "bg-red-100 text-red-700", label: "Rejected" },
 };
 
 // Status flow - what actions vendor can take
 const STATUS_ACTIONS = {
-  Pending:        ["Accepted", "Rejected"],
-  Accepted:       ["Preparing"],
-  Preparing:      ["Ready"],
-  Ready:          ["OutForDelivery"],
+  Pending: ["Accepted", "Rejected"],
+  Accepted: ["Preparing"],
+  Preparing: ["Ready"],
+  Ready: ["OutForDelivery"],
   OutForDelivery: ["Completed"],
-  Completed:      [],
-  Rejected:       [],
+  Completed: [],
+  Rejected: [],
 };
 
 const ACTION_LABELS = {
-  Accepted:       "Accept Order",
-  Rejected:       "Reject Order",
-  Preparing:      "Start Preparing",
-  Ready:          "Mark as Ready",
+  Accepted: "Accept Order",
+  Rejected: "Reject Order",
+  Preparing: "Start Preparing",
+  Ready: "Mark as Ready",
   OutForDelivery: "Out for Delivery",
-  Completed:      "Mark Completed",
+  Completed: "Mark Completed",
 };
 
 const ACTION_COLORS = {
-  Accepted:       "bg-green-500 hover:bg-green-600 text-white",
-  Rejected:       "bg-red-500 hover:bg-red-600 text-white",
-  Preparing:      "bg-purple-500 hover:bg-purple-600 text-white",
-  Ready:          "bg-indigo-500 hover:bg-indigo-600 text-white",
+  Accepted: "bg-green-500 hover:bg-green-600 text-white",
+  Rejected: "bg-red-500 hover:bg-red-600 text-white",
+  Preparing: "bg-purple-500 hover:bg-purple-600 text-white",
+  Ready: "bg-indigo-500 hover:bg-indigo-600 text-white",
   OutForDelivery: "bg-orange-500 hover:bg-orange-600 text-white",
-  Completed:      "bg-green-500 hover:bg-green-600 text-white",
+  Completed: "bg-green-500 hover:bg-green-600 text-white",
 };
 
 // skeleton loader for order card
@@ -72,16 +73,16 @@ const SkeletonOrder = () => (
 //order card component
 const OrderCard = ({ order, onUpdateStatus, updating }) => {
   const [expanded, setExpanded] = useState(false);
-  const config  = STATUS_CONFIG[order.orderStatus] || STATUS_CONFIG.Pending;
+  const config = STATUS_CONFIG[order.orderStatus] || STATUS_CONFIG.Pending;
   const actions = STATUS_ACTIONS[order.orderStatus] || [];
 
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
     return date.toLocaleString("en-PK", {
-      day:    "2-digit",
-      month:  "short",
-      year:   "numeric",
-      hour:   "2-digit",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
       minute: "2-digit",
     });
   };
@@ -226,14 +227,14 @@ const OrderCard = ({ order, onUpdateStatus, updating }) => {
         </div>
       )}
 
-      {/* Completed / Rejected — No Actions */}
+      {/* Completed / Rejected - No Actions */}
       {actions.length === 0 && (
         <div className={`px-5 pb-5`}>
           <div className={`w-full py-2.5 rounded-lg text-sm font-medium 
             text-center ${config.color}`}>
             {order.orderStatus === "Completed"
-              ? "✓ Order Completed"
-              : "✗ Order Rejected"
+              ? "Order Completed"
+              : "Order Rejected"
             }
           </div>
         </div>
@@ -244,17 +245,17 @@ const OrderCard = ({ order, onUpdateStatus, updating }) => {
 
 // Main Orders Page
 const Orders = () => {
-  const [orders, setOrders]         = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState("");
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
-  const [search, setSearch]         = useState("");
-  const [updating, setUpdating]     = useState(null);
+  const [search, setSearch] = useState("");
+  const [updating, setUpdating] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
 
-  // ── Fetch Orders ─────────────────────────────────────────
-  const fetchOrders = useCallback(async () => {
-    setLoading(true);
+  // ── Fetch Orders
+  const fetchOrders = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     setError("");
     try {
       const params = activeFilter !== "All"
@@ -278,7 +279,7 @@ const Orders = () => {
 
   // Auto refresh every 30 seconds
   useEffect(() => {
-    const interval = setInterval(fetchOrders, 30000);
+    const interval = setInterval(() => fetchOrders(true), 30000);
     return () => clearInterval(interval);
   }, [fetchOrders]);
 
@@ -313,7 +314,7 @@ const Orders = () => {
     );
   });
 
-  // ── Order Counts Per Status ──────────────────────────────
+  // Order Counts Per Status
   const statusCounts = orders.reduce((acc, order) => {
     acc[order.orderStatus] = (acc[order.orderStatus] || 0) + 1;
     return acc;
@@ -338,8 +339,8 @@ const Orders = () => {
           onClick={fetchOrders}
           disabled={loading}
           className="flex items-center gap-2 text-sm text-gray-500 
-            hover:text-pink-500 border border-gray-200 
-            hover:border-pink-300 px-3 py-2 rounded-lg 
+            hover:text-primary border border-gray-200 
+            hover:border-primary/40 px-3 py-2 rounded-lg 
             transition-colors disabled:opacity-50"
         >
           <RefreshCw
@@ -371,10 +372,10 @@ const Orders = () => {
             key={filter}
             onClick={() => setActiveFilter(filter)}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold 
-              transition-colors ${
-                activeFilter === filter
-                  ? "bg-pink-500 text-white"
-                  : "bg-white border border-gray-200 text-gray-600 hover:border-pink-300"
+              transition-colors ${activeFilter === filter
+                ? "bg-primary text-white"
+
+                : "bg-white border border-gray-200 text-gray-600 hover:border-primary/40"
               }`}
           >
             {filter}
@@ -404,7 +405,7 @@ const Orders = () => {
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-9 pr-4 py-2.5 text-sm rounded-lg border 
             border-gray-200 focus:outline-none focus:ring-2 
-            focus:ring-pink-500 transition"
+            focus:ring-primary transition"
         />
       </div>
 
@@ -428,24 +429,24 @@ const Orders = () => {
         /* Empty State */
         <div className="bg-white rounded-xl border border-dashed 
           border-gray-200 p-12 text-center">
-          <div className="w-14 h-14 bg-pink-50 rounded-full flex items-center 
+          <div className="w-14 h-14 bg-primary-50 rounded-full flex items-center 
             justify-center mx-auto mb-4">
-            <ShoppingBag size={24} className="text-pink-500" />
+            <ShoppingBag size={24} className="text-primary-500" />
           </div>
           <h3 className="text-gray-800 font-semibold mb-1">
             {search
               ? "No orders match your search"
               : activeFilter !== "All"
-              ? `No ${activeFilter} orders`
-              : "No orders yet"
+                ? `No ${activeFilter} orders`
+                : "No orders yet"
             }
           </h3>
           <p className="text-gray-400 text-sm max-w-xs mx-auto">
             {search
               ? "Try a different search term"
               : activeFilter !== "All"
-              ? "Orders will appear here when their status matches"
-              : "When customers place orders, they will appear here"
+                ? "Orders will appear here when their status matches"
+                : "When customers place orders, they will appear here"
             }
           </p>
         </div>

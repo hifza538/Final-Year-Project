@@ -33,7 +33,7 @@ const StepIndicator = ({ currentStep, totalSteps }) => (
         <div
           className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
             i + 1 === currentStep
-              ? "bg-pink-500 text-white"
+              ? "bg-primary text-white"
               : i + 1 < currentStep
                 ? "bg-green-500 text-white"
                 : "bg-gray-200 text-gray-500"
@@ -307,7 +307,7 @@ const Register = () => {
           </p>
           <button
             onClick={() => navigate("/login")}
-            className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2.5 rounded-lg transition-colors"
+            className="w-full bg-primary hover:bg-primary-dark text-white font-semibold py-2.5 rounded-lg transition-colors"
           >
             Go to Login
           </button>
@@ -319,7 +319,7 @@ const Register = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* ── Left Branding Panel ── */}
-      <div className="hidden lg:flex lg:w-1/2 bg-pink-500 flex-col justify-between p-12">
+      <div className="hidden lg:flex lg:w-1/2 bg-primary flex-col justify-between p-12">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
             <ChefHat size={22} className="text-white" />
@@ -332,7 +332,7 @@ const Register = () => {
             <br />
             restaurants online.
           </h2>
-          <p className="text-pink-100 text-base leading-relaxed max-w-sm">
+          <p className="text-primary-100 text-base leading-relaxed max-w-sm">
             Register your restaurant and start receiving orders from customers
             near you.
           </p>
@@ -344,12 +344,12 @@ const Register = () => {
             ].map(({ label, value }) => (
               <div key={label} className="bg-white/15 rounded-xl px-4 py-3">
                 <p className="text-white font-bold text-lg">{value}</p>
-                <p className="text-pink-100 text-xs">{label}</p>
+                <p className="text-primary-100 text-xs">{label}</p>
               </div>
             ))}
           </div>
         </div>
-        <p className="text-pink-200 text-xs">
+        <p className="text-primary-200 text-xs">
           © {new Date().getFullYear()} LocalBites. All rights reserved.
         </p>
       </div>
@@ -359,7 +359,7 @@ const Register = () => {
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="flex items-center gap-2 mb-6 lg:hidden">
-            <div className="w-8 h-8 bg-pink-500 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <ChefHat size={16} className="text-white" />
             </div>
             <span className="font-bold text-gray-900">LocalBites Vendor</span>
@@ -441,7 +441,7 @@ const Register = () => {
                       onChange={handleChange}
                       placeholder="Min 6 characters"
                       className={`w-full px-4 py-2.5 pr-11 rounded-lg border text-sm
-                        focus:outline-none focus:ring-2 focus:ring-pink-500 transition ${
+                        focus:outline-none focus:ring-2 focus:ring-primary transition ${
                           fieldErrors.password
                             ? "border-red-400 bg-red-50"
                             : "border-gray-200"
@@ -487,7 +487,7 @@ const Register = () => {
                     value={form.cuisine}
                     onChange={handleChange}
                     className={`w-full px-4 py-2.5 rounded-lg border text-sm bg-white
-                      focus:outline-none focus:ring-2 focus:ring-pink-500 transition ${
+                      focus:outline-none focus:ring-2 focus:ring-primary transition ${
                         fieldErrors.cuisine
                           ? "border-red-400 bg-red-50"
                           : "border-gray-200"
@@ -590,7 +590,7 @@ const Register = () => {
                     CNIC Front Image <span className="text-red-500">*</span>
                   </label>
                   {!form.cnicFront ? (
-                    <label className="flex flex-col items-center justify-center gap-1 border-2 border-dashed border-gray-300 rounded-lg py-6 cursor-pointer hover:border-pink-400 transition-colors">
+                    <label className="flex flex-col items-center justify-center gap-1 border-2 border-dashed border-gray-300 rounded-lg py-6 cursor-pointer hover:border-primary/50 transition-colors">
                       <span className="text-sm text-gray-500">
                         Click to upload CNIC front
                       </span>
@@ -637,7 +637,7 @@ const Register = () => {
                     CNIC Back Image <span className="text-red-500">*</span>
                   </label>
                   {!form.cnicBack ? (
-                    <label className="flex flex-col items-center justify-center gap-1 border-2 border-dashed border-gray-300 rounded-lg py-6 cursor-pointer hover:border-pink-400 transition-colors">
+                    <label className="flex flex-col items-center justify-center gap-1 border-2 border-dashed border-gray-300 rounded-lg py-6 cursor-pointer hover:border-primary/50 transition-colors">
                       <span className="text-sm text-gray-500">
                         Click to upload CNIC back
                       </span>
@@ -690,7 +690,7 @@ const Register = () => {
                     name="hasFoodLicense"
                     checked={form.hasFoodLicense}
                     onChange={handleChange}
-                    className="w-4 h-4 accent-pink-500"
+                    className="w-4 h-4 accent-primary"
                   />
                   <span className="text-sm text-gray-700">
                     I have a valid food license
@@ -714,7 +714,7 @@ const Register = () => {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="flex-1 py-2.5 rounded-lg bg-pink-500 hover:bg-pink-600 text-white text-sm font-semibold transition-colors"
+                  className="flex-1 py-2.5 rounded-lg bg-primary hover:bg-primary-dark text-white text-sm font-semibold transition-colors"
                 >
                   Next
                 </button>
@@ -722,7 +722,7 @@ const Register = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-pink-500 hover:bg-pink-600 disabled:bg-pink-300 text-white text-sm font-semibold transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-primary hover:bg-primary-dark disabled:bg-primary/50 text-white text-sm font-semibold transition-colors"
                 >
                   {loading ? (
                     <>
@@ -741,7 +741,7 @@ const Register = () => {
             Already have an account?{" "}
             <Link
               to="/login"
-              className="text-pink-500 hover:underline font-medium"
+              className="text-primary hover:underline font-medium"
             >
               Sign in
             </Link>

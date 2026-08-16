@@ -81,10 +81,10 @@ const Login = () => {
     <div className="min-h-screen bg-gray-50 flex">
 
       {/* Left Branding Panel*/}
-      <div className="hidden lg:flex lg:w-1/2 bg-pink-500 flex-col justify-between p-12">
+      <div className="hidden lg:flex lg:w-1/2 bg-primary-500 flex-col justify-between p-12">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-            <ChefHat size={22} className="text-white" />
+          <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
+            <ChefHat size={22} className="text-primary" />
           </div>
           <span className="text-white font-bold text-xl">LocalBites</span>
         </div>
@@ -95,9 +95,9 @@ const Login = () => {
             <br />
             restaurant with ease.
           </h2>
-          <p className="text-pink-100 text-base leading-relaxed max-w-sm">
-            Track orders in real time, update your menu, and grow your
-            business — all from one place.
+          <p className="text-gray-300 text-base leading-relaxed max-w-sm">
+            Track orders in real time, update your menu and grow your
+            business - all from one place.
           </p>
 
           {/* Stat Pills */}
@@ -107,15 +107,15 @@ const Login = () => {
               { label: "Daily Orders",   value: "2000+" },
               { label: "Cities",         value: "10+" },
             ].map(({ label, value }) => (
-              <div key={label} className="bg-white/15 rounded-xl px-4 py-3">
+              <div key={label} className="bg-white/10 rounded-xl px-4 py-3">
                 <p className="text-white font-bold text-lg">{value}</p>
-                <p className="text-pink-100 text-xs">{label}</p>
+                <p className="text-gray-300 text-xs">{label}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <p className="text-pink-200 text-xs">
+        <p className="text-gray-300 text-xs">
           © {new Date().getFullYear()} LocalBites. All rights reserved.
         </p>
       </div>
@@ -126,7 +126,7 @@ const Login = () => {
 
           {/* Mobile Logo */}
           <div className="flex items-center gap-2 mb-8 lg:hidden">
-            <div className="w-8 h-8 bg-pink-500 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <ChefHat size={16} className="text-white" />
             </div>
             <span className="font-bold text-gray-900">LocalBites Vendor</span>
@@ -155,7 +155,7 @@ const Login = () => {
               value={form.email}
               onChange={handleChange}
               type="email"
-              placeholder="you@restaurant.com"
+              placeholder="enter your email"
               required
               error={fieldErrors.email}
             />
@@ -171,11 +171,11 @@ const Login = () => {
                   name="password"
                   value={form.password}
                   onChange={handleChange}
-                  placeholder="••••••••"
+                  placeholder="enter your password"
                   autoComplete="current-password"
                   className={`w-full px-4 py-2.5 pr-11 rounded-lg border text-sm
                     text-gray-900 placeholder-gray-400 focus:outline-none 
-                    focus:ring-2 focus:ring-pink-500 focus:border-transparent 
+                    focus:ring-2 focus:ring-primary focus:border-transparent 
                     transition ${
                       fieldErrors.password
                         ? "border-red-400 bg-red-50"
@@ -204,7 +204,7 @@ const Login = () => {
               type="submit"
               disabled={loading}
               className="w-full flex items-center justify-center gap-2 
-                bg-pink-500 hover:bg-pink-600 disabled:bg-pink-300 
+                bg-primary hover:bg-primary-dark disabled:bg-primary/50
                 text-white font-semibold py-2.5 rounded-lg text-sm 
                 transition-colors mt-2"
             >
@@ -223,7 +223,7 @@ const Login = () => {
             Not a vendor?{" "}
             <Link
               to="/register"
-              className="text-pink-500 hover:underline font-medium"
+              className="text-primary hover:underline font-medium"
             >
               Register your restaurant
             </Link>

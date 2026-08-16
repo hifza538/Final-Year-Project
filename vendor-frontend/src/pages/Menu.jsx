@@ -1,3 +1,4 @@
+// vendor-frontend/src/pages/Menu.jsx
 import { useEffect, useState, useRef } from "react";
 import {
   Plus, Pencil, Trash2, Loader2, X,
@@ -12,7 +13,7 @@ const CATEGORIES = [
   "Desserts", "Sides", "Salads", "Breakfast", "Other",
 ];
 
-// Custom category dropdown (styled, not the native <select>)
+// Custom category dropdown 
 const CategoryDropdown = ({ value, onChange }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -34,7 +35,7 @@ const CategoryDropdown = ({ value, onChange }) => {
         onClick={() => setOpen((o) => !o)}
         className="flex items-center justify-between gap-3 pl-4 pr-3 py-2.5 
           text-sm rounded-lg border border-gray-200 bg-white 
-          hover:border-pink-300 transition-colors min-w-[180px]"
+          hover:border-primary/40 transition-colors min-w-[180px]"
       >
         <span className="flex items-center gap-2 text-gray-700">
           <Filter size={14} className="text-gray-400" />
@@ -65,7 +66,7 @@ const CategoryDropdown = ({ value, onChange }) => {
               className={`w-full flex items-center justify-between px-3.5 
                 py-2 text-sm text-left transition-colors ${
                   value === cat
-                    ? "text-pink-600 bg-pink-50 font-medium"
+                    ? "text-primary-600 bg-primary-50 font-medium"
                     : "text-gray-600 hover:bg-gray-50"
                 }`}
             >
@@ -135,7 +136,7 @@ const MenuCard = ({ item, onEdit, onDelete, onToggleStock }) => (
           {item.description}
         </p>
       )}
-      <p className="text-lg font-bold text-pink-500 mt-2">
+      <p className="text-lg font-bold text-primary-500 mt-2">
         Rs {item.price.toLocaleString()}
       </p>
 
@@ -143,7 +144,7 @@ const MenuCard = ({ item, onEdit, onDelete, onToggleStock }) => (
       <div className="flex items-center gap-2 mt-3">
         {/* Toggle Stock */}
         <button
-          onClick={() => onToggleStock(item._id, item.inStock)}
+          onClick={() => onToggleStock(item._id)}
           className={`flex items-center gap-1.5 text-xs font-medium px-2.5 
             py-1.5 rounded-lg transition-colors ${
               item.inStock
@@ -325,7 +326,7 @@ const MenuModal = ({ item, onClose, onSaved }) => {
             </label>
             <div className="relative w-full h-40 bg-gray-100 rounded-xl 
               overflow-hidden border-2 border-dashed border-gray-200 
-              hover:border-pink-300 transition-colors cursor-pointer">
+              hover:border-primary/40 transition-colors cursor-pointer">
               {imagePreview ? (
                 <img
                   src={imagePreview}
@@ -362,7 +363,7 @@ const MenuModal = ({ item, onClose, onSaved }) => {
               onChange={handleChange}
               placeholder="e.g. Chicken Burger"
               className={`w-full px-3 py-2.5 text-sm rounded-lg border 
-                focus:outline-none focus:ring-2 focus:ring-pink-500 transition
+                focus:outline-none focus:ring-2 focus:ring-primary transition
                 ${fieldErrors.name
                   ? "border-red-400 bg-red-50"
                   : "border-gray-200"}`}
@@ -384,7 +385,7 @@ const MenuModal = ({ item, onClose, onSaved }) => {
               placeholder="Brief description of the item..."
               rows={3}
               className={`w-full px-3 py-2.5 text-sm rounded-lg border 
-                focus:outline-none focus:ring-2 focus:ring-pink-500 
+                focus:outline-none focus:ring-2 focus:ring-primary 
                 transition resize-none
                 ${fieldErrors.description
                   ? "border-red-400 bg-red-50"
@@ -416,7 +417,7 @@ const MenuModal = ({ item, onClose, onSaved }) => {
                 min="1"
                 placeholder="350"
                 className={`w-full px-3 py-2.5 text-sm rounded-lg border 
-                  focus:outline-none focus:ring-2 focus:ring-pink-500 transition
+                  focus:outline-none focus:ring-2 focus:ring-primary transition
                   ${fieldErrors.price
                     ? "border-red-400 bg-red-50"
                     : "border-gray-200"}`}
@@ -437,7 +438,7 @@ const MenuModal = ({ item, onClose, onSaved }) => {
                 value={form.category}
                 onChange={handleChange}
                 className={`w-full px-3 py-2.5 text-sm rounded-lg border 
-                  focus:outline-none focus:ring-2 focus:ring-pink-500 
+                  focus:outline-none focus:ring-2 focus:ring-primary 
                   transition bg-white
                   ${fieldErrors.category
                     ? "border-red-400 bg-red-50"
@@ -470,8 +471,8 @@ const MenuModal = ({ item, onClose, onSaved }) => {
               type="submit"
               disabled={loading}
               className="flex-1 flex items-center justify-center gap-2 
-                py-2.5 rounded-lg bg-pink-500 hover:bg-pink-600 
-                disabled:bg-pink-300 text-white text-sm font-semibold 
+                py-2.5 rounded-lg bg-primary hover:bg-primary/80 
+                disabled:bg-primary/50 text-white text-sm font-semibold 
                 transition-colors"
             >
               {loading ? (
@@ -631,7 +632,7 @@ const Menu = () => {
             setEditItem(null);
             setShowModal(true);
           }}
-          className="flex items-center gap-2 bg-pink-500 hover:bg-pink-600 
+          className="flex items-center gap-2 bg-primary hover:bg-primary/80 
             text-white text-sm font-semibold px-4 py-2 rounded-lg 
             transition-colors shadow-sm"
         >
@@ -670,7 +671,7 @@ const Menu = () => {
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-4 py-2.5 text-sm rounded-lg border 
                 border-gray-200 focus:outline-none focus:ring-2 
-                focus:ring-pink-500 transition"
+                focus:ring-primary transition"
             />
           </div>
 
@@ -703,9 +704,9 @@ const Menu = () => {
         /* Empty State */
         <div className="bg-white rounded-xl border border-dashed 
           border-gray-200 p-12 text-center">
-          <div className="w-14 h-14 bg-pink-50 rounded-full flex items-center 
+          <div className="w-14 h-14 bg-primary-50 rounded-full flex items-center 
             justify-center mx-auto mb-4">
-            <UtensilsCrossed size={24} className="text-pink-500" />
+            <UtensilsCrossed size={24} className="text-primary-500" />
           </div>
           <h3 className="text-gray-800 font-semibold mb-1">
             {search || filterCategory !== "All"
@@ -725,8 +726,8 @@ const Menu = () => {
                 setEditItem(null);
                 setShowModal(true);
               }}
-              className="inline-flex items-center gap-2 bg-pink-500 
-                hover:bg-pink-600 text-white text-sm font-semibold 
+              className="inline-flex items-center gap-2 bg-primary 
+                hover:bg-primary/80 text-white text-sm font-semibold 
                 px-4 py-2 rounded-lg transition-colors"
             >
               <Plus size={16} />
