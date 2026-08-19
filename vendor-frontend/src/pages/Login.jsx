@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { ChefHat, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import InputField from "../components/common/InputField";
+import AuthLayout from "../components/layout/AuthLayout";
 import api from "../services/api";
 
 const Login = () => {
@@ -13,7 +14,6 @@ const Login = () => {
     email: "",
     password: "",
   });
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
@@ -78,160 +78,69 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-
-      {/* Left Branding Panel*/}
-      <div className="hidden lg:flex lg:w-1/2 bg-primary-500 flex-col justify-between p-12">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
-            <ChefHat size={22} className="text-primary" />
-          </div>
-          <span className="text-white font-bold text-xl">LocalBites</span>
+    <AuthLayout
+      heading={<>Manage your<br />restaurant with ease.</>}
+      subtext="Track orders in real time, update your menu, and grow your business — all from one place."
+    >
+      <h1 className="text-2xl font-bold text-gray-900 mb-1">
+        Welcome back
+      </h1>
+      <p className="text-gray-500 text-sm mb-8">
+        Sign in to your vendor account
+      </p>
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg mb-4">
+          {error}
         </div>
-
-        <div>
-          <h2 className="text-white text-4xl font-bold leading-snug mb-4">
-            Manage your
-            <br />
-            restaurant with ease.
-          </h2>
-          <p className="text-gray-300 text-base leading-relaxed max-w-sm">
-            Track orders in real time, update your menu and grow your
-            business - all from one place.
-          </p>
-
-          {/* Stat Pills */}
-          <div className="flex gap-3 mt-8">
-            {[
-              { label: "Active Vendors", value: "500+" },
-              { label: "Daily Orders",   value: "2000+" },
-              { label: "Cities",         value: "10+" },
-            ].map(({ label, value }) => (
-              <div key={label} className="bg-white/10 rounded-xl px-4 py-3">
-                <p className="text-white font-bold text-lg">{value}</p>
-                <p className="text-gray-300 text-xs">{label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <p className="text-gray-300 text-xs">
-          © {new Date().getFullYear()} LocalBites. All rights reserved.
-        </p>
-      </div>
-
-      {/* Right Form Panel */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-sm">
-
-          {/* Mobile Logo */}
-          <div className="flex items-center gap-2 mb-8 lg:hidden">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <ChefHat size={16} className="text-white" />
-            </div>
-            <span className="font-bold text-gray-900">LocalBites Vendor</span>
-          </div>
-
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">
-            Welcome back
-          </h1>
-          <p className="text-gray-500 text-sm mb-8">
-            Sign in to your vendor account
-          </p>
-
-          {/* Error Banner */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg mb-4">
-              {error}
-            </div>
+      )}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <InputField
+          label="Email Address"
+          name="email"
+          value={form.email}
+          onChange={handleChange}
+          type="email"
+          placeholder="Enter your email"
+          required
+          error={fieldErrors.email}
+        />
+        <InputField
+          label="Password"
+          name="password"
+          value={form.password}
+          onChange={handleChange}
+          type="password"
+          placeholder="Enter your password"
+          required
+          error={fieldErrors.password}
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-2 
+            bg-primary hover:bg-primary-dark disabled:bg-primary/50 
+            text-white font-semibold py-2.5 rounded-lg text-sm 
+            transition-colors mt-2"
+        >
+          {loading ? (
+            <><Loader2 size={16} className="animate-spin" />
+              Signing in...
+            </>
+        ) : (
+            "Sign in"
           )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-
-            {/* Email */}
-            <InputField
-              label="Email Address"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              type="email"
-              placeholder="enter your email"
-              required
-              error={fieldErrors.email}
-            />
-
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Password <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  placeholder="enter your password"
-                  autoComplete="current-password"
-                  className={`w-full px-4 py-2.5 pr-11 rounded-lg border text-sm
-                    text-gray-900 placeholder-gray-400 focus:outline-none 
-                    focus:ring-2 focus:ring-primary focus:border-transparent 
-                    transition ${
-                      fieldErrors.password
-                        ? "border-red-400 bg-red-50"
-                        : "border-gray-200"
-                    }`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 
-                    text-gray-400 hover:text-gray-600 transition"
-                  tabIndex={-1}
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-              {fieldErrors.password && (
-                <p className="text-red-500 text-xs mt-1">
-                  {fieldErrors.password}
-                </p>
-              )}
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 
-                bg-primary hover:bg-primary-dark disabled:bg-primary/50
-                text-white font-semibold py-2.5 rounded-lg text-sm 
-                transition-colors mt-2"
-            >
-              {loading ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  Signing in...
-                </>
-              ) : (
-                "Sign in"
-              )}
-            </button>
-          </form>
-
-          <p className="text-center text-xs text-gray-400 mt-8">
-            Not a vendor?{" "}
-            <Link
-              to="/register"
-              className="text-primary hover:underline font-medium"
-            >
-              Register your restaurant
-            </Link>
-          </p>
-
-        </div>
-      </div>
-    </div>
+        </button>
+        </form>
+        <p className="text-center text-xs text-gray-400 mt-8">
+        Not a vendor?{" "}
+        <Link
+          to="/register"
+          className="text-primary hover:underline font-medium"
+        >
+          Register your restaurant
+        </Link>
+      </p>
+    </AuthLayout>
   );
 };
 
