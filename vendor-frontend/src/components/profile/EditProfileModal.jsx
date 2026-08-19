@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Store, Loader2, X } from "lucide-react";
-import api from "../../services/api";
+import { updateProfile } from "../../services/profileService";
 import Toggle from "./Toggle";
 
 const EditProfileModal = ({ vendor, onClose, onSaved }) => {
@@ -130,9 +130,7 @@ const EditProfileModal = ({ vendor, onClose, onSaved }) => {
       if (coverFile) formData.append("coverPhoto", coverFile);
       if (logoFile) formData.append("logo", logoFile);
 
-      const { data } = await api.put("/vendor/profile", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const data = await updateProfile(formData);
       onSaved(data.vendor);
       onClose();
     } catch (err) {

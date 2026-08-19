@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { ShoppingBag, RefreshCw, Search } from "lucide-react";
-import api from "../services/api";
+import { getVendorOrders, updateOrderStatus } from "../services/orderService";
 import OrderCard from "../components/orders/OrderCard";
 import OrderCardSkeleton from "../components/orders/OrderCardSkeleton";
 import { STATUS_FILTERS } from "../components/orders/orderConstants";
@@ -25,7 +25,7 @@ const Orders = () => {
       const params = activeFilter !== "All"
         ? { status: activeFilter }
         : {};
-      const { data } = await api.get("/vendor/orders", { params });
+      const data = await getVendorOrders(params);
       setOrders(data.orders);
       setLastUpdated(new Date());
     } catch (err) {
@@ -49,10 +49,7 @@ const Orders = () => {
   const handleUpdateStatus = async (orderId, status) => {
     setUpdating(orderId);
     try {
-      const { data } = await api.patch(
-        `/vendor/orders/${orderId}/status`,
-        { status }
-      );
+      const data = await updateOrderStatus(orderId, status );
       setOrders((prev) =>
         prev.map((o) => (o._id === orderId ? data.order : o))
       );
