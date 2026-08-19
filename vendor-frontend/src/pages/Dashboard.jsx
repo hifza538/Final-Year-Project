@@ -8,16 +8,17 @@ import {
   RefreshCw,
 } from "lucide-react";
 import api from "../services/api";
+import ErrorState from "../components/common/ErrorState";
 
 // stat card component
 const StatCard = ({ label, value, icon: Icon, color, sub }) => {
   const colorMap = {
-    pink:  { bg: "bg-pink-50",  icon: "bg-pink-500",  },
+    orange:  { bg: "bg-primary-light",  icon: "bg-primary",  },
     amber: { bg: "bg-amber-50", icon: "bg-amber-500", },
     green: { bg: "bg-green-50", icon: "bg-green-500", },
     blue:  { bg: "bg-blue-50",  icon: "bg-blue-500",  },
   };
-  const c = colorMap[color] || colorMap.pink;
+  const c = colorMap[color] || colorMap.primary;
 
   return (
     <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
@@ -58,8 +59,8 @@ const Dashboard = () => {
   const [error, setError]           = useState("");
   const [lastUpdated, setLastUpdated] = useState(null);
 
-  const fetchStats = useCallback(async () => {
-    setLoading(true);
+  const fetchStats = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     setError("");
     try {
       const { data } = await api.get("/vendor/dashboard-stats");
@@ -78,13 +79,19 @@ const Dashboard = () => {
     fetchStats();
   }, [fetchStats]);
 
+  // auto refresh
+  useEffect(() => {
+    const interval = setInterval(() => fetchStats(true), 30000);
+    return () => clearInterval(interval);
+  }, [fetchStats]);
+
   const cards = stats
     ? [
         {
           label: "Total Orders",
           value: stats.totalOrders ?? 0,
           icon:  ShoppingBag,
-          color: "pink",
+          color: "orange",
           sub:   "All time",
         },
         {
@@ -128,7 +135,7 @@ const Dashboard = () => {
           onClick={fetchStats}
           disabled={loading}
           className="flex items-center gap-2 text-sm text-gray-500 
-            hover:text-pink-500 border border-gray-200 hover:border-pink-300 
+            hover:text-primary-500 border border-gray-200 hover:border-primary-300 
             px-3 py-2 rounded-lg transition-colors disabled:opacity-50"
         >
           <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
@@ -136,19 +143,7 @@ const Dashboard = () => {
         </button>
       </div>
 
-      {/* Error State */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm 
-          px-4 py-3 rounded-lg flex items-center justify-between">
-          <span>{error}</span>
-          <button
-            onClick={fetchStats}
-            className="text-red-500 underline text-xs ml-4"
-          >
-            Retry
-          </button>
-        </div>
-      )}
+      {error && <ErrorState message={error} onRetry={() => fetchStats(false)} />}
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -161,8 +156,8 @@ const Dashboard = () => {
       {/* Empty State */}
       {!loading && !error && stats?.totalOrders === 0 && (
         <div className="bg-white rounded-xl border border-dashed border-gray-200 p-8 text-center">
-          <div className="w-12 h-12 bg-pink-50 rounded-full flex items-center justify-center mx-auto mb-3">
-            <TrendingUp size={22} className="text-pink-500" />
+          <div className="w-12 h-12 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-3">
+            <TrendingUp size={22} className="text-primary-500" />
           </div>
           <h3 className="text-gray-800 font-semibold mb-1">No orders yet</h3>
           <p className="text-gray-400 text-sm max-w-xs mx-auto">

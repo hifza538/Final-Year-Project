@@ -37,7 +37,7 @@ const MapPicker = ({ onLocationSelect }) => {
   // "Use my current location" button
   const detectCurrentLocation = () => {
     if (!navigator.geolocation) {
-      alert("Geolocation aapke browser mein supported nahi hai");
+      alert("Geolocation is not supported by your browser.");
       return;
     }
     setDetecting(true);
@@ -47,7 +47,7 @@ const MapPicker = ({ onLocationSelect }) => {
         setDetecting(false);
       },
       () => {
-        alert("Location access nahi mil saki. Map par manually pin lagayein.");
+        alert("Unable to retrieve your location.");
         setDetecting(false);
       }
     );
@@ -59,7 +59,7 @@ const MapPicker = ({ onLocationSelect }) => {
         type="button"
         onClick={detectCurrentLocation}
         disabled={detecting}
-        className="mb-2 text-sm text-pink-500 font-medium hover:underline disabled:opacity-50"
+        className="mb-2 text-sm text-primary font-medium hover:underline disabled:opacity-50"
       >
         {detecting ? "Detecting..." : "Use my current location"}
       </button>
@@ -78,7 +78,7 @@ const MapPicker = ({ onLocationSelect }) => {
         </MapContainer>
       </div>
       <p className="text-xs text-gray-400 mt-1">
-        Map par click karke apni shop ki location pin karein
+        click on the map to pin your shop's location
       </p>
     </div>
   );
