@@ -6,7 +6,7 @@ import {
   ShoppingBag, Pencil, Loader2, CheckCircle2,
   MapPin, User, UtensilsCrossed, Timer, Camera, Wallet,
 } from "lucide-react";
-import api from "../services/api";
+import { getProfile, updateShopStatus } from "../services/profileService";
 import { useAuth } from "../context/AuthContext";
 import Field from "../components/profile/Field";
 import SectionCard from "../components/profile/SectionCard";
@@ -28,7 +28,7 @@ const Profile = () => {
     setLoading(true);
     setError("");
     try {
-      const { data } = await api.get("/vendor/profile");
+      const data = await getProfile();
       setVendor(data.vendor);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load profile.");
@@ -66,9 +66,7 @@ const Profile = () => {
     setStatusLoading(true);
 
     try {
-      const { data } = await api.patch("/vendor/profile/status", {
-        isOpen: nextStatus,
-      });
+      const data = await updateShopStatus(nextStatus);
       setVendor((v) => ({ ...v, isOpen: data.vendor?.isOpen ?? nextStatus }));
       login({ ...user, isOpen: nextStatus }, token);
     } catch (err) {

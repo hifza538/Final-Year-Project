@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Plus, Search, UtensilsCrossed } from "lucide-react";
-import api from "../services/api";
+import { getMenuItems, deleteMenuItem, toggleMenuItemStock } from "../services/menuService";
 import MenuCard from "../components/menu/MenuCard";
 import MenuCardSkeleton from "../components/menu/MenuCardSkeleton";
 import MenuModal from "../components/menu/MenuModal";
@@ -26,7 +26,7 @@ const Menu = () => {
     setLoading(true);
     setError("");
     try {
-      const { data } = await api.get("/vendor/menu");
+      const data = await getMenuItems();
       setItems(data.items);
     } catch (err) {
       setError(
@@ -54,7 +54,7 @@ const Menu = () => {
   const handleDelete = async () => {
     setDeleteLoading(true);
     try {
-      await api.delete(`/vendor/menu/${deleteId}`);
+      await deleteMenuItem(deleteId);
       setItems((prev) => prev.filter((i) => i._id !== deleteId));
       setDeleteId(null);
     } catch (err) {
@@ -68,9 +68,7 @@ const Menu = () => {
 
   const handleToggleStock = async (id) => {
     try {
-      const { data } = await api.patch(
-        `/vendor/menu/${id}/toggle-stock`
-      );
+      const data = await toggleMenuItemStock(id);
       setItems((prev) =>
         prev.map((i) => (i._id === id ? data.item : i))
       );

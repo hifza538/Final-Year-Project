@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Loader2, X, UtensilsCrossed } from "lucide-react";
-import api from "../../services/api";
+import { addMenuItem, updateMenuItem } from "../../services/menuService";
 import { CATEGORIES } from "./CategoryDropdown";
 
 const MenuModal = ({ item, onClose, onSaved }) => {
@@ -87,13 +87,9 @@ const MenuModal = ({ item, onClose, onSaved }) => {
 
       let data;
       if (isEditing) {
-        ({ data } = await api.put(`/vendor/menu/${item._id}`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        }));
+        data = await updateMenuItem(item._id, formData);
       } else {
-        ({ data } = await api.post("/vendor/menu", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        }));
+        data = await addMenuItem(formData);
       }
 
       onSaved(data.item, isEditing);

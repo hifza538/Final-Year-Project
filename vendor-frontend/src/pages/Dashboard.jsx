@@ -7,7 +7,7 @@ import {
   TrendingUp,
   RefreshCw,
 } from "lucide-react";
-import api from "../services/api";
+import { getDashboardStats } from "../services/orderService";
 import ErrorState from "../components/common/ErrorState";
 
 // stat card component
@@ -63,7 +63,7 @@ const Dashboard = () => {
     if (!silent) setLoading(true);
     setError("");
     try {
-      const { data } = await api.get("/vendor/dashboard-stats");
+      const data = await getDashboardStats();
       setStats(data.stats);
       setLastUpdated(new Date());
     } catch (err) {
