@@ -4,6 +4,7 @@ import asyncHandler from "express-async-handler";
 import Order from "../../models/Order.js";
 import MenuItem from "../../models/MenuItem.js";
 import User from "../../models/User.js";
+import Review from "../../models/Review.js";
 
 /* @desc   Place a new order
 @route  POST /api/customer/orders*/
@@ -106,7 +107,17 @@ export const getMyOrders = asyncHandler(async (req, res) => {
     .populate("vendor", "shopName logo")
     .sort({ createdAt: -1 });
 
-  res.status(200).json({ orders });
+// Check which of these orders have already been reviewed by the customer
+  const orderIds = orders.map((o) => o._id);
+  const reviewedOrderIds = await Review.find({ order: { $in: orderIds } }).distinct("order");
+  const reviewedSet = new Set(reviewedOrderIds.map((id) => id.toString()));
+
+  const ordersWithReviewStatus = orders.map((order) => ({
+    ...order.toObject(),
+    hasReview: reviewedSet.has(order._id.toString()),
+  }));
+
+  res.status(200).json({ orders: ordersWithReviewStatus });
 });
 
 /* @desc   Get single order details (customer's own order only)

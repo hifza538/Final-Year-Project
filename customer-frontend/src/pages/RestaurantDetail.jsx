@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { Clock, MapPin, UtensilsCrossed } from "lucide-react";
+import { Clock, MapPin, UtensilsCrossed, Star } from "lucide-react";
 import { getRestaurantMenu } from "../services/restaurantService";
+import { getRestaurantReviews } from "../services/reviewService";
+import ReviewsModal from "../components/reviews/ReviewsModal";
 import MenuItemCard from "../components/restaurant/MenuItemCard";
 import MenuItemSkeleton from "../components/restaurant/MenuItemSkeleton";
 import EmptyState from "../components/common/EmptyState";
@@ -12,10 +14,13 @@ import ErrorState from "../components/common/ErrorState";
 const RestaurantDetail = () => {
   const { id } = useParams();
   const [restaurant, setRestaurant] = useState(null);
+  const [reviews, setReviews] = useState([]);
+    const [showReviewsModal, setShowReviewsModal] = useState(false);
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeCategory, setActiveCategory] = useState("All");
+  
 
   const fetchMenu = useCallback(async () => {
     setIsLoading(true);
@@ -35,6 +40,24 @@ const RestaurantDetail = () => {
   useEffect(() => {
     fetchMenu();
   }, [fetchMenu]);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const data = await getRestaurantReviews(id);
+        setReviews(data.reviews);
+      } catch (err) {
+        console.error("Failed to fetch reviews:", err);
+      }
+    };
+    fetchReviews();
+  }, [id]);
+
+    const averageRating = useMemo(() => {
+    if (reviews.length === 0) return null;
+    const sum = reviews.reduce((total, r) => total + r.rating, 0);
+    return (sum / reviews.length).toFixed(1);
+  }, [reviews]);
 
   // Build the list of categories that actually have itemshow
   const categories = useMemo(() => {
@@ -100,6 +123,20 @@ const RestaurantDetail = () => {
           <MapPin size={16} />
           {restaurant.zone}, {restaurant.city}
         </span>
+        <button
+          onClick={() => averageRating && setShowReviewsModal(true)}
+          disabled={!averageRating}
+          className={averageRating ? "flex items-center gap-1 font-medium text-gray-700 hover:text-primary transition-colors duration-200" : "text-gray-400 cursor-default"}
+        >
+          {averageRating ? (
+            <>
+              <Star size={16} className="fill-primary text-primary" />
+              {averageRating} ({reviews.length})
+            </>
+          ) : (
+            "No ratings yet"
+          )}
+        </button>
       </div>
 
       {/* Category filter tabs */}
@@ -110,10 +147,9 @@ const RestaurantDetail = () => {
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors duration-200
-                ${
-                  activeCategory === cat
-                    ? "bg-primary text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                ${activeCategory === cat
+                  ? "bg-primary text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
             >
               {cat}
@@ -137,6 +173,14 @@ const RestaurantDetail = () => {
           </div>
         )}
       </div>
+      {showReviewsModal && (
+        <ReviewsModal
+          restaurantName={restaurant.shopName}
+          reviews={reviews}
+          averageRating={averageRating}
+          onClose={() => setShowReviewsModal(false)}
+        />
+      )}
     </div>
   );
 };
