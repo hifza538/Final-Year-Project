@@ -5,9 +5,9 @@ import {
   UtensilsCrossed,
   Store,
   LogOut,
-  ChefHat,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import Logo from "../common/Logo";
 
 const NAV_ITEMS = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -30,16 +30,8 @@ const Sidebar = ({ onNavigate }) => {
     <aside className="h-full w-60 bg-white border-r border-gray-100 flex flex-col shadow-sm">
 
       {/* Logo */}
-      <div className="flex items-center gap-2 px-5 py-5 border-b border-gray-100">
-        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-          <ChefHat size={18} className="text-white" />
-        </div>
-        <div>
-          <p className="text-sm font-bold text-gray-900 leading-none">
-            LocalBites
-          </p>
-          <p className="text-xs text-primary font-medium">Vendor Panel</p>
-        </div>
+      <div className="px-5 py-5 border-b border-gray-100">
+        <Logo size="md" variant="dark" showTagline />
       </div>
 
       {/* Navigation */}
