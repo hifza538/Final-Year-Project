@@ -6,14 +6,16 @@ import api from "../services/api";
 import OrderCard from "../components/orders/OrderCard";
 import OrderCardSkeleton from "../components/orders/OrderCardSkeleton";
 import { STATUS_FILTERS } from "../components/orders/orderConstants";
+import EmptyState from "../components/common/EmptyState";
+import ErrorState from "../components/common/ErrorState";
 
 const Orders = () => {
-  const [orders, setOrders]         = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState("");
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
-  const [search, setSearch]         = useState("");
-  const [updating, setUpdating]     = useState(null);
+  const [search, setSearch] = useState("");
+  const [updating, setUpdating] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
 
   const fetchOrders = useCallback(async (silent = false) => {
@@ -107,18 +109,7 @@ const Orders = () => {
         </button>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 
-          text-sm px-4 py-3 rounded-lg flex items-center justify-between">
-          <span>{error}</span>
-          <button
-            onClick={() => fetchOrders(false)}
-            className="text-red-500 underline text-xs ml-4"
-          >
-            Retry
-          </button>
-        </div>
-      )}
+      {error && <ErrorState message={error} onRetry={() => fetchOrders(false)} />}
 
       <div className="flex gap-2 flex-wrap">
         {STATUS_FILTERS.map((filter) => (
@@ -126,10 +117,9 @@ const Orders = () => {
             key={filter}
             onClick={() => setActiveFilter(filter)}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold 
-              transition-colors ${
-                activeFilter === filter
-                  ? "bg-primary text-white"
-                  : "bg-white border border-gray-200 text-gray-600 hover:border-primary/40"
+              transition-colors ${activeFilter === filter
+                ? "bg-primary text-white"
+                : "bg-white border border-gray-200 text-gray-600 hover:border-primary/40"
               }`}
           >
             {filter}
@@ -177,30 +167,25 @@ const Orders = () => {
             />
           ))}
         </div>
+
       ) : (
-        <div className="bg-white rounded-xl border border-dashed 
-          border-gray-200 p-12 text-center">
-          <div className="w-14 h-14 bg-primary-light rounded-full flex items-center 
-            justify-center mx-auto mb-4">
-            <ShoppingBag size={24} className="text-primary" />
-          </div>
-          <h3 className="text-gray-800 font-semibold mb-1">
-            {search
+        <EmptyState
+          icon={ShoppingBag}
+          title={
+            search
               ? "No orders match your search"
               : activeFilter !== "All"
-              ? `No ${activeFilter} orders`
-              : "No orders yet"
-            }
-          </h3>
-          <p className="text-gray-400 text-sm max-w-xs mx-auto">
-            {search
+                ? `No ${activeFilter} orders`
+                : "No orders yet"
+          }
+          message={
+            search
               ? "Try a different search term"
               : activeFilter !== "All"
-              ? "Orders will appear here when their status matches"
-              : "When customers place orders, they will appear here"
-            }
-          </p>
-        </div>
+                ? "Orders will appear here when their status matches"
+                : "When customers place orders, they will appear here"
+          }
+        />
       )}
     </div>
   );

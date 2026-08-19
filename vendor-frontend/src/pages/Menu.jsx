@@ -8,16 +8,18 @@ import MenuCardSkeleton from "../components/menu/MenuCardSkeleton";
 import MenuModal from "../components/menu/MenuModal";
 import DeleteConfirmModal from "../components/menu/DeleteConfirmModal";
 import CategoryDropdown from "../components/menu/CategoryDropdown";
+import EmptyState from "../components/common/EmptyState";
+import ErrorState from "../components/common/ErrorState";
 
 const Menu = () => {
-  const [items, setItems]           = useState([]);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState("");
-  const [showModal, setShowModal]   = useState(false);
-  const [editItem, setEditItem]     = useState(null);
-  const [deleteId, setDeleteId]     = useState(null);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [editItem, setEditItem] = useState(null);
+  const [deleteId, setDeleteId] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [search, setSearch]         = useState("");
+  const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("All");
 
   const fetchMenu = async () => {
@@ -110,18 +112,7 @@ const Menu = () => {
         </button>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 
-          text-sm px-4 py-3 rounded-lg flex items-center justify-between">
-          <span>{error}</span>
-          <button
-            onClick={fetchMenu}
-            className="text-red-500 underline text-xs ml-4"
-          >
-            Retry
-          </button>
-        </div>
-      )}
+      {error && <ErrorState message={error} onRetry={fetchMenu} />}
 
       {!loading && items.length > 0 && (
         <div className="flex gap-3 flex-wrap">
@@ -165,41 +156,30 @@ const Menu = () => {
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-dashed 
-          border-gray-200 p-12 text-center">
-          <div className="w-14 h-14 bg-primary-light rounded-full flex items-center 
-            justify-center mx-auto mb-4">
-            <UtensilsCrossed size={24} className="text-primary" />
-          </div>
-          <h3 className="text-gray-800 font-semibold mb-1">
-            {search || filterCategory !== "All"
+        <EmptyState
+          icon={UtensilsCrossed}
+          title={
+            search || filterCategory !== "All"
               ? "No items match your search"
               : "No menu items yet"
-            }
-          </h3>
-          <p className="text-gray-400 text-sm max-w-xs mx-auto mb-4">
-            {search || filterCategory !== "All"
+          }
+          message={
+            search || filterCategory !== "All"
               ? "Try a different search or category filter"
               : "Add your first menu item to get started"
-            }
-          </p>
-          {!search && filterCategory === "All" && (
-            <button
-              onClick={() => {
+          }
+          actionLabel={!search && filterCategory === "All" ? "Add First Item" : null}
+          onAction={
+            !search && filterCategory === "All"
+              ? () => {
                 setEditItem(null);
                 setShowModal(true);
-              }}
-              className="inline-flex items-center gap-2 bg-primary 
-                hover:bg-primary-dark text-white text-sm font-semibold 
-                px-4 py-2 rounded-lg transition-colors"
-            >
-              <Plus size={16} />
-              Add First Item
-            </button>
-          )}
-        </div>
+              }
+              : null
+          }
+        />
       )}
-
+      
       {showModal && (
         <MenuModal
           item={editItem}

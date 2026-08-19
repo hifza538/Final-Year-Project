@@ -13,14 +13,15 @@ import SectionCard from "../components/profile/SectionCard";
 import StatPill from "../components/profile/StatPill";
 import ProfileSkeleton from "../components/profile/ProfileSkeleton";
 import EditProfileModal from "../components/profile/EditProfileModal";
+import ErrorState from "../components/common/ErrorState";
 
 const Profile = () => {
   const { user, login, token } = useAuth();
-  const [vendor, setVendor]       = useState(null);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState("");
-  const [showEdit, setShowEdit]   = useState(false);
-  const [saved, setSaved]         = useState(false);
+  const [vendor, setVendor] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [showEdit, setShowEdit] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
 
   const fetchProfile = async () => {
@@ -89,18 +90,7 @@ const Profile = () => {
         </div>
       )}
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 
-          text-sm px-4 py-3 rounded-lg flex items-center justify-between">
-          <span>{error}</span>
-          <button
-            onClick={fetchProfile}
-            className="text-red-500 underline text-xs ml-4"
-          >
-            Retry
-          </button>
-        </div>
-      )}
+      {error && <ErrorState message={error} onRetry={fetchProfile} />}
 
       {loading ? (
         <div className="space-y-4">
@@ -119,10 +109,10 @@ const Profile = () => {
               style={
                 vendor.coverPhoto?.url
                   ? {
-                      backgroundImage: `url(${vendor.coverPhoto.url})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                    }
+                    backgroundImage: `url(${vendor.coverPhoto.url})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }
                   : undefined
               }
             >

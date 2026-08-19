@@ -8,6 +8,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import api from "../services/api";
+import ErrorState from "../components/common/ErrorState";
 
 // stat card component
 const StatCard = ({ label, value, icon: Icon, color, sub }) => {
@@ -142,19 +143,7 @@ const Dashboard = () => {
         </button>
       </div>
 
-      {/* Error State */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm 
-          px-4 py-3 rounded-lg flex items-center justify-between">
-          <span>{error}</span>
-          <button
-            onClick={fetchStats}
-            className="text-red-500 underline text-xs ml-4"
-          >
-            Retry
-          </button>
-        </div>
-      )}
+      {error && <ErrorState message={error} onRetry={() => fetchStats(false)} />}
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
