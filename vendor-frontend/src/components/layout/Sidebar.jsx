@@ -16,17 +16,18 @@ const NAV_ITEMS = [
   { to: "/profile",   label: "Profile",   icon: Store },
 ];
 
-const Sidebar = () => {
+const Sidebar = ({ onNavigate }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     navigate("/login");
+    if (onNavigate) onNavigate();
   };
 
   return (
-    <aside className="fixed top-0 left-0 h-screen w-60 bg-white border-r border-gray-100 flex flex-col z-30 shadow-sm">
+    <aside className="h-full w-60 bg-white border-r border-gray-100 flex flex-col shadow-sm">
 
       {/* Logo */}
       <div className="flex items-center gap-2 px-5 py-5 border-b border-gray-100">
@@ -47,6 +48,7 @@ const Sidebar = () => {
           <NavLink
             key={to}
             to={to}
+            onClick={onNavigate}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm 
               font-medium transition-all duration-150 ${

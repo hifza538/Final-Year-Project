@@ -1,7 +1,7 @@
 // vendor-frontend/src/components/layout/TopBar.jsx
 
 import { useLocation } from "react-router-dom";
-import { Bell } from "lucide-react";
+import { Bell, Menu } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
 const PAGE_TITLES = {
@@ -11,7 +11,7 @@ const PAGE_TITLES = {
   "/profile":   "Restaurant Profile",
 };
 
-const TopBar = () => {
+const TopBar = ({ onMenuClick }) => {
   const { pathname } = useLocation();
   const { user } = useAuth();
   const title = PAGE_TITLES[pathname] || "Dashboard";
@@ -20,7 +20,17 @@ const TopBar = () => {
     <header className="h-16 bg-white border-b border-gray-100 flex items-center 
       justify-between px-6 sticky top-0 z-20">
 
-      <h1 className="text-lg font-semibold text-gray-800">{title}</h1>
+      <div className="flex items-center gap-3">
+        {/* Hamburger Menu for Mobile */}
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden text-gray-600 hover:text-gray-900"
+          aria-label="Open menu"
+        >
+          <Menu size={22} />
+        </button>
+        <h1 className="text-lg font-semibold text-gray-800">{title}</h1>
+      </div>
 
       <div className="flex items-center gap-3">
         {/* Notification Bell */}
