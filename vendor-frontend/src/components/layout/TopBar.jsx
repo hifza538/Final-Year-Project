@@ -8,6 +8,7 @@ const PAGE_TITLES = {
   "/dashboard": "Dashboard",
   "/orders":    "Orders",
   "/menu":      "Menu Management",
+   "/reviews":   "Reviews",
   "/profile":   "Restaurant Profile",
 };
 

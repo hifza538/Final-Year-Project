@@ -9,6 +9,7 @@ import Login from "../pages/Login";
 import Profile from "../pages/Profile";
 import Menu from "../pages/Menu";
 import Orders from "../pages/Orders";
+import Reviews from "../pages/Reviews";
 
 const AppRoutes = () => {
   return (
@@ -31,6 +32,7 @@ const AppRoutes = () => {
         <Route path="profile" element={<Profile />} />
         <Route path="menu"      element={<Menu />} />
         <Route path="orders"    element={<Orders />} />
+        <Route path="reviews" element={<Reviews />} />
       </Route>
 
       {/* Catch All */}
