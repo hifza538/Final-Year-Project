@@ -7,6 +7,7 @@ import { uploadRestaurant } from "../config/cloudinary.js";
 import { getMenuItems, addMenuItem, updateMenuItem, deleteMenuItem, toggleStock } from "../controllers/vendor/menuController.js";
 import { uploadMenuImage } from "../config/cloudinary.js";
 import { getVendorOrders, getOrderById, updateOrderStatus } from "../controllers/vendor/orderController.js";
+import { getMyReviews } from "../controllers/vendor/reviewController.js";
 const router = express.Router();
 
 // All routes are protected - vendor only
@@ -35,5 +36,8 @@ router.patch("/menu/:id/toggle-stock", toggleStock);
 router.get("/orders", getVendorOrders);
 router.get("/orders/:id", getOrderById);
 router.patch("/orders/:id/status", updateOrderStatus);
+
+// Review management route
+router.get("/reviews", getMyReviews);
 
 export default router;
