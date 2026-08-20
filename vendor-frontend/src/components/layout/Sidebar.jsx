@@ -4,6 +4,7 @@ import {
   ShoppingBag,
   UtensilsCrossed,
   Store,
+  Star,
   LogOut,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
@@ -13,6 +14,7 @@ const NAV_ITEMS = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/orders",    label: "Orders",    icon: ShoppingBag },
   { to: "/menu",      label: "Menu",      icon: UtensilsCrossed },
+  { to: "/reviews",   label: "Reviews",   icon: Star },
   { to: "/profile",   label: "Profile",   icon: Store },
 ];
 
