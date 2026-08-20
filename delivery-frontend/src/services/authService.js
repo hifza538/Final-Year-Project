@@ -1,7 +1,9 @@
 import api from "./api";
 
 export const registerDelivery = async (formData) => {
-  const { confirmPassword, ...payload } = formData;
+  const payload = { ...formData };
+  delete payload.confirmPassword;
+
   const response = await api.post("/delivery/register", payload);
   return response.data;
 };
