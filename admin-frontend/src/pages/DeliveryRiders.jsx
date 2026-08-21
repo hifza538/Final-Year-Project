@@ -202,7 +202,6 @@ const DeliveryRiders = () => {
         </div>
       )}
 
-// Modals for confirming actions
       {modalRider?.action === "approve" && (
         <ConfirmModal
           isOpen
