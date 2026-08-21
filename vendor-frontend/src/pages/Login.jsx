@@ -61,7 +61,7 @@ const Login = () => {
 
     try {
       const { data } = await api.post("/auth/login", {
-        email:    form.email.trim().toLowerCase(),
+        email: form.email.trim().toLowerCase(),
         password: form.password,
       });
 
@@ -114,6 +114,13 @@ const Login = () => {
           required
           error={fieldErrors.password}
         />
+        
+        <div className="flex justify-end -mt-2 mb-2">
+          <Link to="/forgot-password" className="text-xs text-primary hover:underline">
+            Forgot password?
+          </Link>
+        </div>
+        
         <button
           type="submit"
           disabled={loading}
@@ -126,12 +133,12 @@ const Login = () => {
             <><Loader2 size={16} className="animate-spin" />
               Signing in...
             </>
-        ) : (
+          ) : (
             "Sign in"
           )}
         </button>
-        </form>
-        <p className="text-center text-xs text-gray-400 mt-8">
+      </form>
+      <p className="text-center text-xs text-gray-400 mt-8">
         Not a vendor?{" "}
         <Link
           to="/register"
