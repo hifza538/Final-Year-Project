@@ -1,5 +1,8 @@
 // backend/routes/vendorRoutes.js
 import express from "express";
+import { registerVendor, loginUser, getMe } from "../controllers/vendor/authController.js";
+import { forgotPassword, resetPassword } from "../controllers/shared/passwordController.js";
+import { uploadCnic } from "../config/cloudinary.js";
 import { protect, vendorOnly } from "../middleware/authMiddleware.js";
 import { getDashboardStats } from "../controllers/vendor/vendorController.js";
 import { getProfile, updateProfile, getShopStatus, updateShopStatus } from "../controllers/vendor/profileController.js";
@@ -10,9 +13,21 @@ import { getVendorOrders, getOrderById, updateOrderStatus } from "../controllers
 import { getMyReviews } from "../controllers/vendor/reviewController.js";
 const router = express.Router();
 
+router.post(
+  "/register",
+  uploadCnic.fields([
+    { name: "cnicFront", maxCount: 1 },
+    { name: "cnicBack", maxCount: 1 },
+  ]),
+  registerVendor
+);
+router.post("/login", loginUser);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password/:token", resetPassword);
+
 // All routes are protected - vendor only
 router.use(protect, vendorOnly);
-
+router.get("/me", getMe);
 // Dashboard statistics route
 router.get("/dashboard-stats", getDashboardStats);
 
