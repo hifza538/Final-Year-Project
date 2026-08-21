@@ -74,6 +74,14 @@ const userSchema = new mongoose.Schema(
       lng: { type: Number, default: null },
     },
 
+    // Delivery Rider Specific Fields
+vehicleType: {
+  type: String,
+  enum: ["bike", "car", "bicycle", ""],
+  default: "",
+},
+vehicleNumber: { type: String, trim: true, default: "" },
+
     // Operational Hours & Service Types
     openingTime: { type: String, default: "09:00" },
     closingTime: { type: String, default: "22:00" },
