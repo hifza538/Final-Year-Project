@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import InputField from "../components/common/InputField";
 import AuthLayout from "../components/layout/AuthLayout";
-import api from "../services/api";
+import {forgotPassword} from "../services/authService";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -32,7 +32,7 @@ const ForgotPassword = () => {
     setLoading(true);
     setError("");
     try {
-      await api.post("/auth/forgot-password", { email: email.trim().toLowerCase() });
+      await forgotPassword(email.trim().toLowerCase());
       setSubmitted(true);
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong. Please try again.");

@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import InputField from "../components/common/InputField";
 import AuthLayout from "../components/layout/AuthLayout";
-import api from "../services/api";
+import { loginVendor } from "../services/authService";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -60,7 +60,7 @@ const Login = () => {
     setError("");
 
     try {
-      const { data } = await api.post("/auth/login", {
+      const data = await loginVendor( {
         email: form.email.trim().toLowerCase(),
         password: form.password,
       });

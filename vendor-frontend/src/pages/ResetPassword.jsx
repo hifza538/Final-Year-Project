@@ -5,7 +5,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import InputField from "../components/common/InputField";
 import AuthLayout from "../components/layout/AuthLayout";
-import api from "../services/api";
+import { resetPassword } from "../services/authService";
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -44,7 +44,7 @@ const ResetPassword = () => {
     setLoading(true);
     setError("");
     try {
-      await api.post(`/auth/reset-password/${token}`, { password: form.password });
+      await resetPassword(token, form.password);
       navigate("/login");
     } catch (err) {
       setError(err.response?.data?.message || "This reset link is invalid or has expired.");
