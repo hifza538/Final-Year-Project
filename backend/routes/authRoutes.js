@@ -3,6 +3,7 @@ import { registerVendor,
   loginUser,
   getMe
  } from "../controllers/auth/authController.js";
+ import { forgotPassword, resetPassword } from "../controllers/shared/passwordController.js";
 import {uploadCnic} from "../config/cloudinary.js";
 import { protect } from "../middleware/authMiddleware.js";
 const router = express.Router();
@@ -20,6 +21,10 @@ router.post("/login", loginUser);
 
 // protected route to get logged-in user details
 router.get("/me", protect, getMe);
+
+// Password reset routes
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password/:token", resetPassword);
 
 
 export default router;

@@ -46,6 +46,10 @@ const userSchema = new mongoose.Schema(
       default: "customer",
     },
 
+    //password reset fields
+    resetPasswordToken: { type: String, default: undefined },
+    resetPasswordExpire: { type: Date, default: undefined },
+
     //delivery address for customers
     addresses: [
       {
