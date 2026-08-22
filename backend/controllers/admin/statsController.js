@@ -33,8 +33,8 @@ export const getOverviewStats = asyncHandler(async (req, res) => {
     totalOrders = await Order.countDocuments();
 
     const revenueResult = await Order.aggregate([
-      { $match: { status: "completed" } },
-      { $group: { _id: null, total: { $sum: "$totalAmount" } } },
+      { $match: { orderStatus: "Completed" } },
+      { $group: { _id: null, total: { $sum: "$totalPrice" } } },
     ]);
     totalRevenue = revenueResult[0]?.total || 0;
   }
