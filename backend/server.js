@@ -1,13 +1,16 @@
-// backend/server.js
+import dns from 'dns';
+dns.setServers(['8.8.8.8', '8.8.4.4']);
+
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
-import authRoutes from "./routes/authRoutes.js";
 import vendorRoutes from "./routes/vendorRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
+import deliveryRoutes from "./routes/deliveryRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import deliveryOrderRoutes from "./routes/delivery/orderRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -18,11 +21,11 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:5173", // vendor-frontend
   "http://localhost:5174", // customer-frontend
-  "http://localhost:5175", // admin-frontend
-  "http://localhost:5176", // currently running frontend
+  "http://localhost:5175", // delivery-frontend
+  "http://localhost:5176", // admin-frontend
 ];
 
-// updated CORS configuration
+// CORS configuration
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -51,12 +54,13 @@ app.get("/", (req, res) => {
 });
 
 // Routes
-app.use("/api/auth", authRoutes);
 app.use("/api/vendor", vendorRoutes);
 app.use("/api/customer", customerRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/delivery", deliveryRoutes);
+app.use("/api/delivery/orders", deliveryOrderRoutes);
 
-// Error handling
+// Error handling middleware
 app.use(notFound);
 app.use(errorHandler);
 

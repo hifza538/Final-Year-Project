@@ -46,6 +46,22 @@ const userSchema = new mongoose.Schema(
       default: "customer",
     },
 
+    //password reset fields
+    resetPasswordToken: { type: String, default: undefined },
+    resetPasswordExpire: { type: Date, default: undefined },
+
+    //delivery address for customers
+    addresses: [
+      {
+        label: { type: String, default: "Home" }, // home, work, etc.
+        fullName: { type: String, required: true, trim: true },
+        phone: { type: String, required: true, trim: true },
+        address: { type: String, required: true, trim: true },
+        notes: { type: String, default: "", trim: true },
+        isDefault: { type: Boolean, default: false },
+      },
+    ],
+
     // Vendor Specific Fields
     shopName: { type: String, trim: true, default: "" },
     shopLocation: { type: String, trim: true, default: "" },
@@ -53,6 +69,15 @@ const userSchema = new mongoose.Schema(
     city: { type: String, trim: true, default: "" },
     zone: { type: String, trim: true, default: "" },
     cuisine: { type: String, trim: true, default: "" },
+    
+    // Delivery Specific Fields
+    vehicleType: {
+      type: String,
+      enum: ["bike", "car", "bicycle", ""],
+      default: "",
+    },
+    vehicleNumber: { type: String, trim: true, default: "" },
+
     coverPhoto: {
       url: { type: String, default: "" },
       publicId: { type: String, default: "" },
