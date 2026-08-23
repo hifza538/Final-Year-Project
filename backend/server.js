@@ -12,6 +12,8 @@ import customerRoutes from "./routes/customerRoutes.js";
 import deliveryRoutes from "./routes/deliveryRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import deliveryOrderRoutes from "./routes/delivery/orderRoutes.js";
+import deliveryProfileRoutes from "./routes/delivery/profileRoutes.js";
+import deliveryStatusRoutes from "./routes/delivery/statusRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -61,6 +63,8 @@ app.use("/api/customer", customerRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/delivery", deliveryRoutes);
 app.use("/api/delivery/orders", deliveryOrderRoutes);
+app.use("/api/delivery/profile", deliveryProfileRoutes);
+app.use("/api/delivery/status", deliveryStatusRoutes);
 
 // Error handling middleware
 app.use(notFound);

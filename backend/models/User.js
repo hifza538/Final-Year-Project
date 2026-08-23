@@ -66,12 +66,18 @@ const userSchema = new mongoose.Schema(
     zone: { type: String, trim: true, default: "" },
     cuisine: { type: String, trim: true, default: "" },
     // Delivery Specific Fields
+
     vehicleType: {
       type: String,
       enum: ["bike", "car", "bicycle", ""],
       default: "",
     },
     vehicleNumber: { type: String, trim: true, default: "" },
+    // rider's current online status
+    isOnline: {
+      type: Boolean,
+      default: false,
+    },
 
     coverPhoto: {
       url: { type: String, default: "" },
@@ -85,7 +91,9 @@ const userSchema = new mongoose.Schema(
 
     minPrepTime: { type: Number, default: 15 },
     maxPrepTime: { type: Number, default: 45 },
-    deliveryFee: { type: Number, default: 50,
+    deliveryFee: {
+      type: Number,
+      default: 50,
       min: [0, "Delivery fee cannot be negative"],
     },
     coordinates: {
