@@ -1,29 +1,36 @@
-// src/pages/Dashboard.jsx
+// admin-frontend/src/pages/Dashboard.jsx
+
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { Users, Store, Bike, Package, Wallet, Clock } from "lucide-react";
+import { Users, Store, Bike, Package, Wallet } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { getOverviewStats } from "../services/statsService";
+import { getOverviewStats, getOrdersTimeline, getRecentOrders } from "../services/statsService";
 import StatCard from "../components/dashboard/StatCard";
-import RevenueSummary from "../components/dashboard/RevenueSummary";
-import ApprovalBreakdown from "../components/dashboard/ApprovalBreakdown";
-import { OrdersLineChart, RevenueBarChart } from "../components/dashboard/DashboardCharts";
+import { OrdersLineChart } from "../components/dashboard/DashboardCharts";
 import RecentOrdersTable from "../components/dashboard/RecentOrdersTable";
 import QuickActions from "../components/dashboard/QuickActions";
 
 const Dashboard = () => {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
+  const [timeline, setTimeline] = useState([]);
+  const [recentOrders, setRecentOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchDashboardData = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await getOverviewStats();
-        setStats(data.stats);
+        const [overviewData, timelineData, recentOrdersData] = await Promise.all([
+          getOverviewStats(),
+          getOrdersTimeline(),
+          getRecentOrders(),
+        ]);
+        setStats(overviewData.stats);
+        setTimeline(timelineData.timeline);
+        setRecentOrders(recentOrdersData.orders);
       } catch (err) {
         setError("Failed to load dashboard stats. Please try again.");
         toast.error("Failed to load dashboard stats");
@@ -32,7 +39,7 @@ const Dashboard = () => {
       }
     };
 
-    fetchStats();
+    fetchDashboardData();
   }, []);
 
   if (error) {
@@ -53,30 +60,23 @@ const Dashboard = () => {
         Here's what's happening on LocalBites today.
       </p>
 
-      {/* Stat cards - dense grid, 4 per row desktop */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5">
+      {/* 5 key stat cards — pending vendor/rider counts are handled via the
+          approval pages themselves, no separate breakdown chart needed */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5 mb-5">
         <StatCard icon={Users} label="Total Customers" value={stats?.totalCustomers} gradient="#E8590C" isLoading={isLoading} />
         <StatCard icon={Store} label="Total Vendors" value={stats?.totalVendors} gradient="#C2410C" isLoading={isLoading} />
         <StatCard icon={Bike} label="Total Riders" value={stats?.totalRiders} gradient="#EA580C" isLoading={isLoading} />
         <StatCard icon={Package} label="Total Orders" value={stats?.totalOrders} gradient="#F97316" isLoading={isLoading} />
         <StatCard icon={Wallet} label="Total Revenue" value={stats ? `Rs ${stats.totalRevenue}` : undefined} gradient="#E8590C" isLoading={isLoading} />
-        <StatCard icon={Clock} label="Pending Vendors" value={stats?.pendingVendors} gradient="#D97706" isLoading={isLoading} />
-        <StatCard icon={Clock} label="Pending Riders" value={stats?.pendingRiders} gradient="#D97706" isLoading={isLoading} />
       </div>
 
-      {/* Two-column main area: left = charts + table, right = real-data widgets */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <OrdersLineChart data={[]} />
-            <RevenueBarChart data={[]} />
-          </div>
-          <RecentOrdersTable orders={[]} />
+          <OrdersLineChart data={timeline} />
+          <RecentOrdersTable orders={recentOrders} />
         </div>
 
-        <div className="space-y-4">
-          <ApprovalBreakdown stats={stats} isLoading={isLoading} />
-          <RevenueSummary isLoading={isLoading} />
+        <div>
           <QuickActions />
         </div>
       </div>

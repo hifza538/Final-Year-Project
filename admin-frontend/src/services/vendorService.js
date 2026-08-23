@@ -1,4 +1,4 @@
-//admin-frontend/src/service/vendorService.js
+//admin-frontend/src/services/vendorService.js
 import api from "./api";
 
 export const getAllVendors = async (params = {}) => {

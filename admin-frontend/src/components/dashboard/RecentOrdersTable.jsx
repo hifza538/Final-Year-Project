@@ -1,8 +1,12 @@
 // src/components/dashboard/RecentOrdersTable.jsx
 const statusStyles = {
-  pending: "bg-yellow-50 text-yellow-700",
-  completed: "bg-green-50 text-green-700",
-  cancelled: "bg-red-50 text-red-600",
+  Pending: "bg-yellow-50 text-yellow-700",
+  Accepted: "bg-blue-50 text-blue-700",
+  Preparing: "bg-purple-50 text-purple-700",
+  Ready: "bg-indigo-50 text-indigo-700",
+  OutForDelivery: "bg-orange-50 text-orange-700",
+  Completed: "bg-green-50 text-green-700",
+  Rejected: "bg-red-50 text-red-600",
 };
 
 const RecentOrdersTable = ({ orders = [] }) => (
@@ -14,9 +18,6 @@ const RecentOrdersTable = ({ orders = [] }) => (
     {orders.length === 0 ? (
       <div className="py-14 text-center">
         <p className="text-sm text-gray-400">No orders yet</p>
-        <p className="text-xs text-gray-300 mt-1">
-          This table will populate once the Orders feature is live
-        </p>
       </div>
     ) : (
       <div className="overflow-x-auto">
