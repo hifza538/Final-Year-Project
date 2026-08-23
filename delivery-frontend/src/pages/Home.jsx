@@ -1,5 +1,8 @@
+// delivery-frontend/src/pages/Home.jsx
 import { useState, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import { UserCircle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import {
   getAvailableOrders,
@@ -11,6 +14,7 @@ import {
 import OrderCard from "../components/orders/OrderCard";
 import OrderCardSkeleton from "../components/orders/OrderCardSkeleton";
 import EmptyState from "../components/common/EmptyState";
+import OnlineToggle from "../components/common/OnlineToggle";
 
 const TABS = [
   { key: "available", label: "Available Orders" },
@@ -25,16 +29,22 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [isOffline, setIsOffline] = useState(false);
 
-  // Fetch orders based on the active tab (available, myOrders, history)
   const fetchOrders = useCallback(async () => {
     setIsLoading(true);
     setError("");
+    setIsOffline(false);
     try {
       let data;
-      if (activeTab === "available") data = await getAvailableOrders();
-      else if (activeTab === "myOrders") data = await getMyOrders();
-      else data = await getOrderHistory();
+      if (activeTab === "available") {
+        data = await getAvailableOrders();
+        setIsOffline(data.isOnline === false);
+      } else if (activeTab === "myOrders") {
+        data = await getMyOrders();
+      } else {
+        data = await getOrderHistory();
+      }
 
       setOrders(data.orders);
     } catch (err) {
@@ -44,26 +54,23 @@ const Home = () => {
     }
   }, [activeTab]);
 
-  // delivery-frontend/src/pages/Home.jsx
-
-useEffect(() => {
-  // Only fetch orders once the rider is approved
-  if (user?.isApproved) {
-    queueMicrotask(() => {
-      fetchOrders();
-    });
-  }
-}, [fetchOrders, user?.isApproved]);
+  useEffect(() => {
+    if (user?.isApproved) {
+      queueMicrotask(() => {
+        fetchOrders();
+      });
+    }
+  }, [fetchOrders, user?.isApproved]);
 
   const handleAccept = async (orderId) => {
     setActionLoadingId(orderId);
     try {
       await acceptOrder(orderId);
-      toast.success("Order accepted! Go to the restaurant.");
+      toast.success("Order accepted! Head to the restaurant.");
       fetchOrders();
     } catch (err) {
       toast.error(err.response?.data?.message || "Could not accept this order.");
-      fetchOrders(); // Refresh the list to reflect any changes (if the order was already accepted by another rider)
+      fetchOrders();
     } finally {
       setActionLoadingId(null);
     }
@@ -88,12 +95,21 @@ useEffect(() => {
         <h1 className="text-2xl font-bold text-gray-800">
           Welcome, {user?.fullName?.split(" ")[0]}
         </h1>
-        <button
-          onClick={logout}
-          className="text-sm font-medium text-gray-500 hover:text-primary transition-colors"
-        >
-          Logout
-        </button>
+        <div className="flex items-center gap-4">
+          <Link
+            to="/profile"
+            className="flex items-center gap-1.5 text-sm font-medium text-gray-500 hover:text-primary transition-colors"
+          >
+            <UserCircle size={18} />
+            Profile
+          </Link>
+          <button
+            onClick={logout}
+            className="text-sm font-medium text-gray-500 hover:text-primary transition-colors"
+          >
+            Logout
+          </button>
+        </div>
       </div>
 
       {!user?.isApproved ? (
@@ -102,7 +118,8 @@ useEffect(() => {
         </div>
       ) : (
         <>
-          {/* Tabs */}
+          <OnlineToggle />
+
           <div className="flex gap-2 mb-6 border-b border-gray-200">
             {TABS.map((tab) => (
               <button
@@ -120,7 +137,6 @@ useEffect(() => {
             ))}
           </div>
 
-          {/* Content */}
           {isLoading ? (
             <>
               <OrderCardSkeleton />
@@ -130,6 +146,8 @@ useEffect(() => {
             <div className="bg-red-50 border border-red-100 text-red-600 rounded-lg p-4 text-sm">
               {error}
             </div>
+          ) : isOffline ? (
+            <EmptyState message="You're offline. Go online above to see available orders." />
           ) : orders.length === 0 ? (
             <EmptyState
               message={
@@ -137,7 +155,7 @@ useEffect(() => {
                   ? "No orders available for pickup right now."
                   : activeTab === "myOrders"
                   ? "You have no active deliveries."
-                  : "You haven't completed any deliveries yet."
+                  : "You have not completed any deliveries yet."
               }
             />
           ) : (

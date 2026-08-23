@@ -24,3 +24,18 @@ export const signupSchema = z
     path: ["confirmPassword"],
   });
 
+// profile update 
+export const profileUpdateSchema = z.object({
+  fullName: z
+    .string()
+    .trim()
+    .min(3, "Full name must be at least 3 characters")
+    .max(100, "Full name must not exceed 100 characters"),
+  phone: z
+    .string()
+    .trim()
+    .min(1, "Phone number is required")
+    .regex(phoneRegex, "Enter a valid Pakistani number"),
+  vehicleType: z.string().min(1, "Please select a vehicle type"),
+  vehicleNumber: z.string().trim().min(1, "Vehicle number is required"),
+});
