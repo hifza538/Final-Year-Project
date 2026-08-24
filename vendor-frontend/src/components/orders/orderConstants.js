@@ -19,8 +19,8 @@ export const STATUS_ACTIONS = {
   Pending:        ["Accepted", "Rejected"],
   Accepted:       ["Preparing"],
   Preparing:      ["Ready"],
-  Ready:          ["OutForDelivery"],
-  OutForDelivery: ["Completed"],
+  Ready:          [],
+  OutForDelivery: [],
   Completed:      [],
   Rejected:       [],
 };
