@@ -12,7 +12,7 @@ import RiderDetails from "../pages/RiderDetails";
 
 const AppRoutes = () => {
   return (
-  
+
     <Routes>
       <Route path="/login" element={<Login />} />
 
@@ -24,20 +24,14 @@ const AppRoutes = () => {
         }
       >
         <Route path="/" element={<Dashboard />} />
+        <Route path="/vendors" element={<Vendors />} />
+        <Route path="/vendors/:id" element={<VendorDetails />} />
+        <Route path="/delivery-approvals" element={<DeliveryRiders />} />
+        <Route path="/delivery-approvals/:id" element={<RiderDetails />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />
-
-// AdminLayout ke andar existing routes ke sath
-     <Route path="/vendors" element={<Vendors />} />
-     <Route path="/vendors/:id" element={<VendorDetails />} /> 
-
-     // AdminLayout ke andar existing routes ke sath:
-<Route path="/delivery-approvals" element={<DeliveryRiders />} />
-<Route path="/delivery-approvals/:id" element={<RiderDetails />} />
-
     </Routes>
-   
   );
 };
 

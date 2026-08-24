@@ -17,7 +17,7 @@ const DetailRow = ({ label, value }) => (
   </div>
 );
 
-// Shows a document image if the URL exists, otherwise a "not uploaded" placeholder
+// Component to display a document preview (CNIC front/back)
 const DocumentPreview = ({ label, url }) => (
   <div>
     <p className="text-xs text-gray-500 mb-2">{label}</p>
@@ -61,7 +61,6 @@ const VendorDetails = () => {
 
   useEffect(() => {
     fetchVendor();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const closeModal = () => setActiveModal(null);
@@ -138,13 +137,12 @@ const VendorDetails = () => {
         <div className="flex items-center justify-between mb-5">
           <h1 className="text-xl font-bold text-secondary">{vendor.shopName}</h1>
           <span
-            className={`px-3 py-1 rounded-full text-xs font-medium ${
-              status === "Blocked"
+            className={`px-3 py-1 rounded-full text-xs font-medium ${status === "Blocked"
                 ? "bg-red-50 text-red-600"
                 : status === "Pending"
-                ? "bg-yellow-50 text-yellow-700"
-                : "bg-green-50 text-green-700"
-            }`}
+                  ? "bg-yellow-50 text-yellow-700"
+                  : "bg-green-50 text-green-700"
+              }`}
           >
             {status}
           </span>
@@ -188,10 +186,9 @@ const VendorDetails = () => {
             <button
               onClick={() => setActiveModal("block")}
               className={`flex-1 flex items-center justify-center gap-2 font-medium text-sm py-2.5
-                rounded-lg transition-colors ${
-                  vendor.isActive
-                    ? "bg-red-50 text-red-600 hover:bg-red-100"
-                    : "bg-green-50 text-green-700 hover:bg-green-100"
+                rounded-lg transition-colors ${vendor.isActive
+                  ? "bg-red-50 text-red-600 hover:bg-red-100"
+                  : "bg-green-50 text-green-700 hover:bg-green-100"
                 }`}
             >
               <Ban size={16} />
@@ -205,8 +202,8 @@ const VendorDetails = () => {
       <div className="bg-white rounded-xl border border-gray-100 p-6 mb-4">
         <h2 className="text-sm font-semibold text-secondary mb-4">Verification Documents</h2>
         <div className="grid grid-cols-2 gap-4">
-          <DocumentPreview label="CNIC" url={vendor.cnicImage} />
-          <DocumentPreview label="Business License" url={vendor.businessLicenseImage} />
+          <DocumentPreview label="CNIC Front" url={vendor.cnicFront?.url} />
+          <DocumentPreview label="CNIC Back" url={vendor.cnicBack?.url} />
         </div>
       </div>
 

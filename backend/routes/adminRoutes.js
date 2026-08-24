@@ -3,7 +3,7 @@
 import express from "express";
 import { loginAdmin, getMe } from "../controllers/admin/authController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
-import { getOverviewStats } from "../controllers/admin/statsController.js";
+import { getOverviewStats, getOrdersTimeline, getRecentOrders } from "../controllers/admin/statsController.js";
 import {getPendingVendors,getAllVendors,getVendorById,approveVendor, rejectVendor, toggleVendorBlock,} from "../controllers/admin/vendorController.js";
 import {getPendingRiders, getAllRiders,getRiderById, approveRider, rejectRider, toggleRiderBlock,} from "../controllers/admin/deliveryController.js";
 
@@ -15,6 +15,9 @@ router.get("/me", protect, adminOnly, getMe);
 
 // Admin stats route
 router.get("/stats/overview", protect, adminOnly, getOverviewStats);
+router.get("/stats/overview", protect, adminOnly, getOverviewStats);
+router.get("/stats/orders-timeline", protect, adminOnly, getOrdersTimeline);
+router.get("/stats/recent-orders", protect, adminOnly, getRecentOrders);
 
 // Vendor management routes
 router.get("/vendors", protect, adminOnly, getAllVendors);
