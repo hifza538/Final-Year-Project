@@ -11,6 +11,8 @@ import Checkout from "../pages/Checkout";
 import OrderConfirmation from "../pages/OrderConfirmation";
 import Orders from "../pages/Orders";
 import Profile from "../pages/Profile";
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
 import NotFound from "../pages/NotFound";
 
 const AppRoutes = () => {
@@ -19,6 +21,8 @@ const AppRoutes = () => {
       //login/signup outside of the main layout
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
       {/* Layout route - Navbar/Footer will wrap all child routes */}
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />

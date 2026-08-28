@@ -6,6 +6,8 @@ import Signup from "../pages/Signup";
 import Profile from "../pages/Profile";
 import NotFound from "../pages/NotFound";
 import PrivateRoute from "./PrivateRoute";
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
 
 const AppRoutes = () => {
   return (
@@ -29,6 +31,8 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="*" element={<NotFound />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
     </Routes>
   );
 };

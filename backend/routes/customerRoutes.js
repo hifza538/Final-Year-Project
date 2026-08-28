@@ -6,6 +6,7 @@ import { getAddresses, addAddress, updateAddress, deleteAddress } from "../contr
 import { getAllRestaurants, getRestaurantById, getAvailableCuisines, getRestaurantMenu } from "../controllers/customer/restaurantController.js";
 import { placeOrder, getMyOrders, getMyOrderById } from "../controllers/customer/orderController.js";
 import { addReview, getRestaurantReviews } from "../controllers/customer/reviewController.js";
+import { forgotPassword, resetPassword } from "../controllers/shared/passwordController.js";
 import { protect, customerOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -14,6 +15,10 @@ router.post("/register", registerCustomer);
 router.post("/login", loginCustomer);
 router.get("/me", protect, customerOnly, getMe);
 router.put("/profile", protect, customerOnly, updateProfile);
+
+// Password reset routes
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password/:token", resetPassword);
 
 // Address routes
 router.get("/addresses", protect, customerOnly, getAddresses);

@@ -46,6 +46,10 @@ const userSchema = new mongoose.Schema(
       default: "customer",
     },
 
+    //password reset fields
+    resetPasswordToken: { type: String, default: undefined },
+    resetPasswordExpire: { type: Date, default: undefined },
+
     //delivery address for customers
     addresses: [
       {
@@ -65,6 +69,7 @@ const userSchema = new mongoose.Schema(
     city: { type: String, trim: true, default: "" },
     zone: { type: String, trim: true, default: "" },
     cuisine: { type: String, trim: true, default: "" },
+    
     // Delivery Specific Fields
 
     vehicleType: {
@@ -88,7 +93,6 @@ const userSchema = new mongoose.Schema(
       publicId: { type: String, default: "" },
     },
     isOpen: { type: Boolean, default: false },
-
     minPrepTime: { type: Number, default: 15 },
     maxPrepTime: { type: Number, default: 45 },
     deliveryFee: {
@@ -127,6 +131,42 @@ const userSchema = new mongoose.Schema(
     // Account Status Fields
     isApproved: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
+
+    // Rejection tracking
+    rejectionReason: {
+      type: String,
+      default: null,
+    },
+
+    //admin activity log
+    approvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    approvedAt: {
+      type: Date,
+      default: null,
+    },
+    rejectedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    rejectedAt: {
+      type: Date,
+      default: null,
+    },
+    blockedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    blockedAt: {
+      type: Date,
+      default: null,
+    },
+
     // Timestamps
   },
   { timestamps: true },

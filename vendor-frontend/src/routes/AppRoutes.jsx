@@ -10,6 +10,8 @@ import Profile from "../pages/Profile";
 import Menu from "../pages/Menu";
 import Orders from "../pages/Orders";
 import Reviews from "../pages/Reviews";
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
 
 const AppRoutes = () => {
   return (
@@ -17,6 +19,8 @@ const AppRoutes = () => {
       {/* Public Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
 
       {/* Protected Routes */}
       <Route

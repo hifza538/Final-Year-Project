@@ -31,8 +31,8 @@ export const getAvailableOrders = asyncHandler(async (req, res) => {
   }
 
   const orders = await Order.find({ orderStatus: "Ready", deliveryRider: null })
-    .populate("vendor", "fullName restaurantName phone")
-    .sort({ createdAt: 1 });
+    .populate("vendor", "shopName phone shopAddress")
+    .sort({ createdAt: 1 }); // oldest ready order first - fair pickup order
 
   res.status(200).json({ orders: orders.map(orderResponse), isOnline: true });
 });
@@ -56,7 +56,7 @@ export const acceptOrder = asyncHandler(async (req, res) => {
     { _id: req.params.id, orderStatus: "Ready", deliveryRider: null },
     { deliveryRider: req.user._id, orderStatus: "OutForDelivery" },
     { new: true }
-  ).populate("vendor", "fullName restaurantName phone");
+  ).populate("vendor", "shopName phone shopAddress");
 
   if (!order) {
     res.status(409);
@@ -72,7 +72,7 @@ export const getMyOrders = asyncHandler(async (req, res) => {
     deliveryRider: req.user._id,
     orderStatus: "OutForDelivery",
   })
-    .populate("vendor", "fullName restaurantName phone")
+    .populate("vendor", "shopName phone shopAddress")
     .sort({ updatedAt: -1 });
 
   res.status(200).json({ orders: orders.map(orderResponse) });
@@ -84,7 +84,7 @@ export const deliverOrder = asyncHandler(async (req, res) => {
     { _id: req.params.id, deliveryRider: req.user._id, orderStatus: "OutForDelivery" },
     { orderStatus: "Completed", isDelivered: true },
     { new: true }
-  ).populate("vendor", "fullName restaurantName phone");
+  ).populate("vendor", "shopName phone shopAddress");
 
   if (!order) {
     res.status(404);
@@ -100,7 +100,7 @@ export const getOrderHistory = asyncHandler(async (req, res) => {
     deliveryRider: req.user._id,
     orderStatus: "Completed",
   })
-    .populate("vendor", "fullName restaurantName phone")
+    .populate("vendor", "shopName phone shopAddress")
     .sort({ updatedAt: -1 });
 
   res.status(200).json({ orders: orders.map(orderResponse) });

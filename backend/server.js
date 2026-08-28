@@ -6,14 +6,11 @@ import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
-import authRoutes from "./routes/authRoutes.js";
 import vendorRoutes from "./routes/vendorRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
 import deliveryRoutes from "./routes/deliveryRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
-import deliveryOrderRoutes from "./routes/delivery/orderRoutes.js";
-import deliveryProfileRoutes from "./routes/delivery/profileRoutes.js";
-import deliveryStatusRoutes from "./routes/delivery/statusRoutes.js";
+import deliveryRoutes from "./routes/deliveryRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -57,14 +54,11 @@ app.get("/", (req, res) => {
 });
 
 // Routes
-app.use("/api/auth", authRoutes);
 app.use("/api/vendor", vendorRoutes);
 app.use("/api/customer", customerRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/delivery", deliveryRoutes);
-app.use("/api/delivery/orders", deliveryOrderRoutes);
-app.use("/api/delivery/profile", deliveryProfileRoutes);
-app.use("/api/delivery/status", deliveryStatusRoutes);
+
 
 // Error handling middleware
 app.use(notFound);
@@ -75,5 +69,6 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
 
 export default app;
