@@ -20,12 +20,21 @@ const orderResponse = (order) => ({
 });
 
 // Get all available orders for delivery riders
+
+// @desc   Get all available orders for delivery riders
+// @route  GET /api/delivery/orders/available
 export const getAvailableOrders = asyncHandler(async (req, res) => {
+  // Check if the rider is online before fetching available orders
+  // This is important because we do not want offline riders to accept orders and then not deliver them
+  if (!req.user.isOnline) {
+    return res.status(200).json({ orders: [], isOnline: false });
+  }
+
   const orders = await Order.find({ orderStatus: "Ready", deliveryRider: null })
-    .populate("vendor", "fullName phone shopAddress")
+    .populate("vendor", "shopName phone shopAddress")
     .sort({ createdAt: 1 }); // oldest ready order first - fair pickup order
 
-  res.status(200).json({ orders: orders.map(orderResponse) });
+  res.status(200).json({ orders: orders.map(orderResponse), isOnline: true });
 });
 
 // Accept an order for delivery

@@ -69,6 +69,20 @@ const userSchema = new mongoose.Schema(
     city: { type: String, trim: true, default: "" },
     zone: { type: String, trim: true, default: "" },
     cuisine: { type: String, trim: true, default: "" },
+    
+    // Delivery Specific Fields
+
+    vehicleType: {
+      type: String,
+      enum: ["bike", "car", "bicycle", ""],
+      default: "",
+    },
+    vehicleNumber: { type: String, trim: true, default: "" },
+    // rider's current online status
+    isOnline: {
+      type: Boolean,
+      default: false,
+    },
 
     coverPhoto: {
       url: { type: String, default: "" },
@@ -90,14 +104,6 @@ const userSchema = new mongoose.Schema(
       lat: { type: Number, default: null },
       lng: { type: Number, default: null },
     },
-
-    // Delivery Rider Specific Fields
-    vehicleType: {
-      type: String,
-      enum: ["bike", "car", "bicycle", ""],
-      default: "",
-    },
-    vehicleNumber: { type: String, trim: true, default: "" },
 
     // Operational Hours & Service Types
     openingTime: { type: String, default: "09:00" },

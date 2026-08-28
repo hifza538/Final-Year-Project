@@ -14,6 +14,7 @@ const deliveryResponse = (user) => ({
   vehicleNumber: user.vehicleNumber,
   isApproved: user.isApproved,
   isActive: user.isActive,
+  isOnline: user.isOnline,
 });
 
 /*@desc   Register a new delivery rider

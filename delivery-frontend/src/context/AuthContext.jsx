@@ -4,7 +4,6 @@ import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext(null);
 
-// this function checks if the token is valid (not expired)
 const isTokenValid = (token) => {
   try {
     const { exp } = jwtDecode(token);
@@ -18,11 +17,9 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem("deliveryUser");
     const savedToken = localStorage.getItem("deliveryToken");
-
     if (savedToken && isTokenValid(savedToken)) {
       return savedUser ? JSON.parse(savedUser) : null;
     }
-
     localStorage.removeItem("deliveryUser");
     localStorage.removeItem("deliveryToken");
     return null;
@@ -47,10 +44,19 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("deliveryToken");
   };
 
+  // Update user data in state and localStorage
+  const updateUser = (partialData) => {
+    setUser((prevUser) => {
+      const updatedUser = { ...prevUser, ...partialData };
+      localStorage.setItem("deliveryUser", JSON.stringify(updatedUser));
+      return updatedUser;
+    });
+  };
+
   const isAuthenticated = !!token && !!user;
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated }}>
+    <AuthContext.Provider value={{ user, token, login, logout, updateUser, isAuthenticated }}>
       {children}
     </AuthContext.Provider>
   );

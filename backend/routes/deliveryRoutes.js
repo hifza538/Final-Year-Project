@@ -8,6 +8,8 @@ import {
   deliverOrder,
   getOrderHistory,
 } from "../controllers/delivery/orderController.js";
+import { getProfile, updateProfile } from "../controllers/delivery/profileController.js";
+import { updateOnlineStatus } from "../controllers/delivery/statusController.js";
 import { protect, deliveryOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -18,6 +20,13 @@ router.post("/reset-password/:token", resetPassword);
 router.post("/login", loginDelivery);
 //protect routes
 router.get("/me", protect, deliveryOnly, getMe);
+
+// Profile routes
+router.get("/profile", protect, deliveryOnly, getProfile);
+router.patch("/profile", protect, deliveryOnly, updateProfile);
+
+// Online/offline status
+router.patch("/status", protect, deliveryOnly, updateOnlineStatus);
 
 // Order management routes
 router.get("/orders/available", protect, deliveryOnly, getAvailableOrders);
