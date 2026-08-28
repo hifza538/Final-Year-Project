@@ -10,7 +10,7 @@ import vendorRoutes from "./routes/vendorRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
 import deliveryRoutes from "./routes/deliveryRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
-import deliveryRoutes from "./routes/deliveryRoutes.js";
+
 
 dotenv.config();
 connectDB();
