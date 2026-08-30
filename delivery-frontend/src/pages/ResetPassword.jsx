@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { resetPasswordSchema } from "../utils/validationSchemas";
 import { resetPassword } from "../services/authService";
 import FormInput from "../components/common/FormInput";
-import { showSuccessToast, showErrorToast } from "../utils/toast";
+import toast from "react-hot-toast";
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -24,10 +24,10 @@ const ResetPassword = () => {
     setIsSubmitting(true);
     try {
       await resetPassword(token, formData.password);
-      showSuccessToast("Password reset successful! Please log in.");
+      toast.success("Password reset successful! Please log in.");
       setTimeout(() => navigate("/login"), 1200);
     } catch (err) {
-      showErrorToast(err.response?.data?.message || "This reset link is invalid or has expired.");
+      toast.error(err.response?.data?.message || "This reset link is invalid or has expired.");
     } finally {
       setIsSubmitting(false);
     }

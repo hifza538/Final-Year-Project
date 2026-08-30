@@ -8,7 +8,7 @@ import { CheckCircle2 } from "lucide-react";
 import { forgotPasswordSchema } from "../utils/validationSchemas";
 import { forgotPassword } from "../services/authService";
 import FormInput from "../components/common/FormInput";
-import { showSuccessToast, showErrorToast } from "../utils/toast";
+import toast from "react-hot-toast";
 
 const ForgotPassword = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,7 +26,7 @@ const ForgotPassword = () => {
       await forgotPassword(formData.email);
       setSubmitted(true);
     } catch (err) {
-      showErrorToast(err.response?.data?.message || "Something went wrong. Please try again.");
+      toast.error(err.response?.data?.message || "Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
