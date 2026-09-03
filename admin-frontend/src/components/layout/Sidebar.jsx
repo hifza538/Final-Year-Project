@@ -10,16 +10,26 @@ import {
   LogOut,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { Package } from "lucide-react";
+import { Tag } from "lucide-react";
+import { BarChart3 } from "lucide-react";
+import { Settings, UserCircle } from "lucide-react";
 
 const Sidebar = ({ isMobileOpen, onMobileClose, isCollapsed, onToggleCollapse, pendingCounts }) => {
   const { user, logout } = useAuth();
 
-  // Badge counts are optional and come from real stats data - only show them if the API call succeeds and returns a number greater than 0.
+  // Define the navigation items for the sidebar
   const navItems = [
     { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
     { to: "/vendors", label: "Vendors", icon: Store, badge: pendingCounts?.vendors },
     { to: "/delivery-approvals", label: "Delivery Approvals", icon: Bike, badge: pendingCounts?.riders },
     { to: "/users", label: "Users", icon: Users },
+    { to: "/customers", label: "Customers", icon: Users, badge: pendingCounts?.customers },
+    { to: "/orders", label: "Orders", icon: Package, badge: pendingCounts?.orders },
+    { to: "/categories", label: "Categories", icon: Tag, badge: pendingCounts?.categories },
+    { to: "/reports", label: "Reports", icon: BarChart3, badge: pendingCounts?.reports },
+    { to: "/settings", label: "Settings", icon: Settings },
+    { to: "/profile", label: "Profile", icon: UserCircle },
   ];
 
   return (
