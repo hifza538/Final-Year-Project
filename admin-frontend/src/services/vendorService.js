@@ -1,9 +1,14 @@
-// admin-frontend/src/services/vendorService.js
+//admin-frontend/src/services/vendorService.js
 
 import api from "./api";
 
-export const getPendingVendors = async () => {
-  const response = await api.get("/admin/vendors/pending");
+export const getAllVendors = async (params = {}) => {
+  const response = await api.get("/admin/vendors", { params });
+  return response.data;
+};
+
+export const getVendorById = async (id) => {
+  const response = await api.get(`/admin/vendors/${id}`);
   return response.data;
 };
 
@@ -14,5 +19,10 @@ export const approveVendor = async (id) => {
 
 export const rejectVendor = async (id) => {
   const response = await api.patch(`/admin/vendors/${id}/reject`);
+  return response.data;
+};
+
+export const toggleVendorBlock = async (id) => {
+  const response = await api.patch(`/admin/vendors/${id}/toggle-block`);
   return response.data;
 };

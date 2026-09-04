@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { Users, Store, Bike, Package, Wallet, Clock } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { getOverviewStats } from "../services/statsService";
+import { getAllOrders } from "../services/orderService";
 import StatCard from "../components/dashboard/StatCard";
 import RevenueSummary from "../components/dashboard/RevenueSummary";
 import ApprovalBreakdown from "../components/dashboard/ApprovalBreakdown";
@@ -11,19 +12,25 @@ import { OrdersLineChart, RevenueBarChart } from "../components/dashboard/Dashbo
 import RecentOrdersTable from "../components/dashboard/RecentOrdersTable";
 import QuickActions from "../components/dashboard/QuickActions";
 
+// Dashboard component for displaying overview stats and recent orders
 const Dashboard = () => {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
+  const [recentOrders, setRecentOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchDashboardData = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await getOverviewStats();
-        setStats(data.stats);
+        const [statsData, ordersData] = await Promise.all([
+          getOverviewStats(),
+          getAllOrders(), // fetches all orders, we only show the latest 5 below
+        ]);
+        setStats(statsData.stats);
+        setRecentOrders(ordersData.orders.slice(0, 5));
       } catch (err) {
         setError("Failed to load dashboard stats. Please try again.");
         toast.error("Failed to load dashboard stats");
@@ -32,7 +39,7 @@ const Dashboard = () => {
       }
     };
 
-    fetchStats();
+    fetchDashboardData();
   }, []);
 
   if (error) {
@@ -71,9 +78,8 @@ const Dashboard = () => {
             <OrdersLineChart data={[]} />
             <RevenueBarChart data={[]} />
           </div>
-          <RecentOrdersTable orders={[]} />
+          <RecentOrdersTable orders={recentOrders} />
         </div>
-
         <div className="space-y-4">
           <ApprovalBreakdown stats={stats} isLoading={isLoading} />
           <RevenueSummary isLoading={isLoading} />

@@ -46,18 +46,6 @@ const userSchema = new mongoose.Schema(
       default: "customer",
     },
 
-    //delivery address for customers
-    addresses: [
-      {
-        label: { type: String, default: "Home" }, // home, work, etc.
-        fullName: { type: String, required: true, trim: true },
-        phone: { type: String, required: true, trim: true },
-        address: { type: String, required: true, trim: true },
-        notes: { type: String, default: "", trim: true },
-        isDefault: { type: Boolean, default: false },
-      },
-    ],
-
     // Vendor Specific Fields
     shopName: { type: String, trim: true, default: "" },
     shopLocation: { type: String, trim: true, default: "" },
@@ -65,14 +53,6 @@ const userSchema = new mongoose.Schema(
     city: { type: String, trim: true, default: "" },
     zone: { type: String, trim: true, default: "" },
     cuisine: { type: String, trim: true, default: "" },
-    // Delivery Specific Fields
-    vehicleType: {
-      type: String,
-      enum: ["bike", "car", "bicycle", ""],
-      default: "",
-    },
-    vehicleNumber: { type: String, trim: true, default: "" },
-
     coverPhoto: {
       url: { type: String, default: "" },
       publicId: { type: String, default: "" },
@@ -82,16 +62,25 @@ const userSchema = new mongoose.Schema(
       publicId: { type: String, default: "" },
     },
     isOpen: { type: Boolean, default: false },
-
     minPrepTime: { type: Number, default: 15 },
     maxPrepTime: { type: Number, default: 45 },
-    deliveryFee: { type: Number, default: 50,
+    deliveryFee: {
+      type: Number,
+      default: 50,
       min: [0, "Delivery fee cannot be negative"],
     },
     coordinates: {
       lat: { type: Number, default: null },
       lng: { type: Number, default: null },
     },
+
+    // Delivery Rider Specific Fields
+vehicleType: {
+  type: String,
+  enum: ["bike", "car", "bicycle", ""],
+  default: "",
+},
+vehicleNumber: { type: String, trim: true, default: "" },
 
     // Operational Hours & Service Types
     openingTime: { type: String, default: "09:00" },
@@ -119,6 +108,45 @@ const userSchema = new mongoose.Schema(
     // Account Status Fields
     isApproved: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
+
+    // Rejection tracking — set when an admin rejects a vendor/rider,
+    // cleared automatically if they're approved later
+    rejectionReason: {
+      type: String,
+      default: null,
+    },
+
+    // Admin activity log — records which admin performed each action and when.
+    // Shared across roles (vendor, delivery) since the same approve/reject/block
+    // pattern applies to both.
+    approvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    approvedAt: {
+      type: Date,
+      default: null,
+    },
+    rejectedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    rejectedAt: {
+      type: Date,
+      default: null,
+    },
+    blockedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    blockedAt: {
+      type: Date,
+      default: null,
+    },
+
     // Timestamps
   },
   { timestamps: true },

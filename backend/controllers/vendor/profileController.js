@@ -1,3 +1,4 @@
+//backend/controllers/vendor/profileController.js
 import asyncHandler from "express-async-handler";
 import User from "../../models/User.js";
 import { deleteFromCloudinary } from "../../config/cloudinary.js";
@@ -27,9 +28,7 @@ const profileResponse = (vendor) => ({
   isActive: vendor.isActive,
 });
 
-/* @desc    Get vendor profile
-   @route   GET /api/vendor/profile
-   @access  Private (vendor) */
+// get vendor profile
 export const getProfile = asyncHandler(async (req, res) => {
   const vendor = await User.findById(req.user._id);
 
@@ -41,9 +40,7 @@ export const getProfile = asyncHandler(async (req, res) => {
   res.status(200).json({ vendor: profileResponse(vendor) });
 });
 
-/* @desc    Update vendor profile
-   @route   PUT /api/vendor/profile
-   @access  Private (vendor) */
+// update vendor profile
 export const updateProfile = asyncHandler(async (req, res) => {
   const vendor = await User.findById(req.user._id);
 
@@ -174,10 +171,8 @@ export const updateProfile = asyncHandler(async (req, res) => {
     vendor: profileResponse(updated),
   });
 });
-/*@desc get vendor shop status (open/closed)
-@route GET /api/vendor/profile/status
-@access Private (vendor)*/
 
+// Get vendor shop status (open/closed)
 export const getShopStatus = async (req, res) => {
   try {
     const vendor = await User.findById(req.user._id);
@@ -191,9 +186,7 @@ export const getShopStatus = async (req, res) => {
   }
 };
 
-/*@desc    Update vendor shop status (open/closed)
-@route   PUT /api/vendor/profile/status
-@access  Private (vendor)*/
+// Update vendor shop status (open/closed)
 export const updateShopStatus = async (req, res) => {
   try {
     const { isOpen } = req.body;

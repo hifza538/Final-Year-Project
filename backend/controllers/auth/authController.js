@@ -87,7 +87,7 @@ export const registerVendor = asyncHandler(async (req, res) => {
   const cnicRegex = /^\d{5}-\d{7}-\d{1}$/;
   const nameRegex = /^[a-zA-Z\s]+$/;
 
-  // ── required fields validation
+  // required fields validation
   if (!firstName?.trim()) await fail("First name is required");
   if (!lastName?.trim()) await fail("Last name is required");
   if (!email?.trim()) await fail("Email is required");
@@ -233,8 +233,7 @@ export const loginUser = asyncHandler(async (req, res) => {
     email: email.trim().toLowerCase(),
   }).select("+password");
 
-  // user not found
-  // same error message for both email and password to prevent user enumeration
+  // check if user exists
   if (!user) {
     res.status(401);
     throw new Error("Invalid email or password");

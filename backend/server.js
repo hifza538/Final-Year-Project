@@ -1,3 +1,4 @@
+//backend/server.js
 import dns from 'dns';
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
@@ -12,6 +13,7 @@ import customerRoutes from "./routes/customerRoutes.js";
 import deliveryRoutes from "./routes/deliveryRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import deliveryOrderRoutes from "./routes/delivery/orderRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -61,6 +63,7 @@ app.use("/api/customer", customerRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/delivery", deliveryRoutes);
 app.use("/api/delivery/orders", deliveryOrderRoutes);
+app.use("/api/categories", categoryRoutes);
 
 // Error handling middleware
 app.use(notFound);

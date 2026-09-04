@@ -16,8 +16,7 @@ const deliveryResponse = (user) => ({
   isActive: user.isActive,
 });
 
-/*@desc   Register a new delivery rider
- @route  POST /api/delivery/register */
+// register a new delivery rider
 export const registerDelivery = asyncHandler(async (req, res) => {
   const { fullName, email, password, phone, cnicNumber, vehicleType, vehicleNumber } = req.body;
 
@@ -125,8 +124,7 @@ export const registerDelivery = asyncHandler(async (req, res) => {
   });
 });
 
-/*@desc   Login delivery rider
- @route  POST /api/delivery/login */
+// login a delivery rider
 export const loginDelivery = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -181,8 +179,7 @@ export const loginDelivery = asyncHandler(async (req, res) => {
   });
 });
 
-/* @desc   Get logged-in delivery rider details
- @route  GET /api/delivery/me */
+// get logged-in delivery rider details
 export const getMe = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
