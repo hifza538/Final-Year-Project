@@ -1,14 +1,13 @@
-import { MapPin, Phone, Package } from "lucide-react";
+// delivery-frontend/src/components/orders/OrderCard.jsx
+import { MapPin, Store, Phone, Package, Banknote } from "lucide-react";
 
-// OrderCard component displays a summary of an order, including vendor info, delivery address, order items count, total price, and an optional action button (e.g., "Accept Order" or "Mark as Delivered").
-// It is used in the rider's dashboard to show available orders or current orders.
 const OrderCard = ({ order, actionLabel, onAction, actionLoading }) => {
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 mb-4">
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 mb-4 hover:shadow-md transition-shadow duration-200">
       <div className="flex items-start justify-between mb-3">
         <div>
-          <p className="text-xs text-gray-400 mb-0.5">
-            Order #{order._id.slice(-6).toUpperCase()}
+          <p className="text-xs text-gray-400 mb-0.5 font-mono">
+            #{order._id.slice(-6).toUpperCase()}
           </p>
           <p className="font-semibold text-gray-800">
             {order.vendor?.shopName || "Restaurant"}
@@ -18,7 +17,7 @@ const OrderCard = ({ order, actionLabel, onAction, actionLoading }) => {
           className={`text-xs font-medium px-2.5 py-1 rounded-full
             ${order.orderStatus === "Ready" ? "bg-blue-50 text-blue-600" : ""}
             ${order.orderStatus === "OutForDelivery" ? "bg-primary-light text-primary-dark" : ""}
-            ${order.orderStatus === "Completed" ? "bg-green-50 text-green-600" : ""}
+            ${order.orderStatus === "Completed" ? "bg-green-50 text-green-700" : ""}
           `}
         >
           {order.orderStatus}
@@ -28,14 +27,14 @@ const OrderCard = ({ order, actionLabel, onAction, actionLoading }) => {
       <div className="space-y-2 mb-4">
         {order.vendor?.shopAddress && (
           <div className="flex items-start gap-2 text-sm text-gray-600">
-            <Store size={16} className="mt-0.5 flex-shrink-0 text-gray-400" />
-            <span>Pickup: {order.vendor.shopAddress}</span>
+            <Store size={16} className="mt-0.5 flex-shrink-0 text-primary" />
+            <span>{order.vendor.shopAddress}</span>
           </div>
         )}
         <div className="flex items-start gap-2 text-sm text-gray-600">
           <MapPin size={16} className="mt-0.5 flex-shrink-0 text-gray-400" />
           <span>
-            Deliver to: {order.deliveryAddress?.address}, {order.deliveryAddress?.city}
+            {order.deliveryAddress?.address}, {order.deliveryAddress?.city}
           </span>
         </div>
         {order.deliveryAddress?.phone && (
@@ -53,13 +52,16 @@ const OrderCard = ({ order, actionLabel, onAction, actionLoading }) => {
       </div>
 
       <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-        <span className="font-semibold text-gray-800">Rs. {order.totalPrice?.toFixed(0)}</span>
+        <div className="flex items-center gap-1.5">
+          <Banknote size={16} className="text-green-700" />
+          <span className="font-bold text-green-700">Rs. {order.totalPrice?.toFixed(0)}</span>
+        </div>
         {actionLabel && (
           <button
             onClick={() => onAction(order._id)}
             disabled={actionLoading}
             className="px-5 py-2 bg-primary text-white text-sm font-semibold rounded-full
-              hover:bg-primary-dark transition-colors duration-200
+              hover:bg-primary-dark active:scale-95 transition-all duration-200
               disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {actionLoading ? "Please wait..." : actionLabel}
