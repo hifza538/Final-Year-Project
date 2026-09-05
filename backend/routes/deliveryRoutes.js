@@ -5,7 +5,7 @@ import {
   getAvailableOrders,
   acceptOrder,
   getMyOrders,
-  deliverOrder,
+  advanceOrderStatus,
   getOrderHistory,
 } from "../controllers/delivery/orderController.js";
 import { getProfile, updateProfile } from "../controllers/delivery/profileController.js";
@@ -32,7 +32,7 @@ router.patch("/status", protect, deliveryOnly, updateOnlineStatus);
 router.get("/orders/available", protect, deliveryOnly, getAvailableOrders);
 router.patch("/orders/:id/accept", protect, deliveryOnly, acceptOrder);
 router.get("/orders/my-orders", protect, deliveryOnly, getMyOrders);
-router.patch("/orders/:id/deliver", protect, deliveryOnly, deliverOrder);
+router.patch("/orders/:id/advance-status", protect, deliveryOnly, advanceOrderStatus);
 router.get("/orders/history", protect, deliveryOnly, getOrderHistory);
 
 export default router;
