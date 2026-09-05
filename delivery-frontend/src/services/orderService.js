@@ -15,8 +15,8 @@ export const getMyOrders = async () => {
   return response.data;
 };
 
-export const deliverOrder = async (orderId) => {
-  const response = await api.patch(`/delivery/orders/${orderId}/deliver`);
+export const advanceOrderStatus = async (orderId) => {
+  const response = await api.patch(`/delivery/orders/${orderId}/advance-status`);
   return response.data;
 };
 
