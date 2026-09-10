@@ -11,7 +11,7 @@ const OrderCard = ({ order, actionLabel, onAction, actionLoading }) => {
             Order #{order._id.slice(-6).toUpperCase()}
           </p>
           <p className="font-semibold text-gray-800">
-            {order.vendor?.restaurantName || order.vendor?.fullName || "Restaurant"}
+            {order.vendor?.shopName || "Restaurant"}
           </p>
         </div>
         <span
@@ -26,10 +26,16 @@ const OrderCard = ({ order, actionLabel, onAction, actionLoading }) => {
       </div>
 
       <div className="space-y-2 mb-4">
+        {order.vendor?.shopAddress && (
+          <div className="flex items-start gap-2 text-sm text-gray-600">
+            <Store size={16} className="mt-0.5 flex-shrink-0 text-gray-400" />
+            <span>Pickup: {order.vendor.shopAddress}</span>
+          </div>
+        )}
         <div className="flex items-start gap-2 text-sm text-gray-600">
           <MapPin size={16} className="mt-0.5 flex-shrink-0 text-gray-400" />
           <span>
-            {order.deliveryAddress?.address}, {order.deliveryAddress?.city}
+            Deliver to: {order.deliveryAddress?.address}, {order.deliveryAddress?.city}
           </span>
         </div>
         {order.deliveryAddress?.phone && (

@@ -1,5 +1,4 @@
 //admin-frontend/src/services/vendorService.js
-
 import api from "./api";
 
 export const getAllVendors = async (params = {}) => {
@@ -17,8 +16,8 @@ export const approveVendor = async (id) => {
   return response.data;
 };
 
-export const rejectVendor = async (id) => {
-  const response = await api.patch(`/admin/vendors/${id}/reject`);
+export const rejectVendor = async (id, reason) => {
+  const response = await api.patch(`/admin/vendors/${id}/reject` , { reason });
   return response.data;
 };
 

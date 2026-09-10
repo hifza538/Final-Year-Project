@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required"],
       minlength: [6, "Password must be at least 6 characters"],
-      select: false, // never returned in queries by default
+      select: false, 
     },
     phone: {
       type: String,
@@ -46,6 +46,22 @@ const userSchema = new mongoose.Schema(
       default: "customer",
     },
 
+    //password reset fields
+    resetPasswordToken: { type: String, default: undefined },
+    resetPasswordExpire: { type: Date, default: undefined },
+
+    //delivery address for customers
+    addresses: [
+      {
+        label: { type: String, default: "Home" }, // home, work, etc.
+        fullName: { type: String, required: true, trim: true },
+        phone: { type: String, required: true, trim: true },
+        address: { type: String, required: true, trim: true },
+        notes: { type: String, default: "", trim: true },
+        isDefault: { type: Boolean, default: false },
+      },
+    ],
+
     // Vendor Specific Fields
     shopName: { type: String, trim: true, default: "" },
     shopLocation: { type: String, trim: true, default: "" },
@@ -53,6 +69,21 @@ const userSchema = new mongoose.Schema(
     city: { type: String, trim: true, default: "" },
     zone: { type: String, trim: true, default: "" },
     cuisine: { type: String, trim: true, default: "" },
+    
+    // Delivery Specific Fields
+
+    vehicleType: {
+      type: String,
+      enum: ["bike", "car", "bicycle", ""],
+      default: "",
+    },
+    vehicleNumber: { type: String, trim: true, default: "" },
+    // rider's current online status
+    isOnline: {
+      type: Boolean,
+      default: false,
+    },
+
     coverPhoto: {
       url: { type: String, default: "" },
       publicId: { type: String, default: "" },
@@ -73,14 +104,6 @@ const userSchema = new mongoose.Schema(
       lat: { type: Number, default: null },
       lng: { type: Number, default: null },
     },
-
-    // Delivery Rider Specific Fields
-vehicleType: {
-  type: String,
-  enum: ["bike", "car", "bicycle", ""],
-  default: "",
-},
-vehicleNumber: { type: String, trim: true, default: "" },
 
     // Operational Hours & Service Types
     openingTime: { type: String, default: "09:00" },
@@ -109,16 +132,12 @@ vehicleNumber: { type: String, trim: true, default: "" },
     isApproved: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
 
-    // Rejection tracking — set when an admin rejects a vendor/rider,
-    // cleared automatically if they're approved later
     rejectionReason: {
       type: String,
       default: null,
     },
 
-    // Admin activity log — records which admin performed each action and when.
-    // Shared across roles (vendor, delivery) since the same approve/reject/block
-    // pattern applies to both.
+    //admin activity log
     approvedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

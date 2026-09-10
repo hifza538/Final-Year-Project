@@ -1,3 +1,5 @@
+//admin-frontend/src/pages/DeliveryRiders.jsx
+
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -5,13 +7,16 @@ import { Search, CheckCircle, Ban, Eye } from "lucide-react";
 import { getAllRiders, approveRider, toggleRiderBlock } from "../services/deliveryService";
 import ConfirmModal from "../components/common/ConfirmModal";
 
-// Status filters for the delivery riders page
+// Status filters for the top filter buttons
+
 const statusFilters = [
   { value: "all", label: "All" },
   { value: "pending", label: "Pending" },
   { value: "approved", label: "Approved" },
   { value: "blocked", label: "Blocked" },
 ];
+
+// StatusBadge component to display the status of a rider
 
 const StatusBadge = ({ rider }) => {
   if (!rider.isActive) {
@@ -23,7 +28,7 @@ const StatusBadge = ({ rider }) => {
   return <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700">Approved</span>;
 };
 
-// DeliveryRiders component for managing delivery riders
+// DeliveryRiders component to display the list of delivery riders
 const DeliveryRiders = () => {
   const [riders, setRiders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -69,6 +74,7 @@ const DeliveryRiders = () => {
     }
   };
 
+  // Toggle block/unblock rider
   const confirmToggleBlock = async () => {
     setActionInProgress(modalRider.id);
     try {

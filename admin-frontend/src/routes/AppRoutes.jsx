@@ -18,10 +18,10 @@ import Reports from "../pages/Reports";
 import AppSettings from "../pages/AppSettings";
 import Profile from "../pages/Profile";
 
-// AdminLayout ke andar existing routes ke sath:
+
 const AppRoutes = () => {
   return (
-  
+
     <Routes>
       <Route path="/login" element={<Login />} />
 
@@ -33,21 +33,21 @@ const AppRoutes = () => {
         }
       >
         <Route path="/" element={<Dashboard />} />
+        <Route path="/vendors" element={<Vendors />} />
+        <Route path="/vendors/:id" element={<VendorDetails />} />
+        <Route path="/delivery-approvals" element={<DeliveryRiders />} />
+        <Route path="/delivery-approvals/:id" element={<RiderDetails />} />
+        <Route path="/customers" element={<Customers />} />
+        <Route path="/customers/:id" element={<CustomerDetails />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/orders/:id" element={<OrderDetails />} />
+        <Route path="/categories" element={<Categories />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/settings" element={<AppSettings />} />
+        <Route path="/profile" element={<Profile />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />
-      <Route path="/vendors" element={<Vendors />} />
-      <Route path="/vendors/:id" element={<VendorDetails />} />
-      <Route path="/delivery-approvals" element={<DeliveryRiders />} />
-      <Route path="/delivery-approvals/:id" element={<RiderDetails />} />
-      <Route path="/customers" element={<Customers />} />
-      <Route path="/customers/:id" element={<CustomerDetails />} />
-      <Route path="/orders" element={<Orders />} />
-      <Route path="/orders/:id" element={<OrderDetails />} />
-      <Route path="/categories" element={<Categories />} />
-      <Route path="/reports" element={<Reports />} />
-      <Route path="/settings" element={<AppSettings />} />
-      <Route path="/profile" element={<Profile />} />
 
     </Routes>
   );

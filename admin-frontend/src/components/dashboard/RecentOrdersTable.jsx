@@ -2,9 +2,9 @@
 const statusStyles = {
   Pending: "bg-yellow-50 text-yellow-700",
   Accepted: "bg-blue-50 text-blue-700",
-  Preparing: "bg-blue-50 text-blue-700",
-  Ready: "bg-blue-50 text-blue-700",
-  OutForDelivery: "bg-purple-50 text-purple-700",
+  Preparing: "bg-purple-50 text-purple-700",
+  Ready: "bg-indigo-50 text-indigo-700",
+  OutForDelivery: "bg-orange-50 text-orange-700",
   Completed: "bg-green-50 text-green-700",
   Rejected: "bg-red-50 text-red-600",
 };

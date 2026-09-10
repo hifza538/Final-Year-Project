@@ -67,8 +67,8 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     Pending:        ["Accepted", "Rejected"],
     Accepted:       ["Preparing"],
     Preparing:      ["Ready"],
-    Ready:          ["OutForDelivery"],
-    OutForDelivery: ["Completed"],
+    Ready:          [],
+    OutForDelivery: [],
     Completed:      [],
     Rejected:       [],
   };

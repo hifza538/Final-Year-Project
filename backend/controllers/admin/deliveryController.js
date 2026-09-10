@@ -2,7 +2,9 @@
 import asyncHandler from "express-async-handler";
 import User from "../../models/User.js";
 
-// get all riders pending approval
+
+// Get all riders pending approval
+
 export const getPendingRiders = asyncHandler(async (req, res) => {
   const pendingRiders = await User.find({
     role: "delivery",
@@ -12,7 +14,8 @@ export const getPendingRiders = asyncHandler(async (req, res) => {
   res.status(200).json({ riders: pendingRiders });
 });
 
-// get all riders with optional search + status filter
+// Get all riders with optional search + status filter
+
 export const getAllRiders = asyncHandler(async (req, res) => {
   const { status, search } = req.query;
 
@@ -37,7 +40,8 @@ export const getAllRiders = asyncHandler(async (req, res) => {
   res.status(200).json({ riders });
 });
 
-// get a single rider's full details
+// Get a single rider's full details
+
 export const getRiderById = asyncHandler(async (req, res) => {
   const rider = await User.findOne({ _id: req.params.id, role: "delivery" })
     .select("-password")
@@ -53,7 +57,8 @@ export const getRiderById = asyncHandler(async (req, res) => {
   res.status(200).json({ rider });
 });
 
-// approve a rider
+// Approve a rider
+
 export const approveRider = asyncHandler(async (req, res) => {
   const rider = await User.findOne({ _id: req.params.id, role: "delivery" });
 
@@ -71,7 +76,8 @@ export const approveRider = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "Rider approved successfully" });
 });
 
-// reject a rider
+// Reject a rider (deactivates account, records reason)
+
 export const rejectRider = asyncHandler(async (req, res) => {
   const { reason } = req.body;
 
@@ -97,7 +103,8 @@ export const rejectRider = asyncHandler(async (req, res) => {
   res.status(200).json({ message: "Rider rejected" });
 });
 
-// toggle a rider's active status (block/unblock)
+// Block or unblock a rider (toggles isActive)
+
 export const toggleRiderBlock = asyncHandler(async (req, res) => {
   const rider = await User.findOne({ _id: req.params.id, role: "delivery" });
 

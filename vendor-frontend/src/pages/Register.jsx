@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { ChefHat, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
-import api from "../services/api";
+import { registerVendor } from "../services/authService";
 import InputField from "../components/common/InputField";
 import MapPicker from "../components/common/MapPicker";
 import AuthLayout from "../components/layout/AuthLayout";
@@ -277,9 +277,7 @@ const Register = () => {
         fd.append(key, val);
       });
 
-      await api.post("/auth/register", fd, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await registerVendor(fd);
       setSuccess(true);
     } catch (err) {
       setError(

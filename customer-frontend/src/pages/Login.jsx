@@ -31,7 +31,8 @@ const Login = () => {
       const data = await loginCustomer(formData);
       login(data.user, data.token); // Save user + token in AuthContext
       showSuccessToast(`Welcome back, ${data.user.fullName.split(" ")[0]}!`);
-      setTimeout(() => { navigate("/"); // Redirect to home after a short delay to allow toast to be seen
+      setTimeout(() => {
+        navigate("/"); // Redirect to home after a short delay to allow toast to be seen
       }, 1500);
     } catch (error) {
       // Backend sends a descriptive message (e.g. "Invalid email or password")
@@ -49,41 +50,47 @@ const Login = () => {
           <h1 className="text-2xl font-bold text-gray-800 mb-1">Welcome Back</h1>
           <p className="text-gray-500 text-sm mb-6">Log in to continue ordering</p>
 
-        <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <FormInput
-            label="Email"
-            type="email"
-            placeholder="Enter Your Email"
-            registration={register("email")}
-            error={errors.email}
-          />
-          <FormInput
-            label="Password"
-            type="password"
-            placeholder="Enter Your Password"
-            registration={register("password")}
-            error={errors.password}
-          />
+          <form onSubmit={handleSubmit(onSubmit)} noValidate>
+            <FormInput
+              label="Email"
+              type="email"
+              placeholder="Enter Your Email"
+              registration={register("email")}
+              error={errors.email}
+            />
+            <FormInput
+              label="Password"
+              type="password"
+              placeholder="Enter Your Password"
+              registration={register("password")}
+              error={errors.password}
+            />
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full mt-2 py-2.5 bg-primary text-white font-semibold rounded-full
+            <div className="flex justify-end -mt-2 mb-2">
+              <Link to="/forgot-password" className="text-xs text-primary hover:underline">
+                Forgot password?
+              </Link>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full mt-2 py-2.5 bg-primary text-white font-semibold rounded-full
                        hover:bg-primary-dark transition-colors duration-200
                        disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {isSubmitting ? "Logging in..." : "Log In"}
-          </button>
-        </form>
+            >
+              {isSubmitting ? "Logging in..." : "Log In"}
+            </button>
+          </form>
 
-        <p className="text-sm text-gray-500 text-center mt-6">
-          Don't have an account?{" "}
-          <Link to="/signup" className="text-primary font-medium hover:underline">
-            Sign up
-          </Link>
-        </p>
+          <p className="text-sm text-gray-500 text-center mt-6">
+            Don't have an account?{" "}
+            <Link to="/signup" className="text-primary font-medium hover:underline">
+              Sign up
+            </Link>
+          </p>
+        </div>
       </div>
-    </div>
     </AuthLayout>
   );
 };

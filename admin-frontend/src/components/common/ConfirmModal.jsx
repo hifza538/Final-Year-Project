@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { AlertTriangle, X } from "lucide-react";
 
-// confirmModal component for displaying confirmation dialogs
 const ConfirmModal = ({
   isOpen,
   title,
@@ -17,7 +16,8 @@ const ConfirmModal = ({
 }) => {
   const [reason, setReason] = useState("");
 
-  // reset the textarea each time the modal opens for a new vendor
+  // Reset the textarea each time the modal opens for a new vendor
+
   useEffect(() => {
     if (isOpen) setReason("");
   }, [isOpen]);

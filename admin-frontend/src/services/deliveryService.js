@@ -1,5 +1,4 @@
 //admin-frontend/src/services/deliveryService.js
-
 import api from "./api";
 
 export const getAllRiders = async (params = {}) => {

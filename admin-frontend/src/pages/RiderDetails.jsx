@@ -1,15 +1,13 @@
+//admin-frontend/src/pages/RiderDetails.jsx
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { ArrowLeft, CheckCircle, XCircle, Ban, FileText } from "lucide-react";
-import {
-  getRiderById,
-  approveRider,
-  rejectRider,
-  toggleRiderBlock,
-} from "../services/deliveryService";
+import {getRiderById,approveRider, rejectRider, toggleRiderBlock,} from "../services/deliveryService";
 import ConfirmModal from "../components/common/ConfirmModal";
 
+// Component to display a label-value pair in the details view
 const DetailRow = ({ label, value }) => (
   <div className="flex justify-between py-3 border-b border-gray-100 last:border-0">
     <span className="text-sm text-gray-500">{label}</span>
@@ -17,6 +15,7 @@ const DetailRow = ({ label, value }) => (
   </div>
 );
 
+// Component to display a document
 const DocumentPreview = ({ label, url }) => (
   <div>
     <p className="text-xs text-gray-500 mb-2">{label}</p>
@@ -37,6 +36,7 @@ const DocumentPreview = ({ label, url }) => (
   </div>
 );
 
+// Main component to display rider details and actions
 const RiderDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -79,6 +79,8 @@ const RiderDetails = () => {
     }
   };
 
+  // Handle rejection of a rider with a provided reason
+
   const handleReject = async (reason) => {
     setActionLoading(true);
     try {
@@ -92,6 +94,8 @@ const RiderDetails = () => {
       setActionLoading(false);
     }
   };
+
+  // Handle toggling block/unblock status of a rider
 
   const handleToggleBlock = async () => {
     setActionLoading(true);
