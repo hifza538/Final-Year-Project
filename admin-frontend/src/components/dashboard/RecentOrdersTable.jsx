@@ -9,6 +9,7 @@ const statusStyles = {
   Rejected: "bg-red-50 text-red-600",
 };
 
+// RecentOrdersTable component for displaying a table of recent orders
 const RecentOrdersTable = ({ orders = [] }) => (
   <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
     <div className="px-5 py-4 border-b border-gray-100">
@@ -36,12 +37,12 @@ const RecentOrdersTable = ({ orders = [] }) => (
             {orders.map((order) => (
               <tr key={order._id} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
                 <td className="px-5 py-3 font-medium">#{order._id.slice(-6)}</td>
-                <td className="px-5 py-3">{order.customerName}</td>
-                <td className="px-5 py-3">{order.vendorName}</td>
-                <td className="px-5 py-3">Rs {order.amount}</td>
+                <td className="px-5 py-3">{order.customer?.fullName || "—"}</td>
+                <td className="px-5 py-3">{order.vendor?.shopName || "—"}</td>
+                <td className="px-5 py-3">Rs {order.totalPrice}</td>
                 <td className="px-5 py-3">
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${statusStyles[order.status] || "bg-gray-100 text-gray-600"}`}>
-                    {order.status}
+                  <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${statusStyles[order.orderStatus] || "bg-gray-100 text-gray-600"}`}>
+                    {order.orderStatus}
                   </span>
                 </td>
                 <td className="px-5 py-3 text-gray-500">

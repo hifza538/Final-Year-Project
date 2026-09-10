@@ -1,4 +1,5 @@
 //admin-frontend/src/pages/RiderDetails.jsx
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -79,6 +80,7 @@ const RiderDetails = () => {
   };
 
   // Handle rejection of a rider with a provided reason
+
   const handleReject = async (reason) => {
     setActionLoading(true);
     try {
@@ -94,6 +96,7 @@ const RiderDetails = () => {
   };
 
   // Handle toggling block/unblock status of a rider
+
   const handleToggleBlock = async () => {
     setActionLoading(true);
     try {

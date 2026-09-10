@@ -10,6 +10,7 @@ import { OrdersLineChart } from "../components/dashboard/DashboardCharts";
 import RecentOrdersTable from "../components/dashboard/RecentOrdersTable";
 import QuickActions from "../components/dashboard/QuickActions";
 
+// Dashboard component for displaying overview stats and recent orders
 const Dashboard = () => {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
@@ -60,8 +61,7 @@ const Dashboard = () => {
         Here's what's happening on LocalBites today.
       </p>
 
-      {/* 5 key stat cards — pending vendor/rider counts are handled via the
-          approval pages themselves, no separate breakdown chart needed */}
+      {/* 5 key stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5 mb-5">
         <StatCard icon={Users} label="Total Customers" value={stats?.totalCustomers} gradient="#E8590C" isLoading={isLoading} />
         <StatCard icon={Store} label="Total Vendors" value={stats?.totalVendors} gradient="#C2410C" isLoading={isLoading} />
