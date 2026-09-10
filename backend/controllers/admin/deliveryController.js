@@ -1,8 +1,10 @@
-// backend/controllers/admin/deliveryController.js
+//backend/controllers/admin/deliveryController.js
 import asyncHandler from "express-async-handler";
 import User from "../../models/User.js";
 
+
 // Get all riders pending approval
+
 export const getPendingRiders = asyncHandler(async (req, res) => {
   const pendingRiders = await User.find({
     role: "delivery",
@@ -13,6 +15,7 @@ export const getPendingRiders = asyncHandler(async (req, res) => {
 });
 
 // Get all riders with optional search + status filter
+
 export const getAllRiders = asyncHandler(async (req, res) => {
   const { status, search } = req.query;
 
@@ -38,6 +41,7 @@ export const getAllRiders = asyncHandler(async (req, res) => {
 });
 
 // Get a single rider's full details
+
 export const getRiderById = asyncHandler(async (req, res) => {
   const rider = await User.findOne({ _id: req.params.id, role: "delivery" })
     .select("-password")
@@ -54,6 +58,7 @@ export const getRiderById = asyncHandler(async (req, res) => {
 });
 
 // Approve a rider
+
 export const approveRider = asyncHandler(async (req, res) => {
   const rider = await User.findOne({ _id: req.params.id, role: "delivery" });
 
@@ -72,6 +77,7 @@ export const approveRider = asyncHandler(async (req, res) => {
 });
 
 // Reject a rider (deactivates account, records reason)
+
 export const rejectRider = asyncHandler(async (req, res) => {
   const { reason } = req.body;
 
@@ -98,6 +104,7 @@ export const rejectRider = asyncHandler(async (req, res) => {
 });
 
 // Block or unblock a rider (toggles isActive)
+
 export const toggleRiderBlock = asyncHandler(async (req, res) => {
   const rider = await User.findOne({ _id: req.params.id, role: "delivery" });
 

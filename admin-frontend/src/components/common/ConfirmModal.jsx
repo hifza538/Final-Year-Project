@@ -1,4 +1,5 @@
 //admin-frontend/src/components/common/ConfirmModal.jsx
+
 import { useState, useEffect } from "react";
 import { AlertTriangle, X } from "lucide-react";
 
@@ -16,6 +17,7 @@ const ConfirmModal = ({
   const [reason, setReason] = useState("");
 
   // Reset the textarea each time the modal opens for a new vendor
+
   useEffect(() => {
     if (isOpen) setReason("");
   }, [isOpen]);

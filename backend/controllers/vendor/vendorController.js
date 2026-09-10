@@ -1,10 +1,8 @@
+//backend/controllers/vendor/vendorController.js
 import asyncHandler from "express-async-handler";
 import Order from "../../models/Order.js";
 
-/* @desc    Get vendor dashboard statistics
-   @route   GET /api/vendor/dashboard-stats
-   @access  Private (vendor)
-*/
+// Get dashboard statistics for the logged-in vendor
 export const getDashboardStats = asyncHandler(async (req, res) => {
   if (!req.user?._id) {
   res.status(401);

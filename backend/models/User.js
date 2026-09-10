@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required"],
       minlength: [6, "Password must be at least 6 characters"],
-      select: false, // never returned in queries by default
+      select: false, 
     },
     phone: {
       type: String,
@@ -132,7 +132,6 @@ const userSchema = new mongoose.Schema(
     isApproved: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
 
-    // Rejection tracking
     rejectionReason: {
       type: String,
       default: null,

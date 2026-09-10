@@ -2,9 +2,7 @@ import asyncHandler from "express-async-handler";
 import MenuItem from "../../models/MenuItem.js";
 import { deleteFromCloudinary } from "../../config/cloudinary.js";
 
-/* @desc    Get all menu items of logged in vendor
-   @route   GET /api/vendor/menu
-   @access  Private (vendor)*/
+// get all menu items for the logged-in vendor
 export const getMenuItems = asyncHandler(async (req, res) => {
   const items = await MenuItem.find({ vendor: req.user._id })
     .sort({ createdAt: -1 });
@@ -12,9 +10,7 @@ export const getMenuItems = asyncHandler(async (req, res) => {
   res.status(200).json({ items });
 });
 
-/* @desc    Add new menu item
-   @route   POST /api/vendor/menu
-   @access  Private (vendor)*/
+// add new menu item
 export const addMenuItem = asyncHandler(async (req, res) => {
   const { name, description, price, category } = req.body;
   const imageFile = req.file;
@@ -76,9 +72,7 @@ export const addMenuItem = asyncHandler(async (req, res) => {
   });
 });
 
-/* @desc    Update menu item
-   @route   PUT /api/vendor/menu/:id
-   @access  Private (vendor) */
+// update menu item
 export const updateMenuItem = asyncHandler(async (req, res) => {
   // Find item - make sure it belongs to this vendor
   const item = await MenuItem.findOne({
@@ -142,9 +136,7 @@ export const updateMenuItem = asyncHandler(async (req, res) => {
   });
 });
 
-/* @desc    Delete menu item
-   @route   DELETE /api/vendor/menu/:id
-   @access  Private (vendor) */
+// delete menu item
 export const deleteMenuItem = asyncHandler(async (req, res) => {
   const item = await MenuItem.findOne({
     _id:    req.params.id,
@@ -168,9 +160,7 @@ export const deleteMenuItem = asyncHandler(async (req, res) => {
   });
 });
 
-/* @desc    Toggle item in stock / out of stock
-   @route   PATCH /api/vendor/menu/:id/toggle-stock
-   @access  Private (vendor) */
+// toggle stock status of menu item
 export const toggleStock = asyncHandler(async (req, res) => {
   const item = await MenuItem.findOne({
     _id:    req.params.id,

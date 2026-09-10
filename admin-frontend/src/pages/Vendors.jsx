@@ -1,3 +1,4 @@
+
 //admin-frontend/src/pages/Vendors.jsx
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
@@ -30,7 +31,9 @@ const Vendors = () => {
   const [status, setStatus] = useState("all");
   const [actionInProgress, setActionInProgress] = useState(null);
 
+
   // Replaces window.confirm - holds which vendor + which action triggered the modal
+
   const [modalVendor, setModalVendor] = useState(null); // { id, shopName, action: "approve" | "block" }
 
   const fetchVendors = useCallback(async () => {

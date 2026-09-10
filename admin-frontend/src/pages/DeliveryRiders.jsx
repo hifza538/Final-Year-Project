@@ -1,4 +1,5 @@
 //admin-frontend/src/pages/DeliveryRiders.jsx
+
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -7,6 +8,7 @@ import { getAllRiders, approveRider, toggleRiderBlock } from "../services/delive
 import ConfirmModal from "../components/common/ConfirmModal";
 
 // Status filters for the top filter buttons
+
 const statusFilters = [
   { value: "all", label: "All" },
   { value: "pending", label: "Pending" },
@@ -15,6 +17,7 @@ const statusFilters = [
 ];
 
 // StatusBadge component to display the status of a rider
+
 const StatusBadge = ({ rider }) => {
   if (!rider.isActive) {
     return <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-50 text-red-600">Blocked</span>;

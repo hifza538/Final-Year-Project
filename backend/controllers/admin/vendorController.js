@@ -2,7 +2,7 @@
 import asyncHandler from "express-async-handler";
 import User from "../../models/User.js";
 
-// all vendors pending approval
+// Get all vendors pending approval
 export const getPendingVendors = asyncHandler(async (req, res) => {
   const pendingVendors = await User.find({
     role: "vendor",
@@ -27,6 +27,7 @@ export const getAllVendors = asyncHandler(async (req, res) => {
   } else if (status === "blocked") {
     query.isActive = false;
   }
+
   // Search by shopName, fullname or email (case-insensitive)
 
   if (search?.trim()) {
@@ -38,7 +39,8 @@ export const getAllVendors = asyncHandler(async (req, res) => {
   res.status(200).json({ vendors });
 });
 
-// A single vendor's full details
+// get a single vendor's full details
+
 export const getVendorById = asyncHandler(async (req, res) => {
   const vendor = await User.findOne({ _id: req.params.id, role: "vendor" })
     .select("-password")
@@ -55,6 +57,7 @@ export const getVendorById = asyncHandler(async (req, res) => {
 });
 
 // Approve a vendor
+
 export const approveVendor = asyncHandler(async (req, res) => {
   const vendor = await User.findOne({ _id: req.params.id, role: "vendor" });
 
@@ -67,6 +70,7 @@ export const approveVendor = asyncHandler(async (req, res) => {
   vendor.approvedBy = req.user._id;
   vendor.approvedAt = new Date();
   // Clear any previous rejection record since the vendor is now approved
+
   vendor.rejectionReason = null;
   await vendor.save();
 
@@ -74,6 +78,7 @@ export const approveVendor = asyncHandler(async (req, res) => {
 });
 
 // Reject a vendor (deactivates account, records reason)
+
 export const rejectVendor = asyncHandler(async (req, res) => {
   const { reason } = req.body;
 
@@ -100,6 +105,7 @@ export const rejectVendor = asyncHandler(async (req, res) => {
 });
 
 // Block or unblock a vendor (toggles isActive)
+
 export const toggleVendorBlock = asyncHandler(async (req, res) => {
   const vendor = await User.findOne({ _id: req.params.id, role: "vendor" });
 
@@ -110,7 +116,7 @@ export const toggleVendorBlock = asyncHandler(async (req, res) => {
 
   vendor.isActive = !vendor.isActive;
 
-  // Only record who blocked it - unblocking doesn't need a separate trail here
+// If blocking, record who blocked and when; if unblocking, clear those fields
   if (!vendor.isActive) {
     vendor.blockedBy = req.user._id;
     vendor.blockedAt = new Date();

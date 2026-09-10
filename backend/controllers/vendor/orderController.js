@@ -1,9 +1,8 @@
+//backend/controllers/vendor/orderController.js
 import asyncHandler from "express-async-handler";
 import Order from "../../models/Order.js";
 
-/* @desc    Get all vendor orders with optional status filter
-   @route   GET /api/vendor/orders
-   @access  Private (vendor) */
+// Helper function to format order response
 export const getVendorOrders = asyncHandler(async (req, res) => {
   const { status } = req.query;
 
@@ -18,9 +17,7 @@ export const getVendorOrders = asyncHandler(async (req, res) => {
   res.status(200).json({ orders });
 });
 
-/* @desc    Get single order details
-   @route   GET /api/vendor/orders/:id
-   @access  Private (vendor) */
+// get a single order details
 export const getOrderById = asyncHandler(async (req, res) => {
   const order = await Order.findOne({
     _id:    req.params.id,
@@ -35,9 +32,7 @@ export const getOrderById = asyncHandler(async (req, res) => {
   res.status(200).json({ order });
 });
 
-/* @desc    Update order status with flow validation
-   @route   PATCH /api/vendor/orders/:id/status
-   @access  Private (vendor) */
+// update order status
 export const updateOrderStatus = asyncHandler(async (req, res) => {
   const { status } = req.body;
 
@@ -56,7 +51,7 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     throw new Error("Invalid status value");
   }
 
-  // Find order — make sure it belongs to this vendor
+  // Find the order and ensure it belongs to this vendor
   const order = await Order.findOne({
     _id:    req.params.id,
     vendor: req.user._id,
@@ -67,7 +62,7 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     throw new Error("Order not found");
   }
 
-  // Status flow — prevent invalid transitions
+  // Define allowed status transitions
   const statusFlow = {
     Pending:        ["Accepted", "Rejected"],
     Accepted:       ["Preparing"],
