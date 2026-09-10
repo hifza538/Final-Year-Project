@@ -22,6 +22,12 @@ const orderSchema = new mongoose.Schema(
       ref: "User",
       default: null,
     },
+    // Drives the rider status
+    deliveryStage:{
+      type: String,
+      enum: ["Accepted", "ArrivedAtRestaurant", "PickedUp", "OnTheWay", "Delivered"],
+      default: "Accepted",
+    },
 
     // Items in the order
     orderItems: [

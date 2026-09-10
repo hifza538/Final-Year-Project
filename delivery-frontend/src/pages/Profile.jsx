@@ -68,111 +68,113 @@ const Profile = () => {
     }
   };
 
-  if (!user) return null; // PrivateRoute should handle redirecting to login if not authenticated
+  if (!user) return null; // private route should handle redirecting to login if not authenticated
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <button
-        onClick={() => navigate("/")}
-        className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-primary transition-colors mb-6"
-      >
-        <ArrowLeft size={16} />
-        Back to Dashboard
-      </button>
+    <div className="min-h-screen bg-cream px-4 py-8">
+      <div className="max-w-2xl mx-auto">
+        <button
+          onClick={() => navigate("/")}
+          className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-dark
+            bg-white border border-primary/20 rounded-full px-4 py-2 mb-6 shadow-sm
+            hover:shadow transition-all duration-200"
+        >
+          <ArrowLeft size={16} />
+          Back to Dashboard
+        </button>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">My Profile</h1>
-          {!isEditing && (
-            <button
-              onClick={handleEditClick}
-              className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-dark transition-colors"
-            >
-              <Pencil size={15} />
-              Edit
-            </button>
-          )}
-        </div>
-
-        {!isEditing ? (
-          
-          <div className="space-y-5">
-            <ProfileField label="Full Name" value={user.fullName} />
-            <ProfileField label="Email" value={user.email} readOnlyNote="Cannot be changed" />
-            <ProfileField label="Phone Number" value={user.phone} />
-            <ProfileField label="CNIC Number" value={user.cnicNumber} readOnlyNote="Cannot be changed" />
-            <div className="grid grid-cols-2 gap-4">
-              <ProfileField
-                label="Vehicle Type"
-                value={
-                  vehicleOptions.find((opt) => opt.value === user.vehicleType)?.label ||
-                  user.vehicleType
-                }
-              />
-              <ProfileField label="Vehicle Number" value={user.vehicleNumber} />
-            </div>
-            <div className="pt-2">
-              <span
-                className={`inline-block text-xs font-medium px-3 py-1 rounded-full
-                  ${user.isApproved ? "bg-green-50 text-green-600" : "bg-primary-light text-primary-dark"}`}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-2xl font-bold text-gray-800">My Profile</h1>
+            {!isEditing && (
+              <button
+                onClick={handleEditClick}
+                className="flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary-dark transition-colors"
               >
-                {user.isApproved ? "Approved Rider" : "Pending Approval"}
-              </span>
-            </div>
+                <Pencil size={15} />
+                Edit
+              </button>
+            )}
           </div>
-        ) : (
-          
-          <form onSubmit={handleSubmit(onSubmit)} noValidate>
-            <FormInput
-              label="Full Name"
-              placeholder="John Doe"
-              registration={register("fullName")}
-              error={errors.fullName}
-            />
-            <FormInput
-              label="Phone Number"
-              placeholder="03001234567"
-              registration={register("phone")}
-              error={errors.phone}
-            />
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormSelect
-                label="Vehicle Type"
-                options={vehicleOptions}
-                registration={register("vehicleType")}
-                error={errors.vehicleType}
+          {!isEditing ? (
+            <div className="space-y-5">
+              <ProfileField label="Full Name" value={user.fullName} />
+              <ProfileField label="Email" value={user.email} readOnlyNote="Cannot be changed" />
+              <ProfileField label="Phone Number" value={user.phone} />
+              <ProfileField label="CNIC Number" value={user.cnicNumber} readOnlyNote="Cannot be changed" />
+              <div className="grid grid-cols-2 gap-4">
+                <ProfileField
+                  label="Vehicle Type"
+                  value={
+                    vehicleOptions.find((opt) => opt.value === user.vehicleType)?.label ||
+                    user.vehicleType
+                  }
+                />
+                <ProfileField label="Vehicle Number" value={user.vehicleNumber} />
+              </div>
+              <div className="pt-2">
+                <span
+                  className={`inline-block text-xs font-medium px-3 py-1 rounded-full
+                    ${user.isApproved ? "bg-green-50 text-green-600" : "bg-primary-light text-primary-dark"}`}
+                >
+                  {user.isApproved ? "Approved Rider" : "Pending Approval"}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit(onSubmit)} noValidate>
+              <FormInput
+                label="Full Name"
+                placeholder="John Doe"
+                registration={register("fullName")}
+                error={errors.fullName}
               />
               <FormInput
-                label="Vehicle Number"
-                placeholder="ABC-123"
-                registration={register("vehicleNumber")}
-                error={errors.vehicleNumber}
+                label="Phone Number"
+                placeholder="03001234567"
+                registration={register("phone")}
+                error={errors.phone}
               />
-            </div>
 
-            <div className="flex gap-3 mt-2">
-              <button
-                type="button"
-                onClick={handleCancel}
-                disabled={isSubmitting}
-                className="flex-1 py-2.5 border border-gray-300 text-gray-600 font-semibold rounded-full
-                  hover:bg-gray-50 transition-colors duration-200 disabled:opacity-60"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="flex-1 py-2.5 bg-primary text-white font-semibold rounded-full
-                  hover:bg-primary-dark transition-colors duration-200
-                  disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? "Saving..." : "Save Changes"}
-              </button>
-            </div>
-          </form>
-        )}
+              <div className="grid grid-cols-2 gap-4">
+                <FormSelect
+                  label="Vehicle Type"
+                  options={vehicleOptions}
+                  registration={register("vehicleType")}
+                  error={errors.vehicleType}
+                />
+                <FormInput
+                  label="Vehicle Number"
+                  placeholder="ABC-123"
+                  registration={register("vehicleNumber")}
+                  error={errors.vehicleNumber}
+                />
+              </div>
+
+              <div className="flex gap-3 mt-2">
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  disabled={isSubmitting}
+                  className="flex-1 py-2.5 border border-gray-300 text-gray-600 font-semibold rounded-full
+                    hover:bg-gray-50 transition-colors duration-200 disabled:opacity-60"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-1 py-2.5 bg-primary text-white font-semibold rounded-full
+                    hover:bg-primary-dark transition-colors duration-200
+                    disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );
