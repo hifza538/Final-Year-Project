@@ -68,7 +68,7 @@ const Profile = () => {
     }
   };
 
-  if (!user) return null; // private route should handle redirecting to login if not authenticated
+  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-cream px-4 py-8">
