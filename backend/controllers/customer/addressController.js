@@ -1,5 +1,4 @@
 // backend/controllers/customer/addressController.js
-
 import asyncHandler from "express-async-handler";
 import User from "../../models/User.js";
 
@@ -15,7 +14,7 @@ export const getAddresses = asyncHandler(async (req, res) => {
 /*@desc   Add a new saved address
 @route  POST /api/customer/addresses*/
 export const addAddress = asyncHandler(async (req, res) => {
-  const { label, fullName, phone, address, city, notes, isDefault } = req.body;
+  const { label, fullName, phone, address, city, notes, isDefault, coordinates } = req.body;
 
   if (!fullName?.trim() || !phone?.trim() || !address?.trim() || !city?.trim()) {
     res.status(400);
@@ -50,6 +49,7 @@ export const addAddress = asyncHandler(async (req, res) => {
     city: city.trim(),
     notes: notes?.trim() || "",
     isDefault: shouldBeDefault,
+    coordinates: coordinates || { lat: null, lng: null },
   });
 
   await user.save();
@@ -71,7 +71,7 @@ export const updateAddress = asyncHandler(async (req, res) => {
     throw new Error("Address not found");
   }
 
-  const { label, fullName, phone, address, city, notes, isDefault } = req.body;
+  const { label, fullName, phone, address, city, notes, isDefault, coordinates } = req.body;
 
   if (fullName !== undefined) {
     if (!fullName.trim()) {
@@ -103,7 +103,8 @@ export const updateAddress = asyncHandler(async (req, res) => {
   }
   if (label !== undefined) addr.label = label.trim();
   if (notes !== undefined) addr.notes = notes.trim();
-
+  if (coordinates !== undefined) addr.coordinates = coordinates || { lat: null, lng: null };
+  
   if (isDefault === true) {
     user.addresses.forEach((a) => (a.isDefault = false));
     addr.isDefault = true;

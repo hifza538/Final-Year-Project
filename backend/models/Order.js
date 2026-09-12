@@ -59,6 +59,10 @@ const orderSchema = new mongoose.Schema(
       address:  { type: String, default: "" },
       city:     { type: String, default: "" },
       notes:    { type: String, default: "" },
+      coordinates: {
+        lat: { type: Number, default: null },
+        lng: { type: Number, default: null },
+      },
     },
 
     // Price breakdown
