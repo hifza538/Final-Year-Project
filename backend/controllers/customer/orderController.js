@@ -86,6 +86,7 @@ export const placeOrder = asyncHandler(async (req, res) => {
       address: deliveryAddress.address.trim(),
       notes: deliveryAddress.notes?.trim() || "",
       city: deliveryAddress.city.trim(),
+      coordinates: deliveryAddress.coordinates || { lat: null, lng: null },
     },
     itemsPrice,
     deliveryFee,

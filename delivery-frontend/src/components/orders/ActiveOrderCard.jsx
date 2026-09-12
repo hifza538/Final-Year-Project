@@ -3,8 +3,7 @@ import { MapPin, Store, Phone, Package, Banknote } from "lucide-react";
 import StageProgress from "./StageProgress";
 import { NEXT_ACTION_LABEL } from "../../utils/deliveryStages";
 
-// ActiveOrderCard component displays detailed information about an active order
-const ActiveOrderCard = ({ order, onAdvance, actionLoading }) => {
+const ActiveOrderCard = ({ order, onAdvance, actionLoading, onViewMap }) => {
   return (
     <div className="bg-cream-panel rounded-xl border border-primary/10 p-5 mb-4">
       <div className="mb-1">
@@ -23,12 +22,18 @@ const ActiveOrderCard = ({ order, onAdvance, actionLoading }) => {
             <span>Pickup: {order.vendor.shopAddress}</span>
           </div>
         )}
+
         <div className="flex items-start gap-2 text-sm text-gray-700">
           <MapPin size={16} className="mt-0.5 flex-shrink-0 text-gray-500" />
-          <span>
+          <button
+            onClick={() => onViewMap(order)}
+            className="text-left underline decoration-dotted decoration-gray-400
+                       hover:text-primary hover:decoration-primary transition-colors"
+          >
             Deliver to: {order.deliveryAddress?.address}, {order.deliveryAddress?.city}
-          </span>
+          </button>
         </div>
+
         {order.deliveryAddress?.phone && (
           <div className="flex items-center gap-2 text-sm text-gray-700">
             <Phone size={16} className="flex-shrink-0 text-gray-500" />

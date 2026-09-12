@@ -16,6 +16,7 @@ import ActiveOrderCard from "../components/orders/ActiveOrderCard";
 import OrderCardSkeleton from "../components/orders/OrderCardSkeleton";
 import EmptyState from "../components/common/EmptyState";
 import OnlineToggle from "../components/common/OnlineToggle";
+import DeliveryMapModal from "../components/orders/DeliveryMapModal";
 
 const TABS = [
   { key: "available", label: "Available", icon: Package },
@@ -31,6 +32,7 @@ const Home = () => {
   const [error, setError] = useState("");
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [isOffline, setIsOffline] = useState(false);
+  const [mapOrder, setMapOrder] = useState(null);
 
   const fetchOrders = useCallback(async () => {
     setIsLoading(true);
@@ -56,9 +58,7 @@ const Home = () => {
 
   useEffect(() => {
     if (user?.isApproved) {
-      queueMicrotask(() => {
-        fetchOrders();
-      });
+      fetchOrders();
     }
   }, [fetchOrders, user?.isApproved]);
 
@@ -91,7 +91,6 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-cream">
-      
       <div className="bg-primary px-4 sm:px-8 py-4 shadow-sm">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -131,7 +130,6 @@ const Home = () => {
           <>
             <OnlineToggle />
 
-           
             <div className="flex gap-1 mb-6 bg-white rounded-xl border border-gray-100 shadow-sm p-1">
               {TABS.map((tab) => {
                 const Icon = tab.icon;
@@ -178,6 +176,7 @@ const Home = () => {
                   order={order}
                   onAdvance={handleAdvance}
                   actionLoading={actionLoadingId === order._id}
+                  onViewMap={setMapOrder}
                 />
               ))
             ) : (
@@ -194,8 +193,13 @@ const Home = () => {
           </>
         )}
       </div>
+
+      {mapOrder && (
+        <DeliveryMapModal order={mapOrder} onClose={() => setMapOrder(null)} />
+      )}
     </div>
   );
 };
 
 export default Home;
+
