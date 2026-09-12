@@ -1,5 +1,4 @@
 // customer-frontend/src/pages/Checkout.jsx
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -12,6 +11,7 @@ import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { getRestaurantById } from "../services/restaurantService";
 import FormInput from "../components/common/FormInput";
+import MapPicker from "../components/common/MapPicker";
 import { showSuccessToast, showErrorToast } from "../utils/toast";
 
 const Checkout = () => {
@@ -25,6 +25,11 @@ const Checkout = () => {
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [useNewAddress, setUseNewAddress] = useState(false);
 
+  const [newAddressCoordinates, setNewAddressCoordinates] = useState({ lat: null, lng: null });
+
+
+  const [locationError, setLocationError] = useState("");
+
   useEffect(() => {
     if (!isAuthenticated) {
       showErrorToast("Please log in to place an order");
@@ -32,7 +37,6 @@ const Checkout = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  // Fetch the actual delivery fee for this cart's restaurant
   useEffect(() => {
     if (!restaurantId) return;
     const fetchFee = async () => {
@@ -47,7 +51,6 @@ const Checkout = () => {
     fetchFee();
   }, [restaurantId]);
 
-  // Load saved addresses — pre-select the default one, or fall back to manual entry
   useEffect(() => {
     if (!isAuthenticated) return;
     const fetchAddresses = async () => {
@@ -105,6 +108,15 @@ const Checkout = () => {
   }
 
   const onSubmit = async (formData) => {
+  
+    if (useNewAddress || savedAddresses.length === 0) {
+      if (!newAddressCoordinates.lat || !newAddressCoordinates.lng) {
+        setLocationError("Please pin your delivery location on the map.");
+        return;
+      }
+    }
+    setLocationError("");
+
     setIsSubmitting(true);
     try {
       // Use the selected saved address if one is picked, otherwise use the manually typed form
@@ -116,8 +128,9 @@ const Checkout = () => {
             address: selectedSaved.address,
             city: selectedSaved.city,
             notes: selectedSaved.notes,
+            coordinates: selectedSaved.coordinates || { lat: null, lng: null },
           }
-        : formData;
+        : { ...formData, coordinates: newAddressCoordinates };
 
       const orderData = {
         vendorId: restaurantId,
@@ -203,7 +216,7 @@ const Checkout = () => {
             </div>
           )}
 
-          {/* Manual entry form — shown when no saved addresses exist, or user chose "New address" */}
+          {/* New address form */}
           {(useNewAddress || savedAddresses.length === 0) && (
             <div className={savedAddresses.length > 0 ? "mt-4 pt-4 border-t border-gray-100" : ""}>
               <FormInput
@@ -237,6 +250,23 @@ const Checkout = () => {
                 error={errors.notes}
                 required={false}
               />
+
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Pin Location <span className="text-red-500">*</span>
+                </label>
+                <MapPicker
+                  initialLat={newAddressCoordinates.lat}
+                  initialLng={newAddressCoordinates.lng}
+                  onLocationSelect={(lat, lng) => {
+                    setNewAddressCoordinates({ lat, lng });
+                    setLocationError("");
+                  }}
+                />
+              
+                {locationError && <p className="text-red-500 text-xs mt-1">{locationError}</p>}
+              </div>
             </div>
           )}
         </div>
@@ -273,7 +303,7 @@ const Checkout = () => {
           </div>
         </div>
 
-        {/* Payment method - Cash on Delivery */}
+        {/* Payment method section */}
         <div className="bg-white rounded-xl border border-gray-100 p-5 mb-6">
           <h2 className="font-semibold text-gray-900 mb-2">Payment Method</h2>
           <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 rounded-lg px-3 py-2.5">
