@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
+import { LocationProvider } from "./context/LocationContext";
 import AppRoutes from "./routes/AppRoutes";
 
 function App() {
@@ -12,7 +13,9 @@ function App() {
       {/* authprovider and cartprovider are used to provide global state to all components */}
       <AuthProvider>
         <CartProvider>
-          <AppRoutes />
+          <LocationProvider>
+            <AppRoutes />
+          </LocationProvider>
           {/* Global toast notifications for success and error messages */}
           <Toaster position="top-center" />
         </CartProvider>
