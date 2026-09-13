@@ -13,7 +13,7 @@ const actions = [
 const QuickActions = () => (
   <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
     <h3 className="text-sm font-semibold text-secondary mb-4">Quick Actions</h3>
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 gap-3">
       {actions.map(({ label, icon: Icon, to }) => (
         <Link
           key={label}
@@ -28,5 +28,5 @@ const QuickActions = () => (
     </div>
   </div>
 );
-
+ 
 export default QuickActions;
