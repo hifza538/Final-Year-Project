@@ -1,20 +1,24 @@
 // delivery-frontend/src/components/orders/OrderCard.jsx
 import { MapPin, Store, Phone, Package, Banknote } from "lucide-react";
+import RestaurantAvatar from "./RestaurantAvatar";
 
 const OrderCard = ({ order, actionLabel, onAction, actionLoading }) => {
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 mb-4 hover:shadow-md transition-shadow duration-200">
+    <div className="bg-white rounded-xl border-2 border-primary/90 shadow-sm p-5 mb-4 hover:shadow-md transition-shadow duration-200">
       <div className="flex items-start justify-between mb-3">
-        <div>
-          <p className="text-xs text-gray-400 mb-0.5 font-mono">
-            #{order._id.slice(-6).toUpperCase()}
-          </p>
-          <p className="font-semibold text-gray-800">
-            {order.vendor?.shopName || "Restaurant"}
-          </p>
+        <div className="flex items-center gap-3">
+          <RestaurantAvatar name={order.vendor?.shopName} />
+          <div>
+            <p className="font-semibold text-gray-800 leading-tight">
+              {order.vendor?.shopName || "Restaurant"}
+            </p>
+            <p className="text-xs text-gray-400 font-mono">
+              #{order._id.slice(-6).toUpperCase()}
+            </p>
+          </div>
         </div>
         <span
-          className={`text-xs font-medium px-2.5 py-1 rounded-full
+          className={`text-xs font-medium px-2.5 py-1 rounded-full flex-shrink-0
             ${order.orderStatus === "Ready" ? "bg-blue-50 text-blue-600" : ""}
             ${order.orderStatus === "OutForDelivery" ? "bg-primary-light text-primary-dark" : ""}
             ${order.orderStatus === "Completed" ? "bg-green-50 text-green-700" : ""}
@@ -28,12 +32,12 @@ const OrderCard = ({ order, actionLabel, onAction, actionLoading }) => {
         {order.vendor?.shopAddress && (
           <div className="flex items-start gap-2 text-sm text-gray-600">
             <Store size={16} className="mt-0.5 flex-shrink-0 text-primary" />
-            <span>{order.vendor.shopAddress}</span>
+            <span className="line-clamp-2">{order.vendor.shopAddress}</span>
           </div>
         )}
         <div className="flex items-start gap-2 text-sm text-gray-600">
           <MapPin size={16} className="mt-0.5 flex-shrink-0 text-gray-400" />
-          <span>
+          <span className="line-clamp-2">
             {order.deliveryAddress?.address}, {order.deliveryAddress?.city}
           </span>
         </div>
