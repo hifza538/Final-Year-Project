@@ -4,24 +4,27 @@ import toast from "react-hot-toast";
 import { ArrowLeft, Ban } from "lucide-react";
 import { getOrderById, cancelOrder } from "../services/orderService";
 import ConfirmModal from "../components/common/ConfirmModal";
-
+ 
 const statusStyles = {
   Pending: "bg-yellow-50 text-yellow-700",
   Accepted: "bg-blue-50 text-blue-700",
-  Preparing: "bg-blue-50 text-blue-700",
-  Ready: "bg-blue-50 text-blue-700",
-  OutForDelivery: "bg-purple-50 text-purple-700",
+  Preparing: "bg-purple-50 text-purple-700",
+  Ready: "bg-indigo-50 text-indigo-700",
+  OutForDelivery: "bg-orange-50 text-orange-700",
   Completed: "bg-green-50 text-green-700",
   Rejected: "bg-red-50 text-red-600",
 };
-
+ 
+// Turns "OutForDelivery" into "Out For Delivery" for display
+const formatStatus = (status) => status?.replace(/([a-z])([A-Z])/g, "$1 $2");
+ 
 const DetailRow = ({ label, value }) => (
   <div className="flex justify-between py-2.5 border-b border-gray-100 last:border-0">
     <span className="text-sm text-gray-500">{label}</span>
     <span className="text-sm font-medium text-secondary">{value || "—"}</span>
   </div>
 );
-
+ 
 const OrderDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -29,7 +32,7 @@ const OrderDetails = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
-
+ 
   const fetchOrder = async () => {
     setIsLoading(true);
     try {
@@ -42,12 +45,12 @@ const OrderDetails = () => {
       setIsLoading(false);
     }
   };
-
+ 
   useEffect(() => {
     fetchOrder();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
-
+ 
   const handleCancel = async () => {
     setActionLoading(true);
     try {
@@ -61,7 +64,7 @@ const OrderDetails = () => {
       setActionLoading(false);
     }
   };
-
+ 
   if (isLoading) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-8">
@@ -72,11 +75,11 @@ const OrderDetails = () => {
       </div>
     );
   }
-
+ 
   if (!order) return null;
-
+ 
   const canCancel = !["Completed", "Rejected"].includes(order.orderStatus);
-
+ 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
       <Link
@@ -86,7 +89,7 @@ const OrderDetails = () => {
         <ArrowLeft size={16} />
         Back to Orders
       </Link>
-
+ 
       {/* Order summary */}
       <div className="bg-white rounded-xl border border-gray-100 p-6 mb-4">
         <div className="flex items-center justify-between mb-5">
@@ -98,14 +101,14 @@ const OrderDetails = () => {
               statusStyles[order.orderStatus] || "bg-gray-100 text-gray-600"
             }`}
           >
-            {order.orderStatus}
+            {formatStatus(order.orderStatus)}
           </span>
         </div>
-
+ 
         <DetailRow label="Placed On" value={new Date(order.createdAt).toLocaleString()} />
         <DetailRow label="Payment" value={order.isPaid ? "Paid" : "Not Paid"} />
         <DetailRow label="Delivered" value={order.isDelivered ? "Yes" : "Not yet"} />
-
+ 
         {canCancel && (
           <div className="mt-5 pt-5 border-t border-gray-100">
             <button
@@ -119,7 +122,7 @@ const OrderDetails = () => {
           </div>
         )}
       </div>
-
+ 
       {/* Customer & Vendor */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div className="bg-white rounded-xl border border-gray-100 p-5">
@@ -128,7 +131,7 @@ const OrderDetails = () => {
           <DetailRow label="Email" value={order.customer?.email} />
           <DetailRow label="Phone" value={order.customer?.phone} />
         </div>
-
+ 
         <div className="bg-white rounded-xl border border-gray-100 p-5">
           <h2 className="text-sm font-semibold text-secondary mb-3">Vendor</h2>
           <DetailRow label="Shop" value={order.vendor?.shopName} />
@@ -136,7 +139,7 @@ const OrderDetails = () => {
           <DetailRow label="City" value={order.vendor?.city} />
         </div>
       </div>
-
+ 
       {/* Delivery rider (if assigned) */}
       {order.deliveryRider && (
         <div className="bg-white rounded-xl border border-gray-100 p-5 mb-4">
@@ -152,7 +155,7 @@ const OrderDetails = () => {
           />
         </div>
       )}
-
+ 
       {/* Delivery address */}
       <div className="bg-white rounded-xl border border-gray-100 p-5 mb-4">
         <h2 className="text-sm font-semibold text-secondary mb-3">Delivery Address</h2>
@@ -164,7 +167,7 @@ const OrderDetails = () => {
           <DetailRow label="Notes" value={order.deliveryAddress.notes} />
         )}
       </div>
-
+ 
       {/* Order items */}
       <div className="bg-white rounded-xl border border-gray-100 overflow-hidden mb-4">
         <h2 className="text-sm font-semibold text-secondary px-5 py-4 border-b border-gray-100">
@@ -189,7 +192,7 @@ const OrderDetails = () => {
           </tbody>
         </table>
       </div>
-
+ 
       {/* Price breakdown */}
       <div className="bg-white rounded-xl border border-gray-100 p-5">
         <h2 className="text-sm font-semibold text-secondary mb-3">Price Breakdown</h2>
@@ -201,7 +204,7 @@ const OrderDetails = () => {
           <span className="text-sm font-bold text-primary">Rs {order.totalPrice}</span>
         </div>
       </div>
-
+ 
       <ConfirmModal
         isOpen={showCancelModal}
         title="Cancel this order?"
@@ -215,5 +218,5 @@ const OrderDetails = () => {
     </div>
   );
 };
-
+ 
 export default OrderDetails;
