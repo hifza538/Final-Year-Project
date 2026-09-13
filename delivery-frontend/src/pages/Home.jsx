@@ -13,9 +13,11 @@ import {
 } from "../services/orderService";
 import OrderCard from "../components/orders/OrderCard";
 import ActiveOrderCard from "../components/orders/ActiveOrderCard";
+import HistoryCard from "../components/orders/HistoryCard";
 import OrderCardSkeleton from "../components/orders/OrderCardSkeleton";
 import EmptyState from "../components/common/EmptyState";
 import OnlineToggle from "../components/common/OnlineToggle";
+import PageBackground from "../components/common/PageBackground";
 import DeliveryMapModal from "../components/orders/DeliveryMapModal";
 
 const TABS = [
@@ -32,6 +34,7 @@ const Home = () => {
   const [error, setError] = useState("");
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [isOffline, setIsOffline] = useState(false);
+
   const [mapOrder, setMapOrder] = useState(null);
 
   const fetchOrders = useCallback(async () => {
@@ -58,7 +61,9 @@ const Home = () => {
 
   useEffect(() => {
     if (user?.isApproved) {
-      fetchOrders();
+      queueMicrotask(() => {
+        fetchOrders();
+      });
     }
   }, [fetchOrders, user?.isApproved]);
 
@@ -90,116 +95,121 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cream">
-      <div className="bg-primary px-4 sm:px-8 py-4 shadow-sm">
-        <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
-              <Bike size={18} className="text-white" />
-            </div>
-            <div>
-              <p className="text-white font-bold leading-tight">LocalBites</p>
-              <p className="text-primary-light/80 text-[11px] -mt-0.5">rider</p>
-            </div>
-          </div>
+    <>
+      <PageBackground />
+      <div className="min-h-screen">
 
-          <div className="flex items-center gap-4">
-            <Link
-              to="/profile"
-              className="flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-white transition-colors"
-            >
-              <UserCircle size={18} />
-              <span className="hidden sm:inline">{user?.fullName?.split(" ")[0]}</span>
-            </Link>
-            <button
-              onClick={logout}
-              className="text-sm font-medium text-white/90 hover:text-white transition-colors"
-            >
-              Logout
-            </button>
+        <div className="bg-primary px-4 sm:px-8 py-4 shadow-sm">
+          <div className="max-w-3xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
+                <Bike size={18} className="text-white" />
+              </div>
+              <div>
+                <p className="text-white font-bold leading-tight">LocalBites</p>
+                <p className="text-primary-light/80 text-[11px] -mt-0.5">rider</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <Link
+                to="/profile"
+                className="flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-white transition-colors"
+              >
+                <UserCircle size={18} />
+                <span className="hidden sm:inline">{user?.fullName?.split(" ")[0]}</span>
+              </Link>
+              <button
+                onClick={logout}
+                className="text-sm font-medium text-white/90 hover:text-white transition-colors"
+              >
+                Logout
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-8 py-6">
-        {!user?.isApproved ? (
-          <div className="bg-primary-light border border-primary/20 text-primary-dark rounded-xl p-4 text-sm">
-            Your account is pending admin approval. You'll be notified once approved.
-          </div>
-        ) : (
-          <>
-            <OnlineToggle />
-
-            <div className="flex gap-1 mb-6 bg-white rounded-xl border border-gray-100 shadow-sm p-1">
-              {TABS.map((tab) => {
-                const Icon = tab.icon;
-                const isActive = activeTab === tab.key;
-                return (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key)}
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
-                      ${isActive ? "bg-primary text-white shadow-sm" : "text-gray-500 hover:bg-cream"}`}
-                  >
-                    <Icon size={15} />
-                    <span className="hidden sm:inline">{tab.label}</span>
-                  </button>
-                );
-              })}
+        <div className="max-w-3xl mx-auto px-4 sm:px-8 py-6">
+          {!user?.isApproved ? (
+            <div className="bg-primary-light border border-primary/20 text-primary-dark rounded-xl p-4 text-sm">
+              Your account is pending admin approval. You'll be notified once approved.
             </div>
+          ) : (
+            <>
+              <OnlineToggle />
 
-            {isLoading ? (
-              <>
-                <OrderCardSkeleton />
-                <OrderCardSkeleton />
-              </>
-            ) : error ? (
-              <div className="bg-red-50 border border-red-100 text-red-600 rounded-xl p-4 text-sm">
-                {error}
+              <div className="flex gap-1 mb-6 bg-white rounded-xl border border-gray-100 shadow-sm p-1">
+                {TABS.map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.key;
+                  return (
+                    <button
+                      key={tab.key}
+                      onClick={() => setActiveTab(tab.key)}
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
+                        ${isActive ? "bg-primary text-white shadow-sm" : "text-gray-500 hover:bg-gray-50"}`}
+                    >
+                      <Icon size={15} />
+                      <span className="hidden sm:inline">{tab.label}</span>
+                    </button>
+                  );
+                })}
               </div>
-            ) : isOffline ? (
-              <EmptyState message="You're offline. Go online to see available orders." />
-            ) : orders.length === 0 ? (
-              <EmptyState
-                message={
-                  activeTab === "available"
-                    ? "No orders available for pickup right now."
-                    : activeTab === "myOrders"
-                    ? "You have no active deliveries."
-                    : "You have not completed any deliveries yet."
-                }
-              />
-            ) : activeTab === "myOrders" ? (
-              orders.map((order) => (
-                <ActiveOrderCard
-                  key={order._id}
-                  order={order}
-                  onAdvance={handleAdvance}
-                  actionLoading={actionLoadingId === order._id}
-                  onViewMap={setMapOrder}
+
+              {isLoading ? (
+                <>
+                  <OrderCardSkeleton />
+                  <OrderCardSkeleton />
+                </>
+              ) : error ? (
+                <div className="bg-red-50 border border-red-100 text-red-600 rounded-xl p-4 text-sm">
+                  {error}
+                </div>
+              ) : isOffline ? (
+                <EmptyState message="You're offline. Go online to see available orders." />
+              ) : orders.length === 0 ? (
+                <EmptyState
+                  message={
+                    activeTab === "available"
+                      ? "No orders available for pickup right now."
+                      : activeTab === "myOrders"
+                      ? "You have no active deliveries."
+                      : "You have not completed any deliveries yet."
+                  }
                 />
-              ))
-            ) : (
-              orders.map((order) => (
-                <OrderCard
-                  key={order._id}
-                  order={order}
-                  actionLabel={activeTab === "available" ? "Accept" : null}
-                  onAction={activeTab === "available" ? handleAccept : undefined}
-                  actionLoading={actionLoadingId === order._id}
-                />
-              ))
-            )}
-          </>
-        )}
+              ) : activeTab === "myOrders" ? (
+                orders.map((order) => (
+                  <ActiveOrderCard
+                    key={order._id}
+                    order={order}
+                    onAdvance={handleAdvance}
+                    actionLoading={actionLoadingId === order._id}
+                    onViewMap={setMapOrder}
+                  />
+                ))
+              ) : activeTab === "history" ? (
+                orders.map((order) => <HistoryCard key={order._id} order={order} />)
+              ) : (
+                orders.map((order) => (
+                  <OrderCard
+                    key={order._id}
+                    order={order}
+                    actionLabel={activeTab === "available" ? "Accept" : null}
+                    onAction={activeTab === "available" ? handleAccept : undefined}
+                    actionLoading={actionLoadingId === order._id}
+                  />
+                ))
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {mapOrder && (
         <DeliveryMapModal order={mapOrder} onClose={() => setMapOrder(null)} />
       )}
-    </div>
+    </>
   );
 };
 
 export default Home;
-

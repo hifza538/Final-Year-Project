@@ -1,4 +1,6 @@
-import { MapContainer, TileLayer, Marker } from "react-leaflet";
+// delivery-frontend/src/components/orders/DeliveryMapModal.jsx
+import { useEffect } from "react";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import { X, MapPin } from "lucide-react";
 
@@ -8,6 +10,17 @@ L.Icon.Default.mergeOptions({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
+
+
+const MapResizeFix = () => {
+  const map = useMap();
+  useEffect(() => {
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
+  }, [map]);
+  return null;
+};
 
 const DeliveryMapModal = ({ order, onClose }) => {
   const { coordinates, address, city, fullName, phone } = order.deliveryAddress || {};
@@ -30,6 +43,7 @@ const DeliveryMapModal = ({ order, onClose }) => {
               zoom={15}
               style={{ height: "100%", width: "100%" }}
             >
+              <MapResizeFix />
               <TileLayer
                 attribution='&copy; OpenStreetMap contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
