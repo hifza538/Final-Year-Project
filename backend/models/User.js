@@ -74,6 +74,12 @@ const userSchema = new mongoose.Schema(
     zone: { type: String, trim: true, default: "" },
     cuisine: { type: String, trim: true, default: "" },
     
+    deliveryRadius: {
+      type: Number,
+      enum: [2, 3, 5],
+      default: 3,
+    },
+    
     // Delivery Specific Fields
 
     vehicleType: {

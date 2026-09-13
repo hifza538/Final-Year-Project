@@ -12,16 +12,21 @@ import {
   ChevronDown,
   LogOut,
   Package,
+  MapPin,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
+import { useLocation } from "../../context/LocationContext";
+import LocationPickerModal from "../common/LocationPickerModal";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
   const dropdownRef = useRef(null);
   const { user, isAuthenticated, logout } = useAuth();
   const { cartCount } = useCart();
+  const { coordinates, locationLabel, setLocation } = useLocation();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -41,6 +46,8 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const locationText = coordinates ? (locationLabel || "Location set") : "Set delivery location";
+
   return (
     <nav className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -49,24 +56,18 @@ const Navbar = () => {
           <Link to="/" className="shrink-0">
             <Logo size="md" variant="dark" />
           </Link>
-
-          {/* Search bar — desktop only */}
-          <div className="hidden md:flex flex-1 max-w-xl mx-8">
-            <div className="relative w-full">
-              <Search
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              />
-              <input
-                type="text"
-                placeholder=" search for restaurants or dishes..."
-                className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 
-                           focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary
-                           transition-all duration-200"
-              />
-            </div>
-          </div>
-
+ 
+          {/* Location button — desktop only */}
+          <button
+            onClick={() => setShowLocationModal(true)}
+            className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium
+                       text-gray-700 hover:bg-primary-light hover:text-primary transition-colors duration-200
+                       shrink-0 max-w-[220px]"
+          >
+            <MapPin size={16} className={coordinates ? "text-primary shrink-0" : "shrink-0"} />
+            <span className="truncate">{locationText}</span>
+          </button>
+ 
           {/* Right side icons — desktop */}
           <div className="hidden md:flex items-center gap-4">
             <Link
@@ -104,7 +105,7 @@ const Navbar = () => {
                     className={`transition-transform duration-200 ${profileDropdownOpen ? "rotate-180" : ""}`}
                   />
                 </button>
-
+ 
                 {profileDropdownOpen && (
                   <div
                     className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg
@@ -150,7 +151,7 @@ const Navbar = () => {
               </Link>
             )}
           </div>
-
+ 
           {/* Mobile menu button */}
           <button
             className="md:hidden p-2 text-gray-700"
@@ -161,10 +162,18 @@ const Navbar = () => {
           </button>
         </div>
       </div>
-
+ 
       {/* Mobile menu */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-3">
+          <button
+            onClick={() => setShowLocationModal(true)}
+            className="w-full flex items-center gap-2 px-2 py-2 text-gray-700"
+          >
+            <MapPin size={18} className={coordinates ? "text-primary" : ""} />
+            {coordinates ? "Location set" : "Set delivery location"}
+          </button>
+ 
           <div className="relative">
             <Search
               size={18}
@@ -176,7 +185,7 @@ const Navbar = () => {
               className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
-
+ 
           <Link
             to="/cart"
             onClick={() => setMobileMenuOpen(false)}
@@ -185,7 +194,7 @@ const Navbar = () => {
             <ShoppingCart size={20} />
             Cart {cartCount > 0 && `(${cartCount})`}
           </Link>
-
+ 
           {isAuthenticated ? (
             <>
               <Link
@@ -214,8 +223,15 @@ const Navbar = () => {
           )}
         </div>
       )}
+ 
+      {showLocationModal && (
+        <LocationPickerModal
+          onClose={() => setShowLocationModal(false)}
+          onConfirm={setLocation}
+        />
+      )}
     </nav>
   );
 };
-
+ 
 export default Navbar;
