@@ -1,36 +1,50 @@
 // vendor-frontend/src/components/profile/EditProfileModal.jsx
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Store, Loader2, X } from "lucide-react";
 import { updateProfile } from "../../services/profileService";
+import { getActiveCategories } from "../../services/categoryService";
 import Toggle from "./Toggle";
 
 const EditProfileModal = ({ vendor, onClose, onSaved }) => {
   const [form, setForm] = useState({
-    shopName:     vendor?.shopName     || "",
-    shopAddress:  vendor?.shopAddress  || "",
-    city:         vendor?.city         || "",
-    zone:         vendor?.zone         || "",
-    cuisine:      vendor?.cuisine      || "",
-    openingTime:  vendor?.openingTime  || "09:00",
-    closingTime:  vendor?.closingTime  || "22:00",
-    minPrepTime:  vendor?.minPrepTime  || 15,
-    maxPrepTime:  vendor?.maxPrepTime  || 45,
-    deliveryFee:  vendor?.deliveryFee  ?? 50,
+    shopName: vendor?.shopName || "",
+    shopAddress: vendor?.shopAddress || "",
+    city: vendor?.city || "",
+    zone: vendor?.zone || "",
+    cuisine: vendor?.cuisine || "",
+    openingTime: vendor?.openingTime || "09:00",
+    closingTime: vendor?.closingTime || "22:00",
+    minPrepTime: vendor?.minPrepTime || 15,
+    maxPrepTime: vendor?.maxPrepTime || 45,
+    deliveryFee: vendor?.deliveryFee ?? 50,
     serviceTypes: {
       delivery: vendor?.serviceTypes?.delivery ?? true,
-      pickup:   vendor?.serviceTypes?.pickup   ?? true,
+      pickup: vendor?.serviceTypes?.pickup ?? true,
     },
   });
 
   const [coverPreview, setCoverPreview] = useState(vendor?.coverPhoto?.url || "");
   const [logoPreview, setLogoPreview] = useState(vendor?.logo?.url || "");
   const [coverFile, setCoverFile] = useState(null);
-  const [logoFile, setLogoFile]   = useState(null);
+  const [logoFile, setLogoFile] = useState(null);
 
-  const [loading, setLoading]         = useState(false);
-  const [error, setError]             = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
+  const [cuisinesOptions, setCuisinesOptions] = useState([]);
+
+  useEffect(() => {
+    const fetchCuisines = async () => {
+      try {
+        const data = await getActiveCategories();
+        setCuisinesOptions(data.categories.map((cat) => cat.name));
+      } catch (err) {
+        console.error("Failed to load cuisine options:", err);
+      }
+    };
+    fetchCuisines();
+  }, []);
 
   const handleImageChange = (e, type) => {
     const file = e.target.files[0];
@@ -286,18 +300,10 @@ const EditProfileModal = ({ vendor, onClose, onSaved }) => {
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1.5">
-              Cuisine Type
-            </label>
-            <input
-              name="cuisine"
-              value={form.cuisine}
-              onChange={handleChange}
-              placeholder="e.g. Pakistani, Chinese"
-              className="w-full px-3 py-2.5 text-sm rounded-lg border border-gray-200 
-                focus:outline-none focus:ring-2 focus:ring-primary transition"
-            />
+          <div> <label className="block text-xs font-medium text-gray-700 mb-1.5"> Cuisine Type </label>
+            <select name="cuisine" value={form.cuisine} onChange={handleChange} className="w-full px-3 py-2.5 text-sm rounded-lg border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary transition" >
+              <option value="">Select Cuisine</option> {cuisinesOptions.map((c) => (<option key={c} value={c}> {c} </option>))}
+            </select>
           </div>
 
           <div className="grid grid-cols-2 gap-3">

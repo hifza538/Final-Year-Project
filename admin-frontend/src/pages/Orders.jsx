@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import { Search, Eye } from "lucide-react";
+import { Search, Eye, Calendar } from "lucide-react";
 import { getAllOrders } from "../services/orderService";
 
 const statusFilters = [
@@ -18,18 +18,22 @@ const statusFilters = [
 const statusStyles = {
   Pending: "bg-yellow-50 text-yellow-700",
   Accepted: "bg-blue-50 text-blue-700",
-  Preparing: "bg-blue-50 text-blue-700",
+  Preparing: "bg-purple-50 text-purple-700",
   Ready: "bg-blue-50 text-blue-700",
-  OutForDelivery: "bg-purple-50 text-purple-700",
+  OutForDelivery: "bg-orange-50 text-orange-700",
   Completed: "bg-green-50 text-green-700",
   Rejected: "bg-red-50 text-red-600",
 };
+
+const formatStatus = (status) => status?.replace(/([a-z])([A-Z])/g, "$1 $2");
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const fetchOrders = useCallback(async () => {
     setIsLoading(true);
@@ -37,7 +41,8 @@ const Orders = () => {
       const params = {};
       if (status !== "all") params.status = status;
       if (search.trim()) params.search = search.trim();
-
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
       const data = await getAllOrders(params);
       setOrders(data.orders);
     } catch (error) {
@@ -45,7 +50,7 @@ const Orders = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [status, search]);
+  }, [status, search, startDate, endDate]);
 
   useEffect(() => {
     const timer = setTimeout(fetchOrders, 400);
@@ -69,21 +74,49 @@ const Orders = () => {
           />
         </div>
 
-        <div className="flex gap-2 overflow-x-auto">
+                <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          className="px-3 py-2.5 rounded-lg border border-gray-200 text-sm bg-white
+            outline-none focus:border-primary transition-colors sm:w-44"
+        >
           {statusFilters.map((f) => (
-            <button
-              key={f.value}
-              onClick={() => setStatus(f.value)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors
-                ${
-                  status === f.value
-                    ? "bg-primary text-white"
-                    : "bg-white border border-gray-200 text-gray-600 hover:border-primary/40"
-                }`}
-            >
-              {f.label}
-            </button>
+            <option key={f.value} value={f.value}>
+              {f.value === "all" ? "Status: All" : f.label}
+            </option>
           ))}
+        </select>
+
+       {/* Date range filter */}
+        <div className="flex items-center gap-1.5 border border-gray-200 rounded-lg px-3 py-2 sm:w-auto">
+          <Calendar size={15} className="text-gray-400 shrink-0" />
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            max={endDate || undefined}
+            className="text-sm outline-none w-[120px] text-gray-600"
+          />
+          <span className="text-gray-300">–</span>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            min={startDate || undefined}
+            className="text-sm outline-none w-[120px] text-gray-600"
+          />
+          {(startDate || endDate) && (
+            <button
+              onClick={() => {
+                setStartDate("");
+                setEndDate("");
+              }}
+              className="text-xs text-gray-400 hover:text-red-500 ml-1"
+              aria-label="Clear date filter"
+            >
+              ✕
+            </button>
+          )}
         </div>
       </div>
 
@@ -122,7 +155,7 @@ const Orders = () => {
                         statusStyles[order.orderStatus] || "bg-gray-100 text-gray-600"
                       }`}
                     >
-                      {order.orderStatus}
+                      {formatStatus(order.orderStatus)}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-gray-500">

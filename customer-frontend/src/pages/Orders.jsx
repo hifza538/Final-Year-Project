@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Package } from "lucide-react";
-import { getMyOrders } from "../services/orderService";
+import { getMyOrders, cancelMyOrder } from "../services/orderService";
 import { addReview } from "../services/reviewService";
 import OrderCard from "../components/orders/OrderCard";
 import OrderCardSkeleton from "../components/orders/OrderCardSkeleton";
@@ -50,6 +50,16 @@ const Orders = () => {
     }
   };
 
+  const handleCancelOrder = async (orderId) => {
+    try {
+      await cancelMyOrder(orderId);
+      showSuccessToast("Order cancelled");
+      fetchOrders();
+    } catch (err) {
+      showErrorToast(err.response?.data?.message || "Failed to cancel order");
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2 mb-6">
@@ -77,7 +87,7 @@ const Orders = () => {
       {!isLoading && !error && orders.length > 0 && (
         <div className="space-y-3">
           {orders.map((order) => (
-            <OrderCard key={order._id} order={order} onWriteReview={setReviewingOrder} />
+            <OrderCard key={order._id} order={order} onWriteReview={setReviewingOrder} onCancel={handleCancelOrder} />
           ))}
         </div>
       )}

@@ -19,3 +19,9 @@ export const getMyOrderById = async (id) => {
   const response = await api.get(`/customer/orders/${id}`);
   return response.data;
 };
+
+// Cancels a pending order for the logged-in customer
+export const cancelMyOrder = async (id) => {
+  const response = await api.patch(`/customer/orders/${id}/cancel`);
+  return response.data;
+};

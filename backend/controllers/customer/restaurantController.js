@@ -4,9 +4,10 @@ import asyncHandler from "express-async-handler";
 import User from "../../models/User.js";
 import MenuItem from "../../models/MenuItem.js";
 import Review from "../../models/Review.js";
+import { getDistanceKm } from "../../utils/distance.js";
 
 // Helper function to format restaurant response for the customer frontend
-const restaurantResponse = (vendor) => ({
+const restaurantResponse = (vendor, distanceKm = null) => ({
   _id: vendor._id,
   shopName: vendor.shopName,
   cuisine: vendor.cuisine,
@@ -21,12 +22,14 @@ const restaurantResponse = (vendor) => ({
   deliveryFee: vendor.deliveryFee,
   openingTime: vendor.openingTime,
   closingTime: vendor.closingTime,
+  deliveryRadius: vendor.deliveryRadius,
+  distanceKm: distanceKm !== null ? Number(distanceKm.toFixed(1)) : null,
 });
 
 /* @desc   Get all approved, active restaurants (public, no login required)
 @route  GET /api/customer/restaurants*/
 export const getAllRestaurants = asyncHandler(async (req, res) => {
-  const { search, cuisine } = req.query;
+  const { search, cuisine, lat, lng } = req.query;
 
   /* Base filter, only show vendors that are approved by admin and not deactivated.
    intentionally do NOT filter out isOpen:false 
@@ -61,17 +64,32 @@ export const getAllRestaurants = asyncHandler(async (req, res) => {
     ratingMap[r._id.toString()] = { avgRating: r.avgRating.toFixed(1), count: r.count };
   });
 
-  const restaurants = vendors.map((vendor) => {
+  const customerLat = lat !== undefined ? Number(lat) : null;
+  const customerLng = lng !== undefined ? Number(lng) : null;
+  const hasCustomerLocation =
+    customerLat !== null && customerLng !== null && !Number.isNaN(customerLat) && !Number.isNaN(customerLng);
+
+  let restaurants = vendors.map((vendor) => {
     const ratingInfo = ratingMap[vendor._id.toString()];
+    let distanceKm = null;
+    if (hasCustomerLocation && vendor.coordinates?.lat != null && vendor.coordinates?.lng != null) {
+      distanceKm = getDistanceKm(customerLat, customerLng, vendor.coordinates.lat, vendor.coordinates.lng);
+    }
     return {
-      ...restaurantResponse(vendor),
+      ...restaurantResponse(vendor, distanceKm),
       averageRating: ratingInfo?.avgRating || null,
       reviewCount: ratingInfo?.count || 0,
     };
   });
+   if (hasCustomerLocation) {
+    // Filter out restaurants that are beyond their delivery radius and sort by distance
+    restaurants = restaurants
+      .filter((r) => r.distanceKm !== null && r.distanceKm <= (r.deliveryRadius ?? 3))
+      .sort((a, b) => a.distanceKm - b.distanceKm);
+  }
 
   res.status(200).json({
-    count: vendors.length,
+    count: restaurants.length,
     restaurants,
   });
 });
@@ -99,18 +117,6 @@ export const getRestaurantById = asyncHandler(async (req, res) => {
   res.status(200).json({ restaurant: restaurantResponse(vendor), averageRating, reviewCount: reviews.length });
 });
 
-/* @desc   Get distinct cuisine types from approved restaurants (for filter chips)
- @route  GET /api/customer/restaurants/cuisines*/
-export const getAvailableCuisines = asyncHandler(async (req, res) => {
-  const cuisines = await User.distinct("cuisine", {
-    role: "vendor",
-    isApproved: true,
-    isActive: true,
-    cuisine: { $ne: "" },
-  });
-
-  res.status(200).json({ cuisines });
-});
 
 /* @desc   Get menu items for a specific restaurant
 @route  GET /api/customer/restaurants/:id/menu */

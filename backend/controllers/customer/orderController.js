@@ -136,3 +136,29 @@ export const getMyOrderById = asyncHandler(async (req, res) => {
 
   res.status(200).json({ order });
 });
+
+// @desc   Cancel a pending order (customer's own order only)
+// @route  PUT /api/customer/orders/:id/cancel
+export const cancelMyOrder = asyncHandler(async (req, res) => {
+  const order = await Order.findOne({
+    _id: req.params.id,
+    customer: req.user._id,
+  });
+ 
+  if (!order) {
+    res.status(404);
+    throw new Error("Order not found");
+  }
+ 
+  if (order.orderStatus !== "Pending") {
+    res.status(400);
+    throw new Error(
+      "This order can no longer be cancelled since the restaurant has already accepted it"
+    );
+  }
+ 
+  order.orderStatus = "Rejected";
+  await order.save();
+ 
+  res.status(200).json({ message: "Order cancelled successfully", order });
+});

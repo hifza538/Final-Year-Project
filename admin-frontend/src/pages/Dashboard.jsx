@@ -9,6 +9,7 @@ import StatCard from "../components/dashboard/StatCard";
 import { OrdersLineChart } from "../components/dashboard/DashboardCharts";
 import RecentOrdersTable from "../components/dashboard/RecentOrdersTable";
 import QuickActions from "../components/dashboard/QuickActions";
+import PendingApprovalsCard from "../components/dashboard/PendingApprovalsCard";
 
 // Dashboard component for displaying overview stats and recent orders
 const Dashboard = () => {
@@ -76,8 +77,12 @@ const Dashboard = () => {
           <RecentOrdersTable orders={recentOrders} />
         </div>
 
-        <div>
+        <div className="space-y-4 self-start">
           <QuickActions />
+          <PendingApprovalsCard
+            pendingVendors={stats?.pendingVendors ?? 0}
+            pendingRiders={stats?.pendingRiders ?? 0}
+          />
         </div>
       </div>
     </div>

@@ -12,6 +12,7 @@ import customerRoutes from "./routes/customerRoutes.js";
 import deliveryRoutes from "./routes/deliveryRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
+import { startAutoRejectOrdersJob } from "./jobs/autoRejectOrdersJob.js";
 
 dotenv.config();
 connectDB();
@@ -76,6 +77,7 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
+  startAutoRejectOrdersJob(); // Start the auto-reject stale orders job when the server starts
 });
 
 

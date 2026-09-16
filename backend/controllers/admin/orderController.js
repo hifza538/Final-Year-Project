@@ -5,12 +5,22 @@ import User from "../../models/User.js";
 
 // get all orders with optional filters for status and search
 export const getAllOrders = asyncHandler(async (req, res) => {
-  const { status, search } = req.query;
+  const { status, search, startDate, endDate } = req.query;
 
   const query = {};
 
   if (status && status !== "all") {
     query.orderStatus = status;
+  }
+  
+   if (startDate || endDate) {
+    query.createdAt = {};
+    if (startDate) {
+      query.createdAt.$gte = new Date(`${startDate}T00:00:00.000Z`);
+    }
+    if (endDate) {
+      query.createdAt.$lte = new Date(`${endDate}T23:59:59.999Z`);
+    }
   }
 
   if (search?.trim()) {
