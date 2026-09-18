@@ -2,6 +2,7 @@
 //backend/controllers/delivery/orderController.js
 import asyncHandler from "express-async-handler";
 import Order from "../../models/Order.js";
+import { notifyUser } from "../../socket.js";
 
 // Define the sequence of delivery stages for validation and progression
 const STAGE_SEQUENCE = ["Accepted", "ArrivedAtRestaurant", "PickedUp", "OnTheWay", "Delivered"];
@@ -65,6 +66,13 @@ export const acceptOrder = asyncHandler(async (req, res) => {
     throw new Error("This order was already accepted by another rider");
   }
 
+  // Let the customer know a rider is now assigned to their order
+  notifyUser(order.customer, "orderUpdate", {
+    orderId: order._id,
+    status: order.orderStatus,
+    message: "A delivery rider has been assigned to your order!",
+  });
+
   res.status(200).json({ message: "Order accepted", order: orderResponse(order) });
 });
 
@@ -111,6 +119,20 @@ export const advanceOrderStatus = asyncHandler(async (req, res) => {
 
   await order.save();
   await order.populate("vendor", "shopName phone shopAddress");
+
+  // Let the customer know their order moved to the next delivery stage
+  const stageMessages = {
+    ArrivedAtRestaurant: "Your rider has arrived at the restaurant.",
+    PickedUp: "Your rider has picked up your order.",
+    OnTheWay: "Your order is on the way!",
+    Delivered: "Your order has been delivered. Enjoy your meal!",
+  };
+ 
+  notifyUser(order.customer, "orderUpdate", {
+    orderId: order._id,
+    status: order.orderStatus,
+    message: stageMessages[nextStage] || `Order status updated to ${nextStage}`,
+  });
 
   res.status(200).json({
     message:
