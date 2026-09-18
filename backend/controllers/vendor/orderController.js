@@ -1,6 +1,7 @@
 //backend/controllers/vendor/orderController.js
 import asyncHandler from "express-async-handler";
 import Order from "../../models/Order.js";
+import { notifyUser, notifyRole } from "../../socket.js";
 
 // Helper function to format order response
 export const getVendorOrders = asyncHandler(async (req, res) => {
@@ -89,6 +90,31 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   }
 
   await order.save();
+
+  // Notify the customer about the status change
+  const statusMessages = {
+    Accepted: "Your order has been accepted by the restaurant!",
+    Preparing: "Your order is being prepared.",
+    Ready: "Your order is ready and waiting for a delivery rider.",
+    Rejected: "Your order was rejected by the restaurant.",
+  };
+
+  if (statusMessages[status]) {
+    notifyUser(order.customer, "orderUpdate", {
+      orderId: order._id,
+      status: order.orderStatus,
+      message: statusMessages[status],
+    });
+  }
+ 
+  // Notify delivery riders when the order is ready for pickup
+  if (status === "Ready") {
+    notifyRole("delivery", "orderUpdate", {
+      orderId: order._id,
+      status: "Ready",
+      message: "A new order is available for pickup!",
+    });
+  }
 
   res.status(200).json({
     message: "Order status updated successfully",

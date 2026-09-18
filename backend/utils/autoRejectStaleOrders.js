@@ -1,5 +1,6 @@
 // backend/utils/autoRejectStaleOrders.js
 import Order from "../models/Order.js";
+import { notifyUser } from "../socket.js";
  
 // Vendors get this long to accept a new order before it's auto-rejected
 const ACCEPT_TIMEOUT_MINUTES = 5;
@@ -8,12 +9,28 @@ const ACCEPT_TIMEOUT_MINUTES = 5;
 export const autoRejectStaleOrders = async () => {
   const cutoff = new Date(Date.now() - ACCEPT_TIMEOUT_MINUTES * 60 * 1000);
  
-  const result = await Order.updateMany(
-    { orderStatus: "Pending", createdAt: { $lt: cutoff } },
+  // Find all orders that are still pending and were created before the cutoff time
+  const staleOrders = await Order.find({
+    orderStatus: "Pending",
+    createdAt: { $lt: cutoff },
+  }).select("_id customer");
+ 
+  if (staleOrders.length === 0) return;
+ 
+  const staleOrderIds = staleOrders.map((o) => o._id);
+ 
+  await Order.updateMany(
+    { _id: { $in: staleOrderIds } },
     { $set: { orderStatus: "Rejected" } }
   );
  
-  if (result.modifiedCount > 0) {
-    console.log(`[auto-reject] ${result.modifiedCount} stale order(s) auto-rejected`);
-  }
+  staleOrders.forEach((order) => {
+    notifyUser(order.customer, "orderUpdate", {
+      orderId: order._id,
+      status: "Rejected",
+      message: "The restaurant didn't respond in time, so your order was automatically cancelled.",
+    });
+  });
+ 
+  console.log(`[auto-reject] ${staleOrders.length} stale order(s) auto-rejected`);
 };

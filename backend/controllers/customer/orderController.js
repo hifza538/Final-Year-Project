@@ -5,6 +5,7 @@ import Order from "../../models/Order.js";
 import MenuItem from "../../models/MenuItem.js";
 import User from "../../models/User.js";
 import Review from "../../models/Review.js";
+import { notifyUser } from "../../socket.js";
 
 /* @desc   Place a new order
 @route  POST /api/customer/orders*/
@@ -95,6 +96,13 @@ export const placeOrder = asyncHandler(async (req, res) => {
     orderStatus: "Pending",
   });
 
+  // Let the vendor know a new order just came in
+  notifyUser(order.vendor, "orderUpdate", {
+    orderId: order._id,
+    status: "Pending",
+    message: "You have a new order!",
+  });
+
   res.status(201).json({
     message: "Order placed successfully",
     order,
@@ -159,6 +167,13 @@ export const cancelMyOrder = asyncHandler(async (req, res) => {
  
   order.orderStatus = "Rejected";
   await order.save();
+
+  // Let the vendor know this order was cancelled by the customer
+  notifyUser(order.vendor, "orderUpdate", {
+    orderId: order._id,
+    status: "Rejected",
+    message: "A customer cancelled order before you accepted it.",
+  });
  
   res.status(200).json({ message: "Order cancelled successfully", order });
 });

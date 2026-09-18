@@ -2,6 +2,7 @@
 import asyncHandler from "express-async-handler";
 import Order from "../../models/Order.js";
 import User from "../../models/User.js";
+import { notifyUser } from "../../socket.js";
 
 // get all orders with optional filters for status and search
 export const getAllOrders = asyncHandler(async (req, res) => {
@@ -75,6 +76,19 @@ export const cancelOrder = asyncHandler(async (req, res) => {
 
   order.orderStatus = "Rejected";
   await order.save();
+
+  // Let both the customer and the vendor know admin stepped in and
+  // cancelled this order
+  notifyUser(order.customer, "orderUpdate", {
+    orderId: order._id,
+    status: "Rejected",
+    message: "Your order was cancelled by LocalBites support.",
+  });
+  notifyUser(order.vendor, "orderUpdate", {
+    orderId: order._id,
+    status: "Rejected",
+    message: "An order was cancelled by LocalBites support.",
+  });
 
   res.status(200).json({ message: "Order cancelled successfully" });
 });

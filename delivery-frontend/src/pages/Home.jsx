@@ -1,9 +1,10 @@
 // delivery-frontend/src/pages/Home.jsx
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import { UserCircle, Package, Clock, History as HistoryIcon, Bike } from "lucide-react";
+import { UserCircle, Package, Clock, History as HistoryIcon, Bike, Bell } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useNotifications } from "../context/NotificationContext";
 import {
   getAvailableOrders,
   acceptOrder,
@@ -25,6 +26,75 @@ const TABS = [
   { key: "myOrders", label: "My Deliveries", icon: Clock },
   { key: "history", label: "History", icon: HistoryIcon },
 ];
+
+// Formats a Date into a short relative time string ("2m ago", "1h ago")
+const timeAgo = (date) => {
+  const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
+  if (seconds < 60) return "Just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+};
+
+const NotificationBell = () => {
+  const [open, setOpen] = useState(false);
+  const bellRef = useRef(null);
+  const { notifications, unreadCount, markAllRead } = useNotifications();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (bellRef.current && !bellRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleToggle = () => {
+    setOpen((prev) => !prev);
+    if (!open) markAllRead();
+  };
+
+  return (
+    <div className="relative" ref={bellRef}>
+      <button
+        onClick={handleToggle}
+        className="relative flex items-center justify-center text-white/90 hover:text-white transition-colors"
+        aria-label="Notifications"
+      >
+        <Bell size={18} />
+        {unreadCount > 0 && (
+          <span className="absolute -top-1.5 -right-2 bg-white text-primary text-[10px]
+            font-bold rounded-full h-4 w-4 flex items-center justify-center">
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <div className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-lg
+                        border border-gray-100 max-h-96 overflow-y-auto z-50 text-left">
+          <div className="px-4 py-3 border-b border-gray-100">
+            <h3 className="text-sm font-semibold text-secondary">Notifications</h3>
+          </div>
+          {notifications.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-8">No notifications yet</p>
+          ) : (
+            notifications.map((n) => (
+              <div key={n.id} className="px-4 py-3 border-b border-gray-100 last:border-0">
+                <p className="text-sm text-gray-700">{n.message}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{timeAgo(n.receivedAt)}</p>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Home = () => {
   const { user, logout } = useAuth();
@@ -112,6 +182,7 @@ const Home = () => {
             </div>
 
             <div className="flex items-center gap-4">
+              <NotificationBell />
               <Link
                 to="/profile"
                 className="flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-white transition-colors"

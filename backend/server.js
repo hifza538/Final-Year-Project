@@ -2,6 +2,7 @@
 import dns from 'dns';
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
+import http from "http";
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -13,6 +14,7 @@ import deliveryRoutes from "./routes/deliveryRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import { startAutoRejectOrdersJob } from "./jobs/autoRejectOrdersJob.js";
+import { initSocket } from "./socket.js";
 
 dotenv.config();
 connectDB();
@@ -75,7 +77,11 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+// Create HTTP server and initialize Socket.IO
+const server = http.createServer(app);
+initSocket(server);
+
+server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
   startAutoRejectOrdersJob(); // Start the auto-reject stale orders job when the server starts
 });
