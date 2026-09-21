@@ -3,16 +3,14 @@ import express from "express";
 import { loginAdmin, getMe } from "../controllers/admin/authController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
 import { getOverviewStats, getOrdersTimeline, getRecentOrders } from "../controllers/admin/statsController.js";
-import { getPendingVendors,getAllVendors,getVendorById,approveVendor,rejectVendor,toggleVendorBlock } from "../controllers/admin/vendorController.js";
-import { getPendingRiders,getAllRiders,getRiderById,approveRider,rejectRider,toggleRiderBlock } from "../controllers/admin/deliveryController.js";
-import { getAllCustomers,getCustomerById,toggleCustomerBlock } from "../controllers/admin/customerController.js";
-import { getAllOrders,getOrderById,cancelOrder } from "../controllers/admin/orderController.js";
-import { getAllCategories,createCategory,updateCategory,deleteCategory } from "../controllers/admin/categoryController.js";
+import { getPendingVendors, getAllVendors, getVendorById, approveVendor, rejectVendor, warnVendor } from "../controllers/admin/vendorController.js";
+import { getPendingRiders, getAllRiders, getRiderById, approveRider, rejectRider } from "../controllers/admin/deliveryController.js";
+import { getAllCustomers, getCustomerById, toggleCustomerBlock } from "../controllers/admin/customerController.js";
+import { getAllOrders, getOrderById, cancelOrder } from "../controllers/admin/orderController.js";
+import { getAllCategories, createCategory, updateCategory, deleteCategory } from "../controllers/admin/categoryController.js";
 import { getReportsOverview } from "../controllers/admin/reportsController.js";
 import { getSettings, updateSettings } from "../controllers/admin/settingsController.js";
 import { updateProfile, changePassword } from "../controllers/admin/profileController.js";
-
-
 
 const router = express.Router();
 
@@ -20,26 +18,10 @@ const router = express.Router();
 router.post("/login", loginAdmin);
 router.get("/me", protect, adminOnly, getMe);
 
-// Admin stats route
+// Admin stats routes
 router.get("/stats/overview", protect, adminOnly, getOverviewStats);
 router.get("/stats/orders-timeline", protect, adminOnly, getOrdersTimeline);
 router.get("/stats/recent-orders", protect, adminOnly, getRecentOrders);
-
-// Vendor management routes
-router.get("/vendors", protect, adminOnly, getAllVendors);
-router.get("/vendors/pending", protect, adminOnly, getPendingVendors);
-router.get("/vendors/:id", protect, adminOnly, getVendorById);
-router.patch("/vendors/:id/approve", protect, adminOnly, approveVendor);
-router.patch("/vendors/:id/reject", protect, adminOnly, rejectVendor);
-router.patch("/vendors/:id/toggle-block", protect, adminOnly, toggleVendorBlock);
-
-// Delivery rider management routes
-router.get("/delivery", protect, adminOnly, getAllRiders);
-router.get("/delivery/pending", protect, adminOnly, getPendingRiders);
-router.get("/delivery/:id", protect, adminOnly, getRiderById);
-router.patch("/delivery/:id/approve", protect, adminOnly, approveRider);
-router.patch("/delivery/:id/reject", protect, adminOnly, rejectRider);
-router.patch("/delivery/:id/toggle-block", protect, adminOnly, toggleRiderBlock);
 
 // Admin vendor management routes
 router.get("/vendors", protect, adminOnly, getAllVendors);
@@ -47,7 +29,7 @@ router.get("/vendors/pending", protect, adminOnly, getPendingVendors);
 router.get("/vendors/:id", protect, adminOnly, getVendorById);
 router.patch("/vendors/:id/approve", protect, adminOnly, approveVendor);
 router.patch("/vendors/:id/reject", protect, adminOnly, rejectVendor);
-router.patch("/vendors/:id/toggle-block", protect, adminOnly, toggleVendorBlock);
+router.post("/vendors/:id/warn", protect, adminOnly, warnVendor);
 
 // Admin delivery rider management routes
 router.get("/delivery", protect, adminOnly, getAllRiders);
@@ -55,7 +37,6 @@ router.get("/delivery/pending", protect, adminOnly, getPendingRiders);
 router.get("/delivery/:id", protect, adminOnly, getRiderById);
 router.patch("/delivery/:id/approve", protect, adminOnly, approveRider);
 router.patch("/delivery/:id/reject", protect, adminOnly, rejectRider);
-router.patch("/delivery/:id/toggle-block", protect, adminOnly, toggleRiderBlock);
 
 // Admin customer management routes
 router.get("/customers", protect, adminOnly, getAllCustomers);

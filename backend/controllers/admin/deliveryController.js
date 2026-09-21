@@ -1,7 +1,9 @@
 //backend/controllers/admin/deliveryController.js
 import asyncHandler from "express-async-handler";
 import User from "../../models/User.js";
-
+import Order from "../../models/Order.js";
+import { sendEmailSafe } from "../../utils/sendEmail.js";
+import { approvalEmail, rejectionEmail } from "../../utils/emailTemplates.js";
 
 // Get all riders pending approval
 
@@ -9,15 +11,17 @@ export const getPendingRiders = asyncHandler(async (req, res) => {
   const pendingRiders = await User.find({
     role: "delivery",
     isApproved: false,
+    isActive: true,
   }).select("-password");
 
   res.status(200).json({ riders: pendingRiders });
 });
 
 // Get all riders with optional search + status filter
-
+// status: pending | approved | rejected
+// from / to: registration date range (YYYY-MM-DD, both inclusive)
 export const getAllRiders = asyncHandler(async (req, res) => {
-  const { status, search } = req.query;
+  const { status, search, from, to } = req.query;
 
   const query = { role: "delivery" };
 
@@ -27,8 +31,18 @@ export const getAllRiders = asyncHandler(async (req, res) => {
   } else if (status === "approved") {
     query.isApproved = true;
     query.isActive = true;
-  } else if (status === "blocked") {
+  } else if (status === "rejected") {
     query.isActive = false;
+  }
+
+  // Registration date range
+  if (from || to) {
+    const range = {};
+    const fromDate = from ? new Date(`${from}T00:00:00`) : null;
+    const toDate = to ? new Date(`${to}T23:59:59.999`) : null;
+    if (fromDate && !isNaN(fromDate)) range.$gte = fromDate;
+    if (toDate && !isNaN(toDate)) range.$lte = toDate;
+    if (Object.keys(range).length) query.createdAt = range;
   }
 
   if (search?.trim()) {
@@ -41,24 +55,37 @@ export const getAllRiders = asyncHandler(async (req, res) => {
 });
 
 // Get a single rider's full details
-
 export const getRiderById = asyncHandler(async (req, res) => {
   const rider = await User.findOne({ _id: req.params.id, role: "delivery" })
     .select("-password")
     .populate("approvedBy", "fullName")
-    .populate("rejectedBy", "fullName")
-    .populate("blockedBy", "fullName");
+    .populate("rejectedBy", "fullName");
 
   if (!rider) {
     res.status(404);
     throw new Error("Rider not found");
   }
 
-  res.status(200).json({ rider });
+  // Calculate rider's performance stats
+  const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const [totalDeliveries, last30Days, lastDelivery, activeOrder] = await Promise.all([
+    Order.countDocuments({ deliveryRider: rider._id, orderStatus: "Completed" }),
+    Order.countDocuments({ deliveryRider: rider._id, orderStatus: "Completed", updatedAt: { $gte: since } }),
+    Order.findOne({ deliveryRider: rider._id, orderStatus: "Completed" }).sort({ updatedAt: -1 }).select("updatedAt"),
+    Order.findOne({ deliveryRider: rider._id, orderStatus: "OutForDelivery" }).select("deliveryStage"),
+  ]);
+
+  const stats = {
+    totalDeliveries,
+    last30Days,
+    lastDeliveryAt: lastDelivery?.updatedAt || null,
+    activeStage: activeOrder?.deliveryStage || null,
+  };
+
+  res.status(200).json({ rider, stats });
 });
 
-// Approve a rider
-
+// Approve a rider + send approval email
 export const approveRider = asyncHandler(async (req, res) => {
   const rider = await User.findOne({ _id: req.params.id, role: "delivery" });
 
@@ -68,16 +95,23 @@ export const approveRider = asyncHandler(async (req, res) => {
   }
 
   rider.isApproved = true;
+  rider.isActive = true; // also reactivates a previously rejected account
   rider.approvedBy = req.user._id;
   rider.approvedAt = new Date();
   rider.rejectionReason = null;
+  rider.rejectedBy = null;
+  rider.rejectedAt = null;
   await rider.save();
 
-  res.status(200).json({ message: "Rider approved successfully" });
+  const emailSent = await sendEmailSafe({
+    to: rider.email,
+    ...approvalEmail({ name: rider.fullName, role: "delivery" }),
+  });
+
+  res.status(200).json({ message: "Rider approved successfully", emailSent });
 });
 
-// Reject a rider (deactivates account, records reason)
-
+// Reject a rider (deactivates account, records reason) + send rejection email
 export const rejectRider = asyncHandler(async (req, res) => {
   const { reason } = req.body;
 
@@ -93,6 +127,8 @@ export const rejectRider = asyncHandler(async (req, res) => {
     throw new Error("Rider not found");
   }
 
+  const wasApproved = rider.isApproved;
+
   rider.isActive = false;
   rider.isApproved = false;
   rider.rejectionReason = reason.trim();
@@ -100,30 +136,10 @@ export const rejectRider = asyncHandler(async (req, res) => {
   rider.rejectedAt = new Date();
   await rider.save();
 
-  res.status(200).json({ message: "Rider rejected" });
-});
-
-// Block or unblock a rider (toggles isActive)
-
-export const toggleRiderBlock = asyncHandler(async (req, res) => {
-  const rider = await User.findOne({ _id: req.params.id, role: "delivery" });
-
-  if (!rider) {
-    res.status(404);
-    throw new Error("Rider not found");
-  }
-
-  rider.isActive = !rider.isActive;
-
-  if (!rider.isActive) {
-    rider.blockedBy = req.user._id;
-    rider.blockedAt = new Date();
-  }
-
-  await rider.save();
-
-  res.status(200).json({
-    message: rider.isActive ? "Rider unblocked" : "Rider blocked",
-    isActive: rider.isActive,
+  const emailSent = await sendEmailSafe({
+    to: rider.email,
+    ...rejectionEmail({ name: rider.fullName, role: "delivery", reason: rider.rejectionReason, wasApproved }),
   });
+
+  res.status(200).json({ message: "Rider rejected", emailSent });
 });
