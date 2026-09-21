@@ -23,3 +23,15 @@ export const resetPassword = async (token, password) => {
   const { data } = await api.post(`/vendor/reset-password/${token}`, { password });
   return data;
 };
+
+// Verifies the account using the token from the verification email
+export const verifyEmail = async (token) => {
+  const { data } = await api.post(`/vendor/verify-email/${token}`);
+  return data;
+};
+ 
+// Requests a new verification email (in case the first one was missed or expired)
+export const resendVerification = async (email) => {
+  const { data } = await api.post("/vendor/resend-verification", { email });
+  return data;
+};

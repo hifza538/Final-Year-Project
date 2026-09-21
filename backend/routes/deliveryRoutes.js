@@ -1,6 +1,7 @@
 import express from "express";
 import { registerDelivery, loginDelivery, getMe } from "../controllers/delivery/authController.js";
 import { forgotPassword, resetPassword } from "../controllers/shared/passwordController.js";
+import { verifyEmail, resendVerification } from "../controllers/shared/verificationController.js";
 import {
   getAvailableOrders,
   acceptOrder,
@@ -17,6 +18,9 @@ const router = express.Router();
 router.post("/register", registerDelivery);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
+router.get("/verify-email/:token", verifyEmail);
+router.post("/resend-verification", resendVerification);
+
 router.post("/login", loginDelivery);
 //protect routes
 router.get("/me", protect, deliveryOnly, getMe);

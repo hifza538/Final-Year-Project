@@ -4,7 +4,7 @@ import api from "./api";
 
 // Registers a new customer account
 export const registerCustomer = async (formData) => {
-  const { confirmPassword, ...payload } = formData; // confirmPassword is not needed for backend registration
+  const { confirmPassword, ...payload } = formData; 
   const response = await api.post("/customer/register", payload);
   return response.data;
 };
@@ -28,5 +28,17 @@ export const forgotPassword = async (email) => {
 
 export const resetPassword = async (token, password) => {
   const response = await api.post(`/customer/reset-password/${token}`, { password });
+  return response.data;
+};
+
+// Verifies the account using the token from the verification email
+export const verifyEmail = async (token) => {
+  const response = await api.post(`/customer/verify-email/${token}`);
+  return response.data;
+};
+ 
+// Requests a new verification email (in case the first one was missed or expired)
+export const resendVerification = async (email) => {
+  const response = await api.post("/customer/resend-verification", { email });
   return response.data;
 };

@@ -411,8 +411,7 @@ const Register = () => {
             Registration Submitted!
           </h2>
           <p className="text-gray-500 text-sm mb-6">
-            Your restaurant registration has been submitted successfully. Please
-            wait for admin approval before logging in.
+            Your restaurant registration has been submitted successfully. Please check your email to verify your account, and wait for admin approval before logging in.
           </p>
           <button
             onClick={() => navigate("/login")}

@@ -8,6 +8,7 @@ import NotFound from "../pages/NotFound";
 import PrivateRoute from "./PrivateRoute";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
+import VerifyEmail from "../pages/VerifyEmail";
 
 const AppRoutes = () => {
   return (
@@ -33,6 +34,7 @@ const AppRoutes = () => {
       <Route path="*" element={<NotFound />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
+      <Route path="/verify-email/:token" element={<VerifyEmail />} />
     </Routes>
   );
 };
