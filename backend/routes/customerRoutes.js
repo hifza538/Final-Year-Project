@@ -1,4 +1,4 @@
-// server/src/routes/customerRoutes.js
+// backend/routes/customerRoutes.js
 
 import express from "express";
 import { registerCustomer, loginCustomer, getMe, updateProfile } from "../controllers/customer/authController.js";
@@ -7,6 +7,7 @@ import { getAllRestaurants, getRestaurantById, getRestaurantMenu } from "../cont
 import { placeOrder, getMyOrders, getMyOrderById, cancelMyOrder } from "../controllers/customer/orderController.js";
 import { addReview, getRestaurantReviews } from "../controllers/customer/reviewController.js";
 import { forgotPassword, resetPassword } from "../controllers/shared/passwordController.js";
+import { verifyEmail, resendVerification } from "../controllers/shared/verificationController.js";
 import { protect, customerOnly } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -19,6 +20,10 @@ router.put("/profile", protect, customerOnly, updateProfile);
 // Password reset routes
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
+
+// Email verification routes
+router.get("/verify-email/:token", verifyEmail);
+router.post("/resend-verification", resendVerification);
 
 // Address routes
 router.get("/addresses", protect, customerOnly, getAddresses);
