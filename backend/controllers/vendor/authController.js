@@ -246,19 +246,20 @@ export const loginUser = asyncHandler(async (req, res) => {
     throw new Error("Invalid email or password");
   }
 
+  if (!user.isActive) {
+    res.status(403);
+    throw new Error(
+      user.rejectionReason
+        ? `Your account has been deactivated: ${user.rejectionReason}. Please contact support.`
+        : "Your account has been deactivated. Please contact support."
+    );
+  }
+
   // vendor approval check
   if (user.role === "vendor" && !user.isApproved) {
     res.status(403);
     throw new Error(
       "Your restaurant is pending admin approval. Please wait."
-    );
-  }
-
-  // account must be active
-  if (!user.isActive) {
-    res.status(403);
-    throw new Error(
-      "Your account has been deactivated. Please contact support."
     );
   }
 
