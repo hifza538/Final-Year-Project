@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import { ArrowLeft, CheckCircle, XCircle, Ban, FileText } from "lucide-react";
-import {getRiderById,approveRider, rejectRider, toggleRiderBlock,} from "../services/deliveryService";
+import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
+import {getRiderById,approveRider, rejectRider} from "../services/deliveryService";
 import ConfirmModal from "../components/common/ConfirmModal";
 
 // Component to display a label-value pair in the details view
@@ -15,41 +15,22 @@ const DetailRow = ({ label, value }) => (
   </div>
 );
 
-// Component to display a document
-const DocumentPreview = ({ label, url }) => (
-  <div>
-    <p className="text-xs text-gray-500 mb-2">{label}</p>
-    {url ? (
-      <a href={url} target="_blank" rel="noopener noreferrer">
-        <img
-          src={url}
-          alt={label}
-          className="w-full h-36 object-cover rounded-lg border border-gray-100 hover:opacity-90 transition-opacity"
-        />
-      </a>
-    ) : (
-      <div className="w-full h-36 rounded-lg border border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-300">
-        <FileText size={20} />
-        <span className="text-xs mt-1">Not uploaded</span>
-      </div>
-    )}
-  </div>
-);
-
 // Main component to display rider details and actions
 const RiderDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [rider, setRider] = useState(null);
+  const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
-  const [activeModal, setActiveModal] = useState(null); // "approve" | "reject" | "block" | null
+  const [activeModal, setActiveModal] = useState(null); // "approve" | "reject" | null
 
   const fetchRider = async () => {
     setIsLoading(true);
     try {
       const data = await getRiderById(id);
       setRider(data.rider);
+      setStats(data.stats);
     } catch (error) {
       toast.error("Failed to load rider details");
       navigate("/delivery-approvals");
@@ -60,7 +41,6 @@ const RiderDetails = () => {
 
   useEffect(() => {
     fetchRider();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const closeModal = () => setActiveModal(null);
@@ -68,8 +48,12 @@ const RiderDetails = () => {
   const handleApprove = async () => {
     setActionLoading(true);
     try {
-      await approveRider(id);
-      toast.success("Rider approved");
+      const data = await approveRider(id);
+      if (data.emailSent === false) {
+        toast("Rider approved, but the email could not be sent", { icon: "⚠️" });
+      } else {
+        toast.success("Rider approved and email sent");
+      }
       closeModal();
       fetchRider();
     } catch (error) {
@@ -84,28 +68,16 @@ const RiderDetails = () => {
   const handleReject = async (reason) => {
     setActionLoading(true);
     try {
-      await rejectRider(id, reason);
-      toast.success("Rider rejected");
+      const data = await rejectRider(id, reason);
+      if (data.emailSent === false) {
+        toast("Rider rejected, but the email could not be sent", { icon: "⚠️" });
+      } else {
+        toast.success("Rider rejected and email sent");
+      }
       closeModal();
       fetchRider();
     } catch (error) {
       toast.error(error.response?.data?.message || "Rejection failed");
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  // Handle toggling block/unblock status of a rider
-
-  const handleToggleBlock = async () => {
-    setActionLoading(true);
-    try {
-      const data = await toggleRiderBlock(id);
-      toast.success(data.message);
-      closeModal();
-      fetchRider();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Action failed");
     } finally {
       setActionLoading(false);
     }
@@ -124,7 +96,7 @@ const RiderDetails = () => {
 
   if (!rider) return null;
 
-  const status = !rider.isActive ? "Blocked" : rider.isApproved ? "Approved" : "Pending";
+  const status = !rider.isActive ? "Rejected" : rider.isApproved ? "Approved" : "Pending";
   const isPending = !rider.isApproved && rider.isActive;
 
   return (
@@ -142,7 +114,7 @@ const RiderDetails = () => {
           <h1 className="text-xl font-bold text-secondary">{rider.fullName}</h1>
           <span
             className={`px-3 py-1 rounded-full text-xs font-medium ${
-              status === "Blocked"
+              status === "Rejected"
                 ? "bg-red-50 text-red-600"
                 : status === "Pending"
                 ? "bg-yellow-50 text-yellow-700"
@@ -157,7 +129,6 @@ const RiderDetails = () => {
         <DetailRow label="Phone" value={rider.phone} />
         <DetailRow label="Vehicle Type" value={rider.vehicleType} />
         <DetailRow label="Vehicle Number" value={rider.vehicleNumber} />
-        <DetailRow label="CNIC Number" value={rider.cnicNumber} />
         <DetailRow
           label="Registered On"
           value={rider.createdAt && new Date(rider.createdAt).toLocaleDateString()}
@@ -185,34 +156,74 @@ const RiderDetails = () => {
             </>
           )}
 
-          {rider.isApproved && (
+          {/* Already-approved accounts can still be rejected (reason required, email sent) */}
+          {rider.isApproved && rider.isActive && (
             <button
-              onClick={() => setActiveModal("block")}
-              className={`flex-1 flex items-center justify-center gap-2 font-medium text-sm py-2.5
-                rounded-lg transition-colors ${
-                  rider.isActive
-                    ? "bg-red-50 text-red-600 hover:bg-red-100"
-                    : "bg-green-50 text-green-700 hover:bg-green-100"
-                }`}
+              onClick={() => setActiveModal("reject")}
+              className="flex-1 flex items-center justify-center gap-2 bg-red-50 text-red-600
+                font-medium text-sm py-2.5 rounded-lg hover:bg-red-100 transition-colors"
             >
-              <Ban size={16} />
-              {rider.isActive ? "Block Rider" : "Unblock Rider"}
+              <XCircle size={16} />
+              Reject Rider
+            </button>
+          )}
+
+          {/* Rejected accounts can be approved again (reactivates the account, email sent) */}
+          {!rider.isActive && (
+            <button
+              onClick={() => setActiveModal("approve")}
+              className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white
+                font-medium text-sm py-2.5 rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <CheckCircle size={16} />
+              Approve Again
             </button>
           )}
         </div>
       </div>
 
-      {/* Document verification */}
-      <div className="bg-white rounded-xl border border-gray-100 p-6 mb-4">
-        <h2 className="text-sm font-semibold text-secondary mb-4">Verification Documents</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <DocumentPreview label="CNIC Front" url={rider.cnicFront?.url} />
-          <DocumentPreview label="CNIC Back" url={rider.cnicBack?.url} />
+      {/* Delivery activity - lets admin see whether the rider is actually working */}
+      {stats && (rider.isApproved || stats.totalDeliveries > 0) && (
+        <div className="bg-white rounded-xl border border-gray-100 p-6 mb-4">
+          <h2 className="text-sm font-semibold text-secondary mb-4">Delivery Activity</h2>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="rounded-lg bg-gray-50 p-3">
+              <p className="text-xs text-gray-500">Total Deliveries</p>
+              <p className="text-lg font-bold text-secondary">{stats.totalDeliveries}</p>
+            </div>
+            <div className="rounded-lg bg-green-50 p-3">
+              <p className="text-xs text-green-700">Last 30 Days</p>
+              <p className="text-lg font-bold text-green-700">{stats.last30Days}</p>
+            </div>
+            <div
+              className={`rounded-lg p-3 ${
+                stats.activeStage
+                  ? "bg-orange-50 text-orange-700"
+                  : rider.isOnline
+                  ? "bg-green-50 text-green-700"
+                  : "bg-gray-50 text-gray-500"
+              }`}
+            >
+              <p className="text-xs">Right Now</p>
+              <p className="text-sm font-bold mt-1">
+                {stats.activeStage
+                  ? `On delivery · ${stats.activeStage.replace(/([a-z])([A-Z])/g, "$1 $2")}`
+                  : rider.isOnline
+                  ? "Online"
+                  : "Offline"}
+              </p>
+            </div>
+          </div>
+          <p className="text-xs text-gray-400 mt-3">
+            {stats.lastDeliveryAt
+              ? `Last delivery: ${new Date(stats.lastDeliveryAt).toLocaleString()}`
+              : "No deliveries completed yet."}
+          </p>
         </div>
-      </div>
+      )}
 
       {/* Activity log */}
-      {(rider.approvedBy || rider.rejectedBy || rider.blockedBy) && (
+      {(rider.approvedBy || rider.rejectedBy) && (
         <div className="bg-white rounded-xl border border-gray-100 p-6">
           <h2 className="text-sm font-semibold text-secondary mb-4">Activity Log</h2>
           <div className="space-y-3 text-sm">
@@ -235,12 +246,6 @@ const RiderDetails = () => {
                 )}
               </div>
             )}
-            {rider.blockedBy && !rider.isActive && (
-              <p className="text-gray-600">
-                Blocked by <span className="font-medium text-secondary">{rider.blockedBy.fullName}</span>{" "}
-                on {new Date(rider.blockedAt).toLocaleString()}
-              </p>
-            )}
           </div>
         </div>
       )}
@@ -248,7 +253,11 @@ const RiderDetails = () => {
       <ConfirmModal
         isOpen={activeModal === "approve"}
         title="Approve this rider?"
-        message={`${rider.fullName} will be able to start accepting deliveries immediately.`}
+        message={
+          rider.isActive
+            ? `${rider.fullName} will be approved and an email will be sent to the rider.`
+            : `${rider.fullName}'s account will be reactivated and approved. An email will be sent to the rider.`
+        }
         confirmLabel="Approve"
         variant="primary"
         isLoading={actionLoading}
@@ -259,27 +268,16 @@ const RiderDetails = () => {
       <ConfirmModal
         isOpen={activeModal === "reject"}
         title="Reject this rider?"
-        message={`Please provide a reason. ${rider.fullName}'s account will be deactivated.`}
+        message={
+          rider.isApproved
+            ? `${rider.fullName} will lose access to their account immediately. Please provide a reason, it will be emailed.`
+            : `Please provide a reason, it will be emailed to the applicant. ${rider.fullName}'s account will be deactivated.`
+        }
         confirmLabel="Reject"
         variant="danger"
         requireReason
         isLoading={actionLoading}
         onConfirm={handleReject}
-        onCancel={closeModal}
-      />
-
-      <ConfirmModal
-        isOpen={activeModal === "block"}
-        title={rider.isActive ? "Block this rider?" : "Unblock this rider?"}
-        message={
-          rider.isActive
-            ? `${rider.fullName} will lose access to their rider account immediately.`
-            : `${rider.fullName} will regain access to their rider account.`
-        }
-        confirmLabel={rider.isActive ? "Block" : "Unblock"}
-        variant={rider.isActive ? "danger" : "primary"}
-        isLoading={actionLoading}
-        onConfirm={handleToggleBlock}
         onCancel={closeModal}
       />
     </div>

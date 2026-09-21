@@ -17,11 +17,11 @@ export const approveVendor = async (id) => {
 };
 
 export const rejectVendor = async (id, reason) => {
-  const response = await api.patch(`/admin/vendors/${id}/reject` , { reason });
+  const response = await api.patch(`/admin/vendors/${id}/reject`, { reason });
   return response.data;
 };
 
-export const toggleVendorBlock = async (id) => {
-  const response = await api.patch(`/admin/vendors/${id}/toggle-block`);
+export const warnVendor = async (id, message) => {
+  const response = await api.post(`/admin/vendors/${id}/warn`, { message });
   return response.data;
 };
