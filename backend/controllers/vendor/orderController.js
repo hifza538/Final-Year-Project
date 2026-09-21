@@ -84,6 +84,11 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
 
   order.orderStatus = status;
 
+    // Vendor rejected the order themselves - counts against the vendor's performance
+  if (status === "Rejected") {
+    order.cancelReason = "vendor_rejected";
+  }
+
   // Mark as delivered when completed
   if (status === "Completed") {
     order.isDelivered = true;

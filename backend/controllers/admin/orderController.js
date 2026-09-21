@@ -75,6 +75,7 @@ export const cancelOrder = asyncHandler(async (req, res) => {
   }
 
   order.orderStatus = "Rejected";
+  order.cancelReason = "admin_cancelled";
   await order.save();
 
   // Let both the customer and the vendor know admin stepped in and
