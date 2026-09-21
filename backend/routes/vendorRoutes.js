@@ -2,6 +2,7 @@
 import express from "express";
 import { registerVendor, loginUser, getMe } from "../controllers/vendor/authController.js";
 import { forgotPassword, resetPassword } from "../controllers/shared/passwordController.js";
+import { verifyEmail, resendVerification } from "../controllers/shared/verificationController.js";
 import { uploadCnic } from "../config/cloudinary.js";
 import { protect, vendorOnly } from "../middleware/authMiddleware.js";
 import { getDashboardStats } from "../controllers/vendor/vendorController.js";
@@ -24,6 +25,10 @@ router.post(
 router.post("/login", loginUser);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
+
+//email verification routes
+router.get("/verify-email/:token", verifyEmail);
+router.post("/resend-verification", resendVerification);
 
 // All routes are protected - vendor only
 router.use(protect, vendorOnly);

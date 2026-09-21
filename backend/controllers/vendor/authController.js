@@ -1,7 +1,10 @@
+// backend/controllers/vendor/authController.js
+
 import asyncHandler from "express-async-handler";
 import jwt from "jsonwebtoken";
 import User from "../../models/User.js";
 import { deleteFromCloudinary } from "../../config/cloudinary.js";
+import { sendVerificationEmail } from "../shared/verificationController.js";
 
 // generate token for user authentication
 const generateToken = (id) => {
@@ -26,6 +29,7 @@ const userResponse = (user) => ({
   serviceTypes: user.serviceTypes,
   isApproved: user.isApproved,
   isActive: user.isActive,
+  isEmailVerified: user.isEmailVerified,
 });
 
 //register vendor
@@ -200,10 +204,15 @@ export const registerVendor = asyncHandler(async (req, res) => {
     throw err;
   }
 
+  // Send verification email to the vendor
+  try {
+    await sendVerificationEmail(vendor);
+  } catch (err) {
+    console.error("Failed to send verification email:", err.message);
+  }
+
   res.status(201).json({
-    message: "Registration submitted! Please wait for admin approval.",
-    user: userResponse(vendor),
-    token: generateToken(vendor._id),
+    message: "Registration submitted! Please check your email to verify your account, then wait for admin approval.",
   });
 });
 
@@ -251,6 +260,14 @@ export const loginUser = asyncHandler(async (req, res) => {
     res.status(403);
     throw new Error(
       "Your restaurant is pending admin approval. Please wait."
+    );
+  }
+
+  // vendor email verification check
+  if (user.role === "vendor" && !user.isEmailVerified) {
+    res.status(403);
+    throw new Error(
+      "Please verify your email before logging in. Check your inbox for the verification link."
     );
   }
 

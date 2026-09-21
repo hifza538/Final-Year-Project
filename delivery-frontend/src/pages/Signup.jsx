@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CheckCircle2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { signupSchema } from "../utils/validationSchemas";
 import { registerDelivery } from "../services/authService";
-import { useAuth } from "../context/AuthContext";
 import FormInput from "../components/common/FormInput";
 import FormSelect from "../components/common/FormSelect";
 import AuthLayout from "../components/layout/AuthLayout";
@@ -18,8 +18,7 @@ const vehicleOptions = [
 
 const Signup = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  const [submitted, setSubmitted] = useState(false);
 
   const {
     register,
@@ -30,10 +29,8 @@ const Signup = () => {
   const onSubmit = async (formData) => {
     setIsSubmitting(true);
     try {
-      const data = await registerDelivery(formData);
-      login(data.user, data.token);
-      toast.success("Registration submitted! Awaiting admin approval.");
-      navigate("/");
+      await registerDelivery(formData);
+      setSubmitted(true);
     } catch (error) {
       const message = error.response?.data?.message || "Registration failed. Please try again.";
       toast.error(message);
@@ -41,6 +38,32 @@ const Signup = () => {
       setIsSubmitting(false);
     }
   };
+
+  if (submitted) {
+    return (
+      <AuthLayout>
+        <div className="lg:hidden flex items-center gap-1 mb-6 justify-center">
+          <span className="text-xl font-bold text-primary">Local</span>
+          <span className="text-xl font-bold text-gray-900">Bites</span>
+          <span className="text-sm text-gray-400 ml-1">Rider</span>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
+          <div className="bg-primary-light w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle2 size={26} className="text-primary" />
+          </div>
+          <h1 className="text-xl font-bold text-gray-900 mb-2">Check Your Email</h1>
+          <p className="text-gray-500 text-sm">
+            We've sent a verification link to your email. Click it to verify your account,
+            then wait for admin approval before logging in.
+          </p>
+          <Link to="/login" className="inline-block mt-6 text-primary font-medium hover:underline text-sm">
+            Back to Login
+          </Link>
+        </div>
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout>
