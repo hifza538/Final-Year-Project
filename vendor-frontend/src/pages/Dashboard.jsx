@@ -3,14 +3,17 @@
 import { useEffect, useState, useCallback } from "react";
 import { ShoppingBag, Clock, DollarSign, Users, TrendingUp, RefreshCw } from "lucide-react";
 import { getDashboardStats, getVendorOrders } from "../services/orderService";
+import { getMyPerformance } from "../services/performanceService";
 import ErrorState from "../components/common/ErrorState";
 import StatCard from "../components/dashboard/StatCard";
 import SkeletonCard from "../components/dashboard/SkeletonCard";
 import RecentOrdersTable from "../components/dashboard/RecentOrdersTable";
+import PerformanceBanner from "../components/dashboard/PerformanceBanner";
  
 // Dashboard page
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
+  const [performance, setPerformance] = useState(null);
   const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -20,12 +23,15 @@ const Dashboard = () => {
     if (!silent) setLoading(true);
     setError("");
     try {
-      const [statsData, ordersData] = await Promise.all([
+      const [statsData, ordersData, performanceData] = await Promise.all([
         getDashboardStats(),
         getVendorOrders(),
+        // The banner is a bonus - if this fails the dashboard should still load
+        getMyPerformance().catch(() => null),
       ]);
       setStats(statsData.stats);
       setRecentOrders(ordersData.orders.slice(0, 5));
+      setPerformance(performanceData?.performance ?? null);
       setLastUpdated(new Date());
     } catch (err) {
       setError(
@@ -105,6 +111,9 @@ const Dashboard = () => {
       </div>
  
       {error && <ErrorState message={error} onRetry={() => fetchStats(false)} />}
+
+      {/* Low-performance / admin warning banner */}
+      {!loading && !error && <PerformanceBanner performance={performance} />}
  
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -124,19 +133,6 @@ const Dashboard = () => {
             Once customers start ordering, your stats will appear here.
             Make sure your menu is set up and your restaurant is active.
           </p>
-        </div>
-      )}
- 
-      {/* Revenue Chart Placeholder - compact bar, no longer a big empty box */}
-      {!loading && !error && (stats?.totalOrders ?? 0) > 0 && (
-        <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0">
-            <TrendingUp size={18} className="text-gray-300" />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-gray-700">Revenue chart</p>
-            <p className="text-xs text-gray-400">Coming in a future update.</p>
-          </div>
         </div>
       )}
  

@@ -175,6 +175,15 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    // Warnings sent by admin (for poor order performance)
+    warnings: [
+      {
+        message: { type: String, default: "" },
+        cancellationRate: { type: Number, default: 0 },
+        sentBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        sentAt: { type: Date, default: Date.now },
+      },
+    ],
 
     // Timestamps
   },

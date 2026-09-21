@@ -172,22 +172,27 @@ export const loginDelivery = asyncHandler(async (req, res) => {
     throw new Error("This app is for delivery riders only.");
   }
 
-  // Rider must be approved by admin before logging in
-  if (!user.isApproved) {
-    res.status(403);
-    throw new Error("Your account is pending admin approval. Please wait.");
-  }
-
-  // Rider must have verified their email
-  if (!user.isEmailVerified) {
-    res.status(403);
-    throw new Error("Please verify your email before logging in. Check your inbox for the verification link.");
-  }
-
+  // Check if the user is active
   if (!user.isActive) {
     res.status(403);
-    throw new Error("Your account has been deactivated. Please contact support.");
+    throw new Error(
+      user.rejectionReason
+        ? `Your account has been deactivated: ${user.rejectionReason}. Please contact support.`
+        : "Your account has been deactivated. Please contact support."
+    );
   }
+
+// Rider must have verified their email
+if (!user.isEmailVerified) {
+  res.status(403);
+  throw new Error("Please verify your email before logging in. Check your inbox for the verification link.");
+}
+
+// Rider must be approved by admin before logging in
+if (!user.isApproved) {
+  res.status(403);
+  throw new Error("Your account is pending admin approval. Please wait.");
+}
 
   res.status(200).json({
     user: deliveryResponse(user),

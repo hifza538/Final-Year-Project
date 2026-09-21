@@ -255,29 +255,26 @@ export const loginUser = asyncHandler(async (req, res) => {
     throw new Error("Invalid email or password");
   }
 
-  // vendor approval check
-  if (user.role === "vendor" && !user.isApproved) {
-    res.status(403);
-    throw new Error(
-      "Your restaurant is pending admin approval. Please wait."
-    );
-  }
-
-  // vendor email verification check
-  if (user.role === "vendor" && !user.isEmailVerified) {
-    res.status(403);
-    throw new Error(
-      "Please verify your email before logging in. Check your inbox for the verification link."
-    );
-  }
-
-  // account must be active
   if (!user.isActive) {
     res.status(403);
     throw new Error(
-      "Your account has been deactivated. Please contact support."
+      user.rejectionReason
+        ? `Your account has been deactivated: ${user.rejectionReason}. Please contact support.`
+        : "Your account has been deactivated. Please contact support."
     );
   }
+
+// vendor email verification check
+if (user.role === "vendor" && !user.isEmailVerified) {
+  res.status(403);
+  throw new Error("Please verify your email before logging in. Check your inbox for the verification link.");
+}
+
+// vendor approval check
+if (user.role === "vendor" && !user.isApproved) {
+  res.status(403);
+  throw new Error("Your restaurant is pending admin approval. Please wait.");
+}
 
   // vendor and admin access check 
   if (user.role !== "vendor" && user.role !== "admin") {

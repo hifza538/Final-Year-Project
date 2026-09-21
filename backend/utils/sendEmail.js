@@ -16,7 +16,18 @@ const sendEmail = async ({ to, subject, text }) => {
     to,
     subject,
     text,
+    html,
   });
+};
+
+export const sendEmailSafe = async (options) => {
+  try {
+    await sendEmail(options);
+    return true;
+  } catch (error) {
+    console.error("Email sending failed:", error.message);
+    return false;
+  }
 };
 
 export default sendEmail;
