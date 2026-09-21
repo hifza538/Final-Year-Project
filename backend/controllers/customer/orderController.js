@@ -91,7 +91,6 @@ export const placeOrder = asyncHandler(async (req, res) => {
     },
     itemsPrice,
     deliveryFee,
-    taxPrice: 0,
     totalPrice,
     orderStatus: "Pending",
   });
@@ -166,6 +165,7 @@ export const cancelMyOrder = asyncHandler(async (req, res) => {
   }
  
   order.orderStatus = "Rejected";
+  order.cancelReason = "customer_cancelled";
   await order.save();
 
   // Let the vendor know this order was cancelled by the customer

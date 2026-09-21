@@ -20,8 +20,3 @@ export const rejectRider = async (id, reason) => {
   const response = await api.patch(`/admin/delivery/${id}/reject`, { reason });
   return response.data;
 };
-
-export const toggleRiderBlock = async (id) => {
-  const response = await api.patch(`/admin/delivery/${id}/toggle-block`);
-  return response.data;
-};

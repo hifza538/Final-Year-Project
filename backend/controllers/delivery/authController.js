@@ -163,15 +163,21 @@ export const loginDelivery = asyncHandler(async (req, res) => {
     throw new Error("This app is for delivery riders only.");
   }
 
+  // Check if the user is active
+  if (!user.isActive) {
+    res.status(403);
+    throw new Error(
+      user.rejectionReason
+        ? `Your account has been deactivated: ${user.rejectionReason}. Please contact support.`
+        : "Your account has been deactivated. Please contact support."
+    );
+  }
+
+
   // Rider must be approved by admin before logging in
   if (!user.isApproved) {
     res.status(403);
     throw new Error("Your account is pending admin approval. Please wait.");
-  }
-
-  if (!user.isActive) {
-    res.status(403);
-    throw new Error("Your account has been deactivated. Please contact support.");
   }
 
   res.status(200).json({

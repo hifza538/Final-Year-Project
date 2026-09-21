@@ -5,6 +5,7 @@ import { forgotPassword, resetPassword } from "../controllers/shared/passwordCon
 import { uploadCnic } from "../config/cloudinary.js";
 import { protect, vendorOnly } from "../middleware/authMiddleware.js";
 import { getDashboardStats } from "../controllers/vendor/vendorController.js";
+import { getMyPerformance } from "../controllers/vendor/performanceController.js";
 import { getProfile, updateProfile, getShopStatus, updateShopStatus } from "../controllers/vendor/profileController.js";
 import { uploadRestaurant } from "../config/cloudinary.js";
 import { getMenuItems, addMenuItem, updateMenuItem, deleteMenuItem, toggleStock } from "../controllers/vendor/menuController.js";
@@ -30,6 +31,7 @@ router.use(protect, vendorOnly);
 router.get("/me", getMe);
 // Dashboard statistics route
 router.get("/dashboard-stats", getDashboardStats);
+router.get("/performance", getMyPerformance);
 
 // Vendor profile routes
 router.get("/profile", getProfile);

@@ -85,6 +85,11 @@ const orderSchema = new mongoose.Schema(
       ],
       default: "Pending",
     },
+    // Cancellation reason
+      cancelReason: {
+      type: String,
+      enum: ["vendor_timeout", "vendor_rejected", "customer_cancelled", "admin_cancelled"],
+    },
 
     // Payment status
     isPaid:       { type: Boolean, default: false },
