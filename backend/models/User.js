@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required"],
       minlength: [6, "Password must be at least 6 characters"],
-      select: false, // never returned in queries by default
+      select: false, 
     },
     phone: {
       type: String,
@@ -59,6 +59,10 @@ const userSchema = new mongoose.Schema(
         address: { type: String, required: true, trim: true },
         notes: { type: String, default: "", trim: true },
         isDefault: { type: Boolean, default: false },
+        coordinates: {
+          lat: { type: Number, default: null },
+          lng: { type: Number, default: null },
+        },
       },
     ],
 
@@ -69,6 +73,12 @@ const userSchema = new mongoose.Schema(
     city: { type: String, trim: true, default: "" },
     zone: { type: String, trim: true, default: "" },
     cuisine: { type: String, trim: true, default: "" },
+    
+    deliveryRadius: {
+      type: Number,
+      enum: [2, 3, 5],
+      default: 3,
+    },
     
     // Delivery Specific Fields
 
@@ -132,7 +142,6 @@ const userSchema = new mongoose.Schema(
     isApproved: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
 
-    // Rejection tracking
     rejectionReason: {
       type: String,
       default: null,
@@ -166,6 +175,15 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    // Warnings sent by admin (for poor order performance)
+    warnings: [
+      {
+        message: { type: String, default: "" },
+        cancellationRate: { type: Number, default: 0 },
+        sentBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        sentAt: { type: Date, default: Date.now },
+      },
+    ],
 
     // Timestamps
   },

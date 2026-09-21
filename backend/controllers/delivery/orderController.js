@@ -1,5 +1,11 @@
+
+//backend/controllers/delivery/orderController.js
 import asyncHandler from "express-async-handler";
 import Order from "../../models/Order.js";
+import { notifyUser } from "../../socket.js";
+
+// Define the sequence of delivery stages for validation and progression
+const STAGE_SEQUENCE = ["Accepted", "ArrivedAtRestaurant", "PickedUp", "OnTheWay", "Delivered"];
 
 // Helper function to format order response
 const orderResponse = (order) => ({
@@ -13,6 +19,7 @@ const orderResponse = (order) => ({
   taxPrice: order.taxPrice,
   totalPrice: order.totalPrice,
   orderStatus: order.orderStatus,
+  deliveryStage: order.deliveryStage,
   isPaid: order.isPaid,
   isDelivered: order.isDelivered,
   createdAt: order.createdAt,
@@ -20,9 +27,6 @@ const orderResponse = (order) => ({
 });
 
 // Get all available orders for delivery riders
-
-// @desc   Get all available orders for delivery riders
-// @route  GET /api/delivery/orders/available
 export const getAvailableOrders = asyncHandler(async (req, res) => {
   // Check if the rider is online before fetching available orders
   // This is important because we do not want offline riders to accept orders and then not deliver them
@@ -39,8 +43,7 @@ export const getAvailableOrders = asyncHandler(async (req, res) => {
 
 // Accept an order for delivery
 export const acceptOrder = asyncHandler(async (req, res) => {
-
- // Check if the rider already has an active order
+  // Check if the rider already has an active order
   const activeOrder = await Order.findOne({
     deliveryRider: req.user._id,
     orderStatus: "OutForDelivery",
@@ -51,10 +54,10 @@ export const acceptOrder = asyncHandler(async (req, res) => {
     throw new Error("Finish your current delivery before accepting a new order");
   }
 
- // Attempt to assign the order to the rider only if it is still available
+  // Attempt to assign the order to the rider only if it is still available
   const order = await Order.findOneAndUpdate(
     { _id: req.params.id, orderStatus: "Ready", deliveryRider: null },
-    { deliveryRider: req.user._id, orderStatus: "OutForDelivery" },
+    { deliveryRider: req.user._id, orderStatus: "OutForDelivery", deliveryStage: "Accepted" },
     { new: true }
   ).populate("vendor", "shopName phone shopAddress");
 
@@ -62,6 +65,13 @@ export const acceptOrder = asyncHandler(async (req, res) => {
     res.status(409);
     throw new Error("This order was already accepted by another rider");
   }
+
+  // Let the customer know a rider is now assigned to their order
+  notifyUser(order.customer, "orderUpdate", {
+    orderId: order._id,
+    status: order.orderStatus,
+    message: "A delivery rider has been assigned to your order!",
+  });
 
   res.status(200).json({ message: "Order accepted", order: orderResponse(order) });
 });
@@ -78,20 +88,57 @@ export const getMyOrders = asyncHandler(async (req, res) => {
   res.status(200).json({ orders: orders.map(orderResponse) });
 });
 
-// Mark an order as delivered
-export const deliverOrder = asyncHandler(async (req, res) => {
-  const order = await Order.findOneAndUpdate(
-    { _id: req.params.id, deliveryRider: req.user._id, orderStatus: "OutForDelivery" },
-    { orderStatus: "Completed", isDelivered: true },
-    { new: true }
-  ).populate("vendor", "shopName phone shopAddress");
+// Move the order to its next delivery stage
+export const advanceOrderStatus = asyncHandler(async (req, res) => {
+  const order = await Order.findOne({
+    _id: req.params.id,
+    deliveryRider: req.user._id,
+    orderStatus: "OutForDelivery",
+  });
 
   if (!order) {
     res.status(404);
     throw new Error("Order not found or not assigned to you");
   }
 
-  res.status(200).json({ message: "Order marked as delivered", order: orderResponse(order) });
+  const currentIndex = STAGE_SEQUENCE.indexOf(order.deliveryStage);
+  const nextStage = STAGE_SEQUENCE[currentIndex + 1];
+
+  if (!nextStage) {
+    res.status(400);
+    throw new Error("This order has already been delivered");
+  }
+
+  order.deliveryStage = nextStage;
+
+  // If the order has reached the "Delivered" stage, we also mark it as completed
+  if (nextStage === "Delivered") {
+    order.orderStatus = "Completed";
+    order.isDelivered = true;
+  }
+
+  await order.save();
+  await order.populate("vendor", "shopName phone shopAddress");
+
+  // Let the customer know their order moved to the next delivery stage
+  const stageMessages = {
+    ArrivedAtRestaurant: "Your rider has arrived at the restaurant.",
+    PickedUp: "Your rider has picked up your order.",
+    OnTheWay: "Your order is on the way!",
+    Delivered: "Your order has been delivered. Enjoy your meal!",
+  };
+ 
+  notifyUser(order.customer, "orderUpdate", {
+    orderId: order._id,
+    status: order.orderStatus,
+    message: stageMessages[nextStage] || `Order status updated to ${nextStage}`,
+  });
+
+  res.status(200).json({
+    message:
+      nextStage === "Delivered" ? "Order marked as delivered" : `Order status updated to ${nextStage}`,
+    order: orderResponse(order),
+  });
 });
 
 // Get the rider's order history (completed orders)

@@ -1,6 +1,9 @@
+//backend/controllers/delivery/authController.js
+
 import asyncHandler from "express-async-handler";
 import User from "../../models/User.js";
 import generateToken from "../../utils/generateToken.js";
+import { sendVerificationEmail } from "../shared/verificationController.js";
 
 // Delivery response format
 const deliveryResponse = (user) => ({
@@ -15,10 +18,10 @@ const deliveryResponse = (user) => ({
   isApproved: user.isApproved,
   isActive: user.isActive,
   isOnline: user.isOnline,
+  isEmailVerified: user.isEmailVerified,
 });
 
-/*@desc   Register a new delivery rider
- @route  POST /api/delivery/register */
+// register a new delivery rider
 export const registerDelivery = asyncHandler(async (req, res) => {
   const { fullName, email, password, phone, cnicNumber, vehicleType, vehicleNumber } = req.body;
 
@@ -119,15 +122,19 @@ export const registerDelivery = asyncHandler(async (req, res) => {
     isApproved: false, // Admin must approve before rider can go online
   });
 
+  // Send verification email to the rider
+  try {
+    await sendVerificationEmail(rider);
+  } catch (err) {
+    console.error("Failed to send verification email:", err.message);
+  }
+
   res.status(201).json({
-    message: "Registration submitted! Please wait for admin approval.",
-    user: deliveryResponse(rider),
-    token: generateToken(rider._id),
+    message: "Registration submitted! Please check your email to verify your account, then wait for admin approval.",
   });
 });
 
-/*@desc   Login delivery rider
- @route  POST /api/delivery/login */
+// login a delivery rider
 export const loginDelivery = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -165,16 +172,27 @@ export const loginDelivery = asyncHandler(async (req, res) => {
     throw new Error("This app is for delivery riders only.");
   }
 
-  // Rider must be approved by admin before logging in
-  if (!user.isApproved) {
-    res.status(403);
-    throw new Error("Your account is pending admin approval. Please wait.");
-  }
-
+  // Check if the user is active
   if (!user.isActive) {
     res.status(403);
-    throw new Error("Your account has been deactivated. Please contact support.");
+    throw new Error(
+      user.rejectionReason
+        ? `Your account has been deactivated: ${user.rejectionReason}. Please contact support.`
+        : "Your account has been deactivated. Please contact support."
+    );
   }
+
+// Rider must have verified their email
+if (!user.isEmailVerified) {
+  res.status(403);
+  throw new Error("Please verify your email before logging in. Check your inbox for the verification link.");
+}
+
+// Rider must be approved by admin before logging in
+if (!user.isApproved) {
+  res.status(403);
+  throw new Error("Your account is pending admin approval. Please wait.");
+}
 
   res.status(200).json({
     user: deliveryResponse(user),
@@ -182,8 +200,7 @@ export const loginDelivery = asyncHandler(async (req, res) => {
   });
 });
 
-/* @desc   Get logged-in delivery rider details
- @route  GET /api/delivery/me */
+// get logged-in delivery rider details
 export const getMe = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 

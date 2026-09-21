@@ -1,10 +1,12 @@
 // customer-frontend/src/components/address/AddressFormModal.jsx
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X } from "lucide-react";
 import { addressSchema } from "../../utils/validationSchemas";
 import FormInput from "../common/FormInput";
+import MapPicker from "../common/MapPicker";
 
 const AddressFormModal = ({ initialData, onClose, onSubmit, isSubmitting }) => {
   const {
@@ -23,6 +25,25 @@ const AddressFormModal = ({ initialData, onClose, onSubmit, isSubmitting }) => {
     },
   });
 
+  const [coordinates, setCoordinates] = useState(
+    initialData?.coordinates?.lat
+      ? { lat: initialData.coordinates.lat, lng: initialData.coordinates.lng }
+      : { lat: null, lng: null }
+  );
+
+  
+  const [locationError, setLocationError] = useState("");
+
+  const handleFormSubmit = (formData) => {
+  
+    if (!coordinates.lat || !coordinates.lng) {
+      setLocationError("Please pin your exact location on the map before saving.");
+      return;
+    }
+    setLocationError("");
+    onSubmit({ ...formData, coordinates });
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
@@ -35,7 +56,7 @@ const AddressFormModal = ({ initialData, onClose, onSubmit, isSubmitting }) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="px-6 py-5" noValidate>
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="px-6 py-5" noValidate>
           <FormInput
             label="Label"
             placeholder="Home, Work, etc."
@@ -73,6 +94,23 @@ const AddressFormModal = ({ initialData, onClose, onSubmit, isSubmitting }) => {
             error={errors.notes}
             required={false}
           />
+
+        
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Pin Location <span className="text-red-500">*</span>
+            </label>
+            <MapPicker
+              initialLat={coordinates.lat}
+              initialLng={coordinates.lng}
+              onLocationSelect={(lat, lng) => {
+                setCoordinates({ lat, lng });
+                setLocationError("");
+              }}
+            />
+          
+            {locationError && <p className="text-red-500 text-xs mt-1">{locationError}</p>}
+          </div>
 
           <div className="flex gap-3 pt-1">
             <button

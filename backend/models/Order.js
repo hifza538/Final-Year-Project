@@ -22,6 +22,12 @@ const orderSchema = new mongoose.Schema(
       ref: "User",
       default: null,
     },
+    // Drives the rider status
+    deliveryStage:{
+      type: String,
+      enum: ["Accepted", "ArrivedAtRestaurant", "PickedUp", "OnTheWay", "Delivered"],
+      default: "Accepted",
+    },
 
     // Items in the order
     orderItems: [
@@ -53,6 +59,10 @@ const orderSchema = new mongoose.Schema(
       address:  { type: String, default: "" },
       city:     { type: String, default: "" },
       notes:    { type: String, default: "" },
+      coordinates: {
+        lat: { type: Number, default: null },
+        lng: { type: Number, default: null },
+      },
     },
 
     // Price breakdown
@@ -74,6 +84,11 @@ const orderSchema = new mongoose.Schema(
         "Rejected",
       ],
       default: "Pending",
+    },
+    // Cancellation reason
+      cancelReason: {
+      type: String,
+      enum: ["vendor_timeout", "vendor_rejected", "customer_cancelled", "admin_cancelled"],
     },
 
     // Payment status

@@ -12,16 +12,93 @@ import {
   ChevronDown,
   LogOut,
   Package,
+  MapPin,
+  Bell,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
+import { useLocation } from "../../context/LocationContext";
+import { useNotifications } from "../../context/NotificationContext";
+import LocationPickerModal from "../common/LocationPickerModal";
+
+// Formats a Date into a short relative time string ("2m ago", "1h ago")
+const timeAgo = (date) => {
+  const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
+  if (seconds < 60) return "Just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+};
+
+const NotificationBell = () => {
+  const [open, setOpen] = useState(false);
+  const bellRef = useRef(null);
+  const { notifications, unreadCount, markAllRead } = useNotifications();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (bellRef.current && !bellRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleToggle = () => {
+    setOpen((prev) => !prev);
+    if (!open) markAllRead();
+  };
+
+  return (
+    <div className="relative" ref={bellRef}>
+      <button
+        onClick={handleToggle}
+        className="relative flex items-center justify-center w-10 h-10 rounded-full
+                   text-gray-700 hover:bg-primary-light hover:text-primary transition-colors duration-200"
+        aria-label="Notifications"
+      >
+        <Bell size={20} />
+        {unreadCount > 0 && (
+          <span className="absolute top-1 right-1.5 bg-primary text-white text-[10px]
+            font-bold rounded-full h-4 w-4 flex items-center justify-center">
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg
+                        border border-gray-100 max-h-96 overflow-y-auto z-50">
+          <div className="px-4 py-3 border-b border-gray-100">
+            <h3 className="text-sm font-semibold text-secondary">Notifications</h3>
+          </div>
+          {notifications.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-8">No notifications yet</p>
+          ) : (
+            notifications.map((n) => (
+              <div key={n.id} className="px-4 py-3 border-b border-gray-100 last:border-0">
+                <p className="text-sm text-gray-700">{n.message}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{timeAgo(n.receivedAt)}</p>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
   const dropdownRef = useRef(null);
   const { user, isAuthenticated, logout } = useAuth();
   const { cartCount } = useCart();
+  const { coordinates, locationLabel, setLocation } = useLocation();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -41,6 +118,8 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const locationText = coordinates ? (locationLabel || "Location set") : "Set delivery location";
+
   return (
     <nav className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -50,25 +129,19 @@ const Navbar = () => {
             <Logo size="md" variant="dark" />
           </Link>
 
-          {/* Search bar — desktop only */}
-          <div className="hidden md:flex flex-1 max-w-xl mx-8">
-            <div className="relative w-full">
-              <Search
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              />
-              <input
-                type="text"
-                placeholder=" search for restaurants or dishes..."
-                className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-200 
-                           focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary
-                           transition-all duration-200"
-              />
-            </div>
-          </div>
+          {/* Location button — desktop only */}
+          <button
+            onClick={() => setShowLocationModal(true)}
+            className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium
+                       text-gray-700 hover:bg-primary-light hover:text-primary transition-colors duration-200
+                       shrink-0 max-w-[220px]"
+          >
+            <MapPin size={16} className={coordinates ? "text-primary shrink-0" : "shrink-0"} />
+            <span className="truncate">{locationText}</span>
+          </button>
 
           {/* Right side icons — desktop */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-2">
             <Link
               to="/cart"
               className="relative flex items-center gap-1.5 px-3 py-2 rounded-full
@@ -86,6 +159,7 @@ const Navbar = () => {
                 </span>
               )}
             </Link>
+
             {isAuthenticated ? (
               // Profile dropdown — replaces the old plain name + separate logout button
               <div className="relative" ref={dropdownRef}>
@@ -149,6 +223,8 @@ const Navbar = () => {
                 Login
               </Link>
             )}
+
+            {isAuthenticated && <NotificationBell />}
           </div>
 
           {/* Mobile menu button */}
@@ -165,6 +241,14 @@ const Navbar = () => {
       {/* Mobile menu */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-3">
+          <button
+            onClick={() => setShowLocationModal(true)}
+            className="w-full flex items-center gap-2 px-2 py-2 text-gray-700"
+          >
+            <MapPin size={18} className={coordinates ? "text-primary" : ""} />
+            {coordinates ? "Location set" : "Set delivery location"}
+          </button>
+
           <div className="relative">
             <Search
               size={18}
@@ -213,6 +297,13 @@ const Navbar = () => {
             </Link>
           )}
         </div>
+      )}
+
+      {showLocationModal && (
+        <LocationPickerModal
+          onClose={() => setShowLocationModal(false)}
+          onConfirm={setLocation}
+        />
       )}
     </nav>
   );

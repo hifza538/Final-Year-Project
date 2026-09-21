@@ -16,3 +16,16 @@
     @apply bg-gray-200 rounded animate-pulse;
   }
 }
+
+@layer utilities {
+  @keyframes heroIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-hero-in { animation: heroIn 0.5s ease-out both; }
+  .animate-hero-in-delayed { animation: heroIn 0.6s ease-out 0.1s both; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hero-in, .animate-hero-in-delayed { animation: none; }
+}

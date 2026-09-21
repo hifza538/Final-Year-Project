@@ -1,7 +1,10 @@
+// backend/controllers/vendor/authController.js
+
 import asyncHandler from "express-async-handler";
 import jwt from "jsonwebtoken";
 import User from "../../models/User.js";
 import { deleteFromCloudinary } from "../../config/cloudinary.js";
+import { sendVerificationEmail } from "../shared/verificationController.js";
 
 // generate token for user authentication
 const generateToken = (id) => {
@@ -26,6 +29,7 @@ const userResponse = (user) => ({
   serviceTypes: user.serviceTypes,
   isApproved: user.isApproved,
   isActive: user.isActive,
+  isEmailVerified: user.isEmailVerified,
 });
 
 //register vendor
@@ -87,7 +91,7 @@ export const registerVendor = asyncHandler(async (req, res) => {
   const cnicRegex = /^\d{5}-\d{7}-\d{1}$/;
   const nameRegex = /^[a-zA-Z\s]+$/;
 
-  // ── required fields validation
+  // required fields validation
   if (!firstName?.trim()) await fail("First name is required");
   if (!lastName?.trim()) await fail("Last name is required");
   if (!email?.trim()) await fail("Email is required");
@@ -200,10 +204,15 @@ export const registerVendor = asyncHandler(async (req, res) => {
     throw err;
   }
 
+  // Send verification email to the vendor
+  try {
+    await sendVerificationEmail(vendor);
+  } catch (err) {
+    console.error("Failed to send verification email:", err.message);
+  }
+
   res.status(201).json({
-    message: "Registration submitted! Please wait for admin approval.",
-    user: userResponse(vendor),
-    token: generateToken(vendor._id),
+    message: "Registration submitted! Please check your email to verify your account, then wait for admin approval.",
   });
 });
 
@@ -233,8 +242,7 @@ export const loginUser = asyncHandler(async (req, res) => {
     email: email.trim().toLowerCase(),
   }).select("+password");
 
-  // user not found
-  // same error message for both email and password to prevent user enumeration
+  // check if user exists
   if (!user) {
     res.status(401);
     throw new Error("Invalid email or password");
@@ -247,21 +255,26 @@ export const loginUser = asyncHandler(async (req, res) => {
     throw new Error("Invalid email or password");
   }
 
-  // vendor approval check
-  if (user.role === "vendor" && !user.isApproved) {
-    res.status(403);
-    throw new Error(
-      "Your restaurant is pending admin approval. Please wait."
-    );
-  }
-
-  // account must be active
   if (!user.isActive) {
     res.status(403);
     throw new Error(
-      "Your account has been deactivated. Please contact support."
+      user.rejectionReason
+        ? `Your account has been deactivated: ${user.rejectionReason}. Please contact support.`
+        : "Your account has been deactivated. Please contact support."
     );
   }
+
+// vendor email verification check
+if (user.role === "vendor" && !user.isEmailVerified) {
+  res.status(403);
+  throw new Error("Please verify your email before logging in. Check your inbox for the verification link.");
+}
+
+// vendor approval check
+if (user.role === "vendor" && !user.isApproved) {
+  res.status(403);
+  throw new Error("Your restaurant is pending admin approval. Please wait.");
+}
 
   // vendor and admin access check 
   if (user.role !== "vendor" && user.role !== "admin") {

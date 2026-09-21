@@ -187,7 +187,7 @@ const Profile = () => {
             Edit Profile
           </button>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex bg-white rounded-2xl border border-gray-100 shadow-sm divide-x divide-gray-100 overflow-x-auto">
             <StatPill
               label="Hours"
               value={`${fmt12(vendor.openingTime)} - ${fmt12(vendor.closingTime)}`}

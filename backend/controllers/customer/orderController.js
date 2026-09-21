@@ -5,6 +5,7 @@ import Order from "../../models/Order.js";
 import MenuItem from "../../models/MenuItem.js";
 import User from "../../models/User.js";
 import Review from "../../models/Review.js";
+import { notifyUser } from "../../socket.js";
 
 /* @desc   Place a new order
 @route  POST /api/customer/orders*/
@@ -86,12 +87,19 @@ export const placeOrder = asyncHandler(async (req, res) => {
       address: deliveryAddress.address.trim(),
       notes: deliveryAddress.notes?.trim() || "",
       city: deliveryAddress.city.trim(),
+      coordinates: deliveryAddress.coordinates || { lat: null, lng: null },
     },
     itemsPrice,
     deliveryFee,
-    taxPrice: 0,
     totalPrice,
     orderStatus: "Pending",
+  });
+
+  // Let the vendor know a new order just came in
+  notifyUser(order.vendor, "orderUpdate", {
+    orderId: order._id,
+    status: "Pending",
+    message: "You have a new order!",
   });
 
   res.status(201).json({
@@ -134,4 +142,38 @@ export const getMyOrderById = asyncHandler(async (req, res) => {
   }
 
   res.status(200).json({ order });
+});
+
+// @desc   Cancel a pending order (customer's own order only)
+// @route  PUT /api/customer/orders/:id/cancel
+export const cancelMyOrder = asyncHandler(async (req, res) => {
+  const order = await Order.findOne({
+    _id: req.params.id,
+    customer: req.user._id,
+  });
+ 
+  if (!order) {
+    res.status(404);
+    throw new Error("Order not found");
+  }
+ 
+  if (order.orderStatus !== "Pending") {
+    res.status(400);
+    throw new Error(
+      "This order can no longer be cancelled since the restaurant has already accepted it"
+    );
+  }
+ 
+  order.orderStatus = "Rejected";
+  order.cancelReason = "customer_cancelled";
+  await order.save();
+
+  // Let the vendor know this order was cancelled by the customer
+  notifyUser(order.vendor, "orderUpdate", {
+    orderId: order._id,
+    status: "Rejected",
+    message: "A customer cancelled order before you accepted it.",
+  });
+ 
+  res.status(200).json({ message: "Order cancelled successfully", order });
 });

@@ -2,9 +2,11 @@
 import express from "express";
 import { registerVendor, loginUser, getMe } from "../controllers/vendor/authController.js";
 import { forgotPassword, resetPassword } from "../controllers/shared/passwordController.js";
+import { verifyEmail, resendVerification } from "../controllers/shared/verificationController.js";
 import { uploadCnic } from "../config/cloudinary.js";
 import { protect, vendorOnly } from "../middleware/authMiddleware.js";
 import { getDashboardStats } from "../controllers/vendor/vendorController.js";
+import { getMyPerformance } from "../controllers/vendor/performanceController.js";
 import { getProfile, updateProfile, getShopStatus, updateShopStatus } from "../controllers/vendor/profileController.js";
 import { uploadRestaurant } from "../config/cloudinary.js";
 import { getMenuItems, addMenuItem, updateMenuItem, deleteMenuItem, toggleStock } from "../controllers/vendor/menuController.js";
@@ -25,11 +27,16 @@ router.post("/login", loginUser);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
 
+//email verification routes
+router.get("/verify-email/:token", verifyEmail);
+router.post("/resend-verification", resendVerification);
+
 // All routes are protected - vendor only
 router.use(protect, vendorOnly);
 router.get("/me", getMe);
 // Dashboard statistics route
 router.get("/dashboard-stats", getDashboardStats);
+router.get("/performance", getMyPerformance);
 
 // Vendor profile routes
 router.get("/profile", getProfile);
