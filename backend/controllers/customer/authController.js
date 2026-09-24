@@ -4,6 +4,7 @@ import asyncHandler from "express-async-handler";
 import jwt from "jsonwebtoken";
 import User from "../../models/User.js";
 import generateToken from "../../utils/generateToken.js";
+import { sendVerificationEmail } from "../shared/verificationController.js";
 
 // Customer response format
 const customerResponse = (user) => ({
@@ -85,8 +86,14 @@ export const registerCustomer = asyncHandler(async (req, res) => {
     role: "customer",
   });
 
+  try {
+    await sendVerificationEmail(customer);
+  } catch (error) {
+    console.error("Failed to send verification email:", error.message);
+  }
+
   res.status(201).json({
-    message: "Registration successful!",
+    message: "Registration successful! Please check your email to verify your account.",
     user: customerResponse(customer),
     token: generateToken(customer._id),
   });

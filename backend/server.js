@@ -18,7 +18,7 @@ import { startAutoRejectOrdersJob } from "./jobs/autoRejectOrdersJob.js";
 import { initSocket } from "./socket.js";
 
 dotenv.config();
-connectDB();
+await connectDB();
 
 const app = express();
 

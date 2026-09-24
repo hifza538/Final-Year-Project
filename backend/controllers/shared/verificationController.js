@@ -5,10 +5,14 @@ import asyncHandler from "express-async-handler";
 import User from "../../models/User.js";
 import sendEmail from "../../utils/sendEmail.js";
 
-const FRONTEND_URLS = {
-  customer: process.env.CUSTOMER_FRONTEND_URL,
-  vendor: process.env.VENDOR_FRONTEND_URL,
-  delivery: process.env.DELIVERY_FRONTEND_URL,
+const getFrontendUrl = (role) => {
+  const frontendUrls = {
+    customer: process.env.CUSTOMER_FRONTEND_URL,
+    vendor: process.env.VENDOR_FRONTEND_URL,
+    delivery: process.env.DELIVERY_FRONTEND_URL,
+  };
+
+  return frontendUrls[role] || frontendUrls.customer;
 };
 
 // verification email is sent when a user registers, and the link expires after 24 hours. The user can also request a new verification email if the first one was missed or expired.
@@ -20,7 +24,7 @@ export const sendVerificationEmail = async (user) => {
   user.emailVerificationExpire = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
   await user.save();
 
-  const baseUrl = FRONTEND_URLS[user.role] || FRONTEND_URLS.customer;
+  const baseUrl = getFrontendUrl(user.role);
   const verifyUrl = `${baseUrl}/verify-email/${verifyToken}`;
 
   const message =

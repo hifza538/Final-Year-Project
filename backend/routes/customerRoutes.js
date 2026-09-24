@@ -25,6 +25,7 @@ router.post("/reset-password/:token", resetPassword);
 
 // Email verification routes
 router.get("/verify-email/:token", verifyEmail);
+router.post("/verify-email/:token", verifyEmail);
 router.post("/resend-verification", resendVerification);
 
 // Address routes

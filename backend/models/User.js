@@ -50,6 +50,11 @@ const userSchema = new mongoose.Schema(
     resetPasswordToken: { type: String, default: undefined },
     resetPasswordExpire: { type: Date, default: undefined },
 
+    // email verification fields
+    isEmailVerified: { type: Boolean, default: false },
+    emailVerificationToken: { type: String, default: undefined, select: false },
+    emailVerificationExpire: { type: Date, default: undefined, select: false },
+
     //delivery address for customers
     addresses: [
       {
