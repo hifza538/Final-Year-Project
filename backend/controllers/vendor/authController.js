@@ -3,6 +3,7 @@
 import asyncHandler from "express-async-handler";
 import jwt from "jsonwebtoken";
 import User from "../../models/User.js";
+import Cuisine from "../../models/Cuisine.js";
 import { deleteFromCloudinary } from "../../config/cloudinary.js";
 import { sendVerificationEmail } from "../shared/verificationController.js";
 
@@ -130,6 +131,12 @@ export const registerVendor = asyncHandler(async (req, res) => {
   if (!cnicRegex.test(cnicNumber.trim()))
     await fail("CNIC must be in format: XXXXX-XXXXXXX-X");
 
+  const selectedCuisine = await Cuisine.findOne({
+    name: { $regex: `^${cuisine.trim()}$`, $options: "i" },
+    isActive: true,
+  });
+  if (!selectedCuisine) await fail("Please select a valid cuisine");
+
   // time validation for minPrepTime and maxPrepTime
   if (
     minPrepTime !== undefined &&
@@ -175,7 +182,7 @@ export const registerVendor = asyncHandler(async (req, res) => {
       phone: phone.trim(),
       role: "vendor",
       shopName: shopName.trim(),
-      cuisine: cuisine.trim(),
+      cuisines: [selectedCuisine._id],
       city: city.trim(),
       zone: zone.trim(),
       shopAddress: shopAddress.trim(),

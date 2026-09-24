@@ -2,7 +2,7 @@
 
 import nodemailer from "nodemailer";
 
-const sendEmail = async ({ to, subject, text }) => {
+const sendEmail = async ({ to, subject, text, html }) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -11,13 +11,15 @@ const sendEmail = async ({ to, subject, text }) => {
     },
   });
 
-  await transporter.sendMail({
+  const mail = {
     from: `"LocalBites" <${process.env.EMAIL_USER}>`,
     to,
     subject,
     text,
-    html,
-  });
+  };
+
+  if (html) mail.html = html;
+  await transporter.sendMail(mail);
 };
 
 export const sendEmailSafe = async (options) => {

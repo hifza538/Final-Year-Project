@@ -1,6 +1,7 @@
 //backend/controllers/vendor/profileController.js
 import asyncHandler from "express-async-handler";
 import User from "../../models/User.js";
+import Cuisine from "../../models/Cuisine.js";
 import { deleteFromCloudinary } from "../../config/cloudinary.js";
 
 // Safe fields to return in response
@@ -14,7 +15,10 @@ const profileResponse = (vendor) => ({
   shopAddress: vendor.shopAddress,
   city: vendor.city,
   zone: vendor.zone,
-  cuisine: vendor.cuisine,
+  cuisines: (vendor.cuisines || []).map((cuisine) =>
+    typeof cuisine === "string" ? cuisine : cuisine.name
+  ).filter(Boolean),
+  cuisine: vendor.cuisines?.[0]?.name || vendor.cuisine || "",
   coverPhoto: vendor.coverPhoto,
   logo: vendor.logo,
   isOpen: vendor.isOpen,
@@ -30,7 +34,7 @@ const profileResponse = (vendor) => ({
 
 // get vendor profile
 export const getProfile = asyncHandler(async (req, res) => {
-  const vendor = await User.findById(req.user._id);
+  const vendor = await User.findById(req.user._id).populate("cuisines", "name");
 
   if (!vendor) {
     res.status(404);
@@ -42,7 +46,7 @@ export const getProfile = asyncHandler(async (req, res) => {
 
 // update vendor profile
 export const updateProfile = asyncHandler(async (req, res) => {
-  const vendor = await User.findById(req.user._id);
+  const vendor = await User.findById(req.user._id).populate("cuisines", "name");
 
   if (!vendor) {
     res.status(404);
@@ -132,7 +136,17 @@ export const updateProfile = asyncHandler(async (req, res) => {
   if (shopAddress !== undefined) vendor.shopAddress = shopAddress.trim();
   if (city !== undefined) vendor.city = city.trim();
   if (zone !== undefined) vendor.zone = zone.trim();
-  if (cuisine !== undefined) vendor.cuisine = cuisine.trim();
+  if (cuisine !== undefined) {
+    const selectedCuisine = await Cuisine.findOne({
+      name: { $regex: `^${String(cuisine).trim()}$`, $options: "i" },
+      isActive: true,
+    });
+    if (!selectedCuisine) {
+      res.status(400);
+      throw new Error("Please select a valid cuisine");
+    }
+    vendor.cuisines = [selectedCuisine._id];
+  }
   if (openingTime !== undefined) vendor.openingTime = openingTime;
   if (closingTime !== undefined) vendor.closingTime = closingTime;
   if (minPrepTime !== undefined) vendor.minPrepTime = Number(minPrepTime);
@@ -165,6 +179,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
   }
 
   const updated = await vendor.save();
+  await updated.populate("cuisines", "name");
 
   res.status(200).json({
     message: "Profile updated successfully",
