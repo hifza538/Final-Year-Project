@@ -135,9 +135,11 @@ const Checkout = () => {
       const orderData = {
         vendorId: restaurantId,
         items: cartItems.map((item) => ({
-          _id: item._id,
+          _id: item.itemId || item._id,
           name: item.name,
           quantity: item.quantity,
+          variantId: item.variantId || "",
+          addonOptionIds: Array.isArray(item.addonOptionIds) ? item.addonOptionIds : [],
         })),
         deliveryAddress,
       };

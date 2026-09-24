@@ -1,4 +1,21 @@
+// backend/models/MenuItem.js
 import mongoose from "mongoose";
+
+// Price of a menu item variant
+const variantSchema = new mongoose.Schema({
+  label: {
+    type:      String,
+    required:  [true, "Size label is required"],
+    trim:      true,
+    maxlength: [40, "Size label must not exceed 40 characters"],
+  },
+  price: {
+    type:     Number,
+    required: [true, "Price is required"],
+    min:      [1, "Price must be greater than 0"],
+  },
+  isAvailable: { type: Boolean, default: true },
+});
 
 const menuItemSchema = new mongoose.Schema(
   {
@@ -23,26 +40,25 @@ const menuItemSchema = new mongoose.Schema(
       default:   "",
       maxlength: [500, "Description must not exceed 500 characters"],
     },
-    price: {
-      type:     Number,
-      required: [true, "Price is required"],
-      min:      [1,    "Price must be greater than 0"],
-    },
+
+    // Category of this menu item
     category: {
-      type:     String,
+      type:     mongoose.Schema.Types.ObjectId,
+      ref:      "Category",
       required: [true, "Category is required"],
-      enum: [
-        "Burgers",
-        "Pizza",
-        "Biryani",
-        "Drinks",
-        "Desserts",
-        "Sides",
-        "Salads",
-        "Breakfast",
-        "Other",
-      ],
     },
+
+    // Variants (sizes) of this menu item
+    variants: {
+      type: [variantSchema],
+      validate: [(v) => v.length > 0, "At least one variant is required"],
+    },
+
+    // Addon groups that can be attached to this menu item
+    addonGroups: [{ type: mongoose.Schema.Types.ObjectId, ref: "AddonGroup" }],
+
+    // Price of the menu item (minimum price among variants)
+    price: { type: Number, min: 1 },
 
     // Item Image
     image: {
@@ -58,6 +74,14 @@ const menuItemSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+menuItemSchema.pre("validate", function () {
+  if (this.variants?.length) {
+    this.price = Math.min(...this.variants.map((v) => v.price));
+  }
+});
+
+menuItemSchema.index({ vendor: 1, category: 1 });
 
 const MenuItem = mongoose.model("MenuItem", menuItemSchema);
 export default MenuItem;

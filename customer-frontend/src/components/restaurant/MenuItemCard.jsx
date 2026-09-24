@@ -1,62 +1,99 @@
 // customer-frontend/src/components/restaurant/MenuItemCard.jsx
 
+import { useState } from "react";
 import { Plus, UtensilsCrossed } from "lucide-react";
 import { useCart } from "../../context/CartContext";
+import ItemOptionsModal from "./ItemOptionsModal";
 
-// Shows one menu item with an Add to Cart button - disabled when out of stock
 const MenuItemCard = ({ item, restaurantId }) => {
   const { addToCart } = useCart();
+  const [showOptions, setShowOptions] = useState(false);
+
+  const hasOptions = item.variants.length > 1 || (item.addonGroups || []).length > 0;
+  const singleVariant = item.variants[0];
 
   const handleAdd = () => {
     if (!item.inStock) return;
-    addToCart(item, restaurantId);
+    if (hasOptions) {
+      setShowOptions(true);
+      return;
+    }
+    addToCart(
+      {
+        _id: item._id,
+        itemId: item._id,
+        name: item.name,
+        image: item.image,
+        price: singleVariant.price,
+        variantId: singleVariant._id,
+        addonOptionIds: [],
+        qty: 1,
+        unitPriceEstimate: singleVariant.price,
+      },
+      restaurantId
+    );
   };
 
-  return (
-    <div
-      className={`flex gap-4 bg-white rounded-xl border border-gray-100 p-4
-                  ${!item.inStock ? "opacity-60" : ""}`}
-    >
-      {/* Image */}
-      <div className="w-20 h-20 rounded-lg bg-gray-100 shrink-0 overflow-hidden">
-        {item.image?.url ? (
-          <img src={item.image.url} alt={item.name} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-primary-light">
-            <UtensilsCrossed size={20} className="text-primary/40" />
-          </div>
-        )}
-      </div>
+  const priceLabel =
+    item.variants.length > 1
+      ? `From Rs ${Math.min(...item.variants.map((v) => v.price)).toLocaleString()}`
+      : `Rs ${singleVariant.price.toLocaleString()}`;
 
-      {/* Details */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-2">
-          <h4 className="font-semibold text-gray-900">{item.name}</h4>
-          {!item.inStock && (
-            <span className="text-xs font-medium text-red-500 bg-red-50 px-2 py-0.5 rounded-full shrink-0">
-              Out of Stock
-            </span>
+  return (
+    <>
+      <div
+        className={`flex gap-4 bg-white rounded-xl border border-gray-100 p-4
+                    ${!item.inStock ? "opacity-60" : ""}`}
+      >
+        {/* Image */}
+        <div className="w-20 h-20 rounded-lg bg-gray-100 shrink-0 overflow-hidden">
+          {item.image?.url ? (
+            <img src={item.image.url} alt={item.name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-primary-light">
+              <UtensilsCrossed size={20} className="text-primary/40" />
+            </div>
           )}
         </div>
-        {item.description && (
-          <p className="text-sm text-gray-500 mt-1 line-clamp-2">{item.description}</p>
-        )}
 
-        <div className="flex items-center justify-between mt-3">
-          <span className="font-semibold text-gray-900">Rs. {item.price}</span>
-          <button
-            onClick={handleAdd}
-            disabled={!item.inStock}
-            className="flex items-center gap-1 px-3 py-1.5 bg-primary text-white text-sm font-medium
-                       rounded-full hover:bg-primary-dark transition-colors duration-200
-                       disabled:bg-gray-300 disabled:cursor-not-allowed"
-          >
-            <Plus size={16} />
-            Add
-          </button>
+        {/* Details */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-2">
+            <h4 className="font-semibold text-gray-900">{item.name}</h4>
+            {!item.inStock && (
+              <span className="text-xs font-medium text-red-500 bg-red-50 px-2 py-0.5 rounded-full shrink-0">
+                Out of Stock
+              </span>
+            )}
+          </div>
+          {item.description && (
+            <p className="text-sm text-gray-500 mt-1 line-clamp-2">{item.description}</p>
+          )}
+
+          <div className="flex items-center justify-between mt-3">
+            <span className="font-semibold text-gray-900">{priceLabel}</span>
+            <button
+              onClick={handleAdd}
+              disabled={!item.inStock}
+              className="flex items-center gap-1 px-3 py-1.5 bg-primary text-white text-sm font-medium
+                         rounded-full hover:bg-primary-dark transition-colors duration-200
+                         disabled:bg-gray-300 disabled:cursor-not-allowed"
+            >
+              <Plus size={16} />
+              {hasOptions ? "Select" : "Add"}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+
+      {showOptions && (
+        <ItemOptionsModal
+          item={item}
+          onClose={() => setShowOptions(false)}
+          onAdd={(line) => addToCart(line, restaurantId)}
+        />
+      )}
+    </>
   );
 };
 

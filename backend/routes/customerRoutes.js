@@ -9,11 +9,13 @@ import { addReview, getRestaurantReviews } from "../controllers/customer/reviewC
 import { forgotPassword, resetPassword } from "../controllers/shared/passwordController.js";
 import { verifyEmail, resendVerification } from "../controllers/shared/verificationController.js";
 import { protect, customerOnly } from "../middleware/authMiddleware.js";
+import { submitContactMessage } from "../controllers/public/contactController.js";
 
 const router = express.Router();
 
 router.post("/register", registerCustomer);
 router.post("/login", loginCustomer);
+router.post("/contact", submitContactMessage);
 router.get("/me", protect, customerOnly, getMe);
 router.put("/profile", protect, customerOnly, updateProfile);
 

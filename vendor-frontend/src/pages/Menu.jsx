@@ -1,33 +1,43 @@
 // vendor-frontend/src/pages/Menu.jsx
 
 import { useEffect, useState } from "react";
-import { Plus, Search, UtensilsCrossed } from "lucide-react";
-import { getMenuItems, deleteMenuItem, toggleMenuItemStock } from "../services/menuService";
+import { Plus, Search, UtensilsCrossed, Layers } from "lucide-react";
+import { getMenuItems, deleteMenuItem, toggleMenuItemStock, getCategories, getAddonGroups } from "../services/menuService";
 import MenuCard from "../components/menu/MenuCard";
 import MenuCardSkeleton from "../components/menu/MenuCardSkeleton";
 import MenuModal from "../components/menu/MenuModal";
 import DeleteConfirmModal from "../components/menu/DeleteConfirmModal";
-import CategoryDropdown from "../components/menu/CategoryDropdown";
+import CategorySelect from "../components/menu/CategorySelect";
+import AddonGroupManager from "../components/menu/AddonGroupManager";
 import EmptyState from "../components/common/EmptyState";
 import ErrorState from "../components/common/ErrorState";
 
 const Menu = () => {
   const [items, setItems] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [addonGroups, setAddonGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [showAddonManager, setShowAddonManager] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("All");
 
-  const fetchMenu = async () => {
+  const fetchAll = async () => {
     setLoading(true);
     setError("");
     try {
-      const data = await getMenuItems();
-      setItems(data.items);
+      const [menuData, categoryData, addonData] = await Promise.all([
+        getMenuItems(),
+        getCategories(),
+        getAddonGroups(),
+      ]);
+      setItems(menuData.items);
+      setCategories(categoryData.categories);
+      setAddonGroups(addonData.addonGroups);
     } catch (err) {
       setError(
         err.response?.data?.message || "Failed to load menu items."
@@ -38,8 +48,13 @@ const Menu = () => {
   };
 
   useEffect(() => {
-    fetchMenu();
+    fetchAll();
   }, []);
+
+  const refreshAddonGroups = async () => {
+    const data = await getAddonGroups();
+    setAddonGroups(data.addonGroups);
+  };
 
   const handleSaved = (savedItem, isEditing) => {
     if (isEditing) {
@@ -84,36 +99,49 @@ const Menu = () => {
       .toLowerCase()
       .includes(search.toLowerCase());
     const matchCategory =
-      filterCategory === "All" || item.category === filterCategory;
+      filterCategory === "All" || item.category?.name === filterCategory;
     return matchSearch && matchCategory;
   });
 
   return (
     <div className="space-y-6">
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <p className="text-sm text-gray-500">
           <span className="font-semibold text-gray-900">{items.length}</span>{" "}
           item{items.length !== 1 ? "s" : ""} in your menu
         </p>
-        <button
-          onClick={() => {
-            setEditItem(null);
-            setShowModal(true);
-          }}
-          className="flex items-center gap-2 bg-primary hover:bg-primary-dark 
-            text-white text-sm font-semibold px-4 py-2 rounded-lg 
-            transition-colors shadow-sm"
-        >
-          <Plus size={16} />
-          Add Item
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowAddonManager(true)}
+            className="flex items-center gap-2 border border-gray-200 hover:border-primary/40
+              text-gray-600 text-sm font-semibold px-4 py-2 rounded-lg
+              transition-colors"
+          >
+            <Layers size={16} />
+            Add-ons
+          </button>
+          <button
+            onClick={() => {
+              setEditItem(null);
+              setShowModal(true);
+            }}
+            disabled={categories.length === 0}
+            className="flex items-center gap-2 bg-primary hover:bg-primary-dark
+              disabled:bg-gray-300 disabled:cursor-not-allowed
+              text-white text-sm font-semibold px-4 py-2 rounded-lg
+              transition-colors shadow-sm"
+          >
+            <Plus size={16} />
+            Add Item
+          </button>
+        </div>
       </div>
 
-      {error && <ErrorState message={error} onRetry={fetchMenu} />}
+      {error && <ErrorState message={error} onRetry={fetchAll} />}
 
-      {!loading && items.length > 0 && (
-        <div className="flex gap-3 flex-wrap">
+      {!loading && (
+        <div className="flex gap-3 flex-wrap items-start">
           <div className="relative flex-1 min-w-48">
             <Search
               size={14}
@@ -130,7 +158,11 @@ const Menu = () => {
             />
           </div>
 
-          <CategoryDropdown value={filterCategory} onChange={setFilterCategory} />
+          <CategorySelect
+            value={filterCategory}
+            onChange={setFilterCategory}
+            categories={categories}
+          />
         </div>
       )}
 
@@ -138,6 +170,12 @@ const Menu = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {Array(6).fill(0).map((_, i) => <MenuCardSkeleton key={i} />)}
         </div>
+      ) : categories.length === 0 ? (
+        <EmptyState
+          icon={UtensilsCrossed}
+          title="No categories available yet"
+          message="Categories are set up by the platform admin. Please check back once categories like Pizza or Burgers are added."
+        />
       ) : filteredItems.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {filteredItems.map((item) => (
@@ -181,11 +219,21 @@ const Menu = () => {
       {showModal && (
         <MenuModal
           item={editItem}
+          categories={categories}
+          addonGroups={addonGroups}
           onClose={() => {
             setShowModal(false);
             setEditItem(null);
           }}
           onSaved={handleSaved}
+        />
+      )}
+
+      {showAddonManager && (
+        <AddonGroupManager
+          addonGroups={addonGroups}
+          onClose={() => setShowAddonManager(false)}
+          onChanged={refreshAddonGroups}
         />
       )}
 
