@@ -24,74 +24,7 @@ const Footer = () => {
               Delicious food from your favorite local restaurants, delivered
               straight to your door.
             </p>
-          </div>
-
-          {/* Company links */}
-          <div>
-            <h4 className="text-white font-semibold mb-3">Company</h4>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link
-                  to="/about"
-                  className="hover:text-primary transition-colors"
-                >
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/careers"
-                  className="hover:text-primary transition-colors"
-                >
-                  Careers
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/blog"
-                  className="hover:text-primary transition-colors"
-                >
-                  Blog
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Support links */}
-          <div>
-            <h4 className="text-white font-semibold mb-3">Support</h4>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link
-                  to="/help"
-                  className="hover:text-primary transition-colors"
-                >
-                  Help Center
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/terms"
-                  className="hover:text-primary transition-colors"
-                >
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/privacy"
-                  className="hover:text-primary transition-colors"
-                >
-                  Privacy Policy
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Social */}
-          <div>
-            <h4 className="text-white font-semibold mb-3">Follow Us</h4>
-            <div className="flex gap-3">
+            <div className="flex gap-3 mt-4">
               <a
                 href="#"
                 aria-label="Facebook"
@@ -115,10 +48,71 @@ const Footer = () => {
               </a>
             </div>
           </div>
+
+          {/* Company links */}
+          <div>
+            <h4 className="text-white font-semibold mb-3">Company</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/about" className="hover:text-primary transition-colors">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="hover:text-primary transition-colors">
+                  Contact Us
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Partner links */}
+          <div>
+            <h4 className="text-white font-semibold mb-3">Partner With Us</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a
+                  href="https://localbites-vendor-zeta.vercel.app/register"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-primary transition-colors"
+                >
+                  Become a Vendor
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://localbites-delivery.vercel.app/signup"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-primary transition-colors"
+                >
+                  Become a Rider
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Support links */}
+          <div>
+            <h4 className="text-white font-semibold mb-3">Support</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/terms" className="hover:text-primary transition-colors">
+                  Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacy" className="hover:text-primary transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <div className="border-t border-gray-700 mt-10 pt-6 text-center text-sm text-gray-500">
-          © {currentYear} LocalBites for academic purposes only.
+          © {currentYear} LocalBites. All rights reserved.
         </div>
       </div>
     </footer>

@@ -14,6 +14,10 @@ import Profile from "../pages/Profile";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 import VerifyEmail from "../pages/VerifyEmail";
+import TermsOfService from "../pages/TermsOfService";
+import PrivacyPolicy from "../pages/PrivacyPolicy";
+import AboutUs from "../pages/AboutUs";
+import ContactUs from "../pages/ContactUs";
 import NotFound from "../pages/NotFound";
 
 const AppRoutes = () => {
@@ -25,6 +29,10 @@ const AppRoutes = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
       <Route path="/verify-email/:token" element={<VerifyEmail />} />
+      <Route path="/terms" element={<TermsOfService />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/about" element={<AboutUs />} />
+      <Route path="/contact" element={<ContactUs />} />
       {/* Layout route - Navbar/Footer will wrap all child routes */}
       <Route element={<Layout />}>
         <Route path="/" element={<Home />} />

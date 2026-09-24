@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { useEffect, useState } from "react";
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -18,9 +18,19 @@ const LocationMarker = ({ position, onSelect }) => {
   return position ? <Marker position={position} /> : null;
 };
 
+const MapPosition = ({ position }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (position) map.flyTo(position, 15, { duration: 0.6 });
+  }, [map, position]);
+
+  return null;
+};
+
 const MapPicker = ({ initialLat, initialLng, onLocationSelect }) => {
   const [position, setPosition] = useState(
-    initialLat && initialLng ? [initialLat, initialLng] : null
+    initialLat != null && initialLng != null ? [initialLat, initialLng] : null
   );
   const [detecting, setDetecting] = useState(false);
   const [error, setError] = useState("");
@@ -75,11 +85,12 @@ const MapPicker = ({ initialLat, initialLng, onLocationSelect }) => {
             attribution='&copy; OpenStreetMap contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
+          <MapPosition position={position} />
           <LocationMarker position={position} onSelect={handleSelect} />
         </MapContainer>
       </div>
       <p className="text-xs text-gray-400 mt-1">
-        Click on the map or use current location to pin your delivery address
+        Click on the map to manually pin your delivery address, or use current location above.
       </p>
     </div>
   );
