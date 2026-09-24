@@ -2,6 +2,7 @@
 import asyncHandler from "express-async-handler";
 import mongoose from "mongoose";
 import User from "../../models/User.js";
+import escapeRegex from "../../utils/escapeRegex.js";
 
 // get all customers with optional filters for status and search
 export const getAllCustomers = asyncHandler(async (req, res) => {
@@ -16,7 +17,7 @@ export const getAllCustomers = asyncHandler(async (req, res) => {
   }
 
   if (search?.trim()) {
-    const regex = new RegExp(search.trim(), "i");
+    const regex = new RegExp(escapeRegex(search.trim().slice(0, 100)), "i");
     query.$or = [{ fullName: regex }, { email: regex }, { phone: regex }];
   }
 

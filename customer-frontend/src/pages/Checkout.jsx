@@ -60,6 +60,8 @@ const Checkout = () => {
         const defaultAddr = data.addresses.find((a) => a.isDefault);
         if (defaultAddr) {
           setSelectedAddressId(defaultAddr._id);
+        } else if (data.addresses.length > 0) {
+          setSelectedAddressId(data.addresses[0]._id);
         } else if (data.addresses.length === 0) {
           setUseNewAddress(true);
         }
