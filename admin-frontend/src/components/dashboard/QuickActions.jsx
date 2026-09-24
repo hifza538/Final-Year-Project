@@ -1,13 +1,14 @@
 // src/components/dashboard/QuickActions.jsx
 import { Link } from "react-router-dom";
-import { CheckCircle, Bike, Package, FolderPlus } from "lucide-react";
+import { CheckCircle, Bike, Package, FolderPlus, Tags } from "lucide-react";
 
 // Compact card showing quick action links for approving vendors/riders, viewing orders, and adding categories. Each action links to the appropriate page.
 const actions = [
   { label: "Approve Vendors", icon: CheckCircle, to: "/vendors" },
   { label: "Approve Riders", icon: Bike, to: "/delivery-approvals" },
   { label: "View Orders", icon: Package, to: "/orders" },
-  { label: "Add Category", icon: FolderPlus, to: "/categories" },
+  { label: "Manage Cuisines", icon: FolderPlus, to: "/cuisines" },
+  { label: "Menu Categories", icon: Tags, to: "/categories" },
 ];
 
 const QuickActions = () => (

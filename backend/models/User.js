@@ -72,7 +72,9 @@ const userSchema = new mongoose.Schema(
     shopAddress: { type: String, trim: true, default: "" },
     city: { type: String, trim: true, default: "" },
     zone: { type: String, trim: true, default: "" },
+    // Cuisine and Cuisines for vendors
     cuisine: { type: String, trim: true, default: "" },
+    cuisines: [{ type: mongoose.Schema.Types.ObjectId, ref: "Cuisine" }],
     
     deliveryRadius: {
       type: Number,
