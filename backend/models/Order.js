@@ -49,6 +49,23 @@ const orderSchema = new mongoose.Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: "MenuItem",
         },
+        variantId: {
+          type: mongoose.Schema.Types.ObjectId,
+          default: null,
+        },
+        variantLabel: {
+          type: String,
+          default: "",
+        },
+        addonOptions: [
+          {
+            groupId: { type: mongoose.Schema.Types.ObjectId, default: null },
+            groupName: { type: String, default: "" },
+            optionId: { type: mongoose.Schema.Types.ObjectId, default: null },
+            name: { type: String, default: "" },
+            price: { type: Number, default: 0 },
+          },
+        ],
       },
     ],
 

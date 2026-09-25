@@ -3,13 +3,11 @@
 import { Link } from "react-router-dom";
 import { Clock, MapPin, UtensilsCrossed, Star } from "lucide-react";
 
-/* Shows one restaurant's summary - used on the Home page listing grid.
-Rating is intentionally not shown yet since no review system exists yet */
 const RestaurantCard = ({ restaurant }) => {
   const {
     _id,
     shopName,
-    cuisine,
+    cuisines,
     city,
     zone,
     coverPhoto,
@@ -20,11 +18,12 @@ const RestaurantCard = ({ restaurant }) => {
     averageRating,
     reviewCount,
   } = restaurant;
+  const cuisineText = Array.isArray(cuisines) ? cuisines.join(", ") : cuisines || restaurant.cuisine || "";
 
   return (
     <Link
       to={`/restaurant/${_id}`}
-      className="block bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden
+      className="block bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden
                  hover:shadow-md transition-shadow duration-200 group"
     >
       {/* Cover photo */}
@@ -60,17 +59,21 @@ const RestaurantCard = ({ restaurant }) => {
 
       {/* Details */}
       <div className="p-4 pt-6">
-        <h3 className="font-semibold text-gray-900 truncate">{shopName}</h3>
-        <p className="text-sm text-gray-500 mt-0.5 truncate">{cuisine}</p>
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="font-semibold text-gray-900 truncate">{shopName}</h3>
+          {averageRating && (
+            <span className="flex items-center gap-1 text-xs font-medium text-gray-700 shrink-0">
+              <Star size={12} className="fill-primary text-primary" />
+              {averageRating}
+              <span className="text-gray-400">({reviewCount})</span>
+            </span>
+          )}
+        </div>
+        <p className="text-sm text-gray-500 mt-0.5 truncate">
+          {cuisineText || "Cuisine not specified"}
+        </p>
 
-        {averageRating && (
-          <span className="flex items-center gap-1 text-xs font-medium text-gray-700 shrink-0">
-            <Star size={12} className="fill-primary text-primary" />
-            {averageRating} <span className="text-gray-400">({reviewCount})</span>
-          </span>
-        )}
-
-        <div className="flex items-center gap-3 mt-3 text-xs text-gray-500">
+        <div className="flex items-center gap-3 mt-3 text-xs text-gray-500 min-w-0">
           <span className="flex items-center gap-1">
             <Clock size={14} />
             {minPrepTime}-{maxPrepTime} min

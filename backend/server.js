@@ -12,12 +12,13 @@ import vendorRoutes from "./routes/vendorRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
 import deliveryRoutes from "./routes/deliveryRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import cuisineRoutes from "./routes/cuisineRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import { startAutoRejectOrdersJob } from "./jobs/autoRejectOrdersJob.js";
 import { initSocket } from "./socket.js";
 
 dotenv.config();
-connectDB();
+await connectDB();
 
 const app = express();
 
@@ -68,6 +69,7 @@ app.use("/api/vendor", vendorRoutes);
 app.use("/api/customer", customerRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/delivery", deliveryRoutes);
+app.use("/api/cuisines", cuisineRoutes);
 app.use("/api/categories", categoryRoutes);
 
 

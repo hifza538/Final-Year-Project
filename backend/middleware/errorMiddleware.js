@@ -12,8 +12,8 @@ const errorHandler = (err, req, res, next) => {
 
   res.status(statusCode).json({
     message: err.message,
-    // show stack trace only in development mode
-    stack: process.env.NODE_ENV === "production" ? null : err.stack,
+    // Do not expose internal details unless explicitly running in development.
+    stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
   });
 };
 

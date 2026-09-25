@@ -4,6 +4,7 @@ import User from "../../models/User.js";
 import Order from "../../models/Order.js";
 import { sendEmailSafe } from "../../utils/sendEmail.js";
 import { approvalEmail, rejectionEmail } from "../../utils/emailTemplates.js";
+import escapeRegex from "../../utils/escapeRegex.js";
 
 // Get all riders pending approval
 
@@ -46,7 +47,7 @@ export const getAllRiders = asyncHandler(async (req, res) => {
   }
 
   if (search?.trim()) {
-    const regex = new RegExp(search.trim(), "i");
+    const regex = new RegExp(escapeRegex(search.trim().slice(0, 100)), "i");
     query.$or = [{ fullName: regex }, { email: regex }, { vehicleNumber: regex }];
   }
 

@@ -3,6 +3,7 @@ import asyncHandler from "express-async-handler";
 import Order from "../../models/Order.js";
 import User from "../../models/User.js";
 import { notifyUser } from "../../socket.js";
+import escapeRegex from "../../utils/escapeRegex.js";
 
 // get all orders with optional filters for status and search
 export const getAllOrders = asyncHandler(async (req, res) => {
@@ -25,7 +26,7 @@ export const getAllOrders = asyncHandler(async (req, res) => {
   }
 
   if (search?.trim()) {
-    const regex = new RegExp(search.trim(), "i");
+    const regex = new RegExp(escapeRegex(search.trim().slice(0, 100)), "i");
 
 // Search for users matching the search term in fullName, email, or shopName
     const matchingUsers = await User.find({
@@ -74,8 +75,10 @@ export const cancelOrder = asyncHandler(async (req, res) => {
     throw new Error(`Cannot cancel an order that is already ${order.orderStatus.toLowerCase()}`);
   }
 
+  const riderId = order.deliveryRider;
   order.orderStatus = "Rejected";
   order.cancelReason = "admin_cancelled";
+  order.deliveryRider = null;
   await order.save();
 
   // Let both the customer and the vendor know admin stepped in and
@@ -90,6 +93,13 @@ export const cancelOrder = asyncHandler(async (req, res) => {
     status: "Rejected",
     message: "An order was cancelled by LocalBites support.",
   });
+  if (riderId) {
+    notifyUser(riderId, "orderUpdate", {
+      orderId: order._id,
+      status: "Rejected",
+      message: "Your assigned order was cancelled by LocalBites support.",
+    });
+  }
 
   res.status(200).json({ message: "Order cancelled successfully" });
 });

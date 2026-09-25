@@ -10,6 +10,7 @@ import {
   MIN_ORDERS_FOR_RATING,
   AT_RISK_RATE,
 } from "../../utils/vendorPerformance.js";
+import escapeRegex from "../../utils/escapeRegex.js";
 
 // Get all vendors pending approval
 export const getPendingVendors = asyncHandler(async (req, res) => {
@@ -56,7 +57,7 @@ export const getAllVendors = asyncHandler(async (req, res) => {
 
   // Search by shopName, fullname or email (case-insensitive)
   if (search?.trim()) {
-    const regex = new RegExp(search.trim(), "i");
+    const regex = new RegExp(escapeRegex(search.trim().slice(0, 100)), "i");
     query.$or = [{ shopName: regex }, { fullName: regex }, { email: regex }];
   }
 

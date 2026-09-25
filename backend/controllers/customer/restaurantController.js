@@ -2,15 +2,23 @@
 
 import asyncHandler from "express-async-handler";
 import User from "../../models/User.js";
+import Cuisine from "../../models/Cuisine.js";
 import MenuItem from "../../models/MenuItem.js";
 import Review from "../../models/Review.js";
 import { getDistanceKm } from "../../utils/distance.js";
 
 // Helper function to format restaurant response for the customer frontend
-const restaurantResponse = (vendor, distanceKm = null) => ({
+const restaurantResponse = (vendor, distanceKm = null) => {
+  const cuisines = (vendor.cuisines || []).map((cuisine) =>
+    typeof cuisine === "string" ? cuisine : cuisine.name
+  ).filter(Boolean);
+  if (cuisines.length === 0 && vendor.cuisine) cuisines.push(vendor.cuisine);
+
+  return {
   _id: vendor._id,
   shopName: vendor.shopName,
-  cuisine: vendor.cuisine,
+  cuisines,
+  cuisine: cuisines[0] || "",
   city: vendor.city,
   zone: vendor.zone,
   shopAddress: vendor.shopAddress,
@@ -24,7 +32,8 @@ const restaurantResponse = (vendor, distanceKm = null) => ({
   closingTime: vendor.closingTime,
   deliveryRadius: vendor.deliveryRadius,
   distanceKm: distanceKm !== null ? Number(distanceKm.toFixed(1)) : null,
-});
+  };
+};
 
 /* @desc   Get all approved, active restaurants (public, no login required)
 @route  GET /api/customer/restaurants*/
@@ -48,10 +57,16 @@ export const getAllRestaurants = asyncHandler(async (req, res) => {
 
   // Optional filter by cuisine
   if (cuisine?.trim() && cuisine.trim() !== "All") {
-    filter.cuisine = { $regex: `^${cuisine.trim()}$`, $options: "i" };
+    const matchingCuisine = await Cuisine.findOne({
+      name: { $regex: `^${cuisine.trim()}$`, $options: "i" },
+      isActive: true,
+    }).select("_id");
+    filter.$or = matchingCuisine
+      ? [{ cuisines: matchingCuisine._id }, { cuisine: matchingCuisine.name }]
+      : [{ _id: null }];
   }
 
-  const vendors = await User.find(filter).sort({ createdAt: -1 });
+  const vendors = await User.find(filter).populate("cuisines", "name").sort({ createdAt: -1 });
 
 // Aggregate reviews to compute average rating and review count for each restaurant
   const vendorIds = vendors.map((v) => v._id);
@@ -102,7 +117,7 @@ export const getRestaurantById = asyncHandler(async (req, res) => {
     role: "vendor",
     isApproved: true,
     isActive: true,
-  });
+  }).populate("cuisines", "name");
 
   if (!vendor) {
     res.status(404);
@@ -118,7 +133,7 @@ export const getRestaurantById = asyncHandler(async (req, res) => {
 });
 
 
-/* @desc   Get menu items for a specific restaurant
+/* @desc   Get menu items for a specific restaurant, grouped by category
 @route  GET /api/customer/restaurants/:id/menu */
 export const getRestaurantMenu = asyncHandler(async (req, res) => {
   // First confirm the restaurant exists and is a valid, approved vendor
@@ -133,11 +148,32 @@ export const getRestaurantMenu = asyncHandler(async (req, res) => {
     throw new Error("Restaurant not found");
   }
 
-  // Return all menu items 
-  const items = await MenuItem.find({ vendor: req.params.id }).sort({ category: 1, createdAt: -1 });
+  // Categories are global/shared across the platform - fetch this vendor's
+  // items first, then group them under whichever categories they actually use
+  // (in the platform-wide category order set by admin).
+  const items = await MenuItem.find({
+    vendor: req.params.id,
+    category: { $type: "objectId" },
+  })
+    .populate({ path: "addonGroups", match: { isActive: true } })
+    .populate({ path: "category", match: { isActive: true }, select: "name slug sortOrder" })
+    .sort({ createdAt: -1 })
+    .lean();
+
+  const itemsByCategory = new Map();
+  items.forEach((item) => {
+    if (!item.category) return; // category was hidden by admin - don't show the item
+    const key = String(item.category._id);
+    if (!itemsByCategory.has(key)) itemsByCategory.set(key, { ...item.category, items: [] });
+    itemsByCategory.get(key).items.push(item);
+  });
+
+  const menu = [...itemsByCategory.values()].sort(
+    (a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name)
+  );
 
   res.status(200).json({
     restaurant: restaurantResponse(vendor),
-    items,
+    menu,
   });
 });

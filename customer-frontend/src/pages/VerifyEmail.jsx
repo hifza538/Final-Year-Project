@@ -1,6 +1,6 @@
 // customer-frontend/src/pages/VerifyEmail.jsx
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { verifyEmail, resendVerification } from "../services/authService";
@@ -24,7 +24,12 @@ const VerifyEmail = () => {
   const [isResending, setIsResending] = useState(false);
   const [resendSent, setResendSent] = useState(false);
 
+  const hasRun = useRef(false);
+
   useEffect(() => {
+    if (hasRun.current) return;
+    hasRun.current = true;
+
     const runVerification = async () => {
       try {
         await verifyEmail(token);

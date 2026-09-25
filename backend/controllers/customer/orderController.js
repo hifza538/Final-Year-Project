@@ -6,6 +6,7 @@ import MenuItem from "../../models/MenuItem.js";
 import User from "../../models/User.js";
 import Review from "../../models/Review.js";
 import { notifyUser } from "../../socket.js";
+import { calculateLinePrice } from "../../utils/menuPricing.js";
 
 /* @desc   Place a new order
 @route  POST /api/customer/orders*/
@@ -48,7 +49,10 @@ export const placeOrder = asyncHandler(async (req, res) => {
   const orderItems = [];
 
   for (const cartItem of items) {
-    const menuItem = await MenuItem.findOne({ _id: cartItem._id, vendor: vendorId });
+    const menuItem = await MenuItem.findOne({ _id: cartItem._id, vendor: vendorId }).populate({
+      path: "addonGroups",
+      match: { isActive: true },
+    });
 
     if (!menuItem) {
       res.status(400);
@@ -63,14 +67,24 @@ export const placeOrder = asyncHandler(async (req, res) => {
       throw new Error(`Invalid quantity for "${menuItem.name}"`);
     }
 
-    const lineTotal = menuItem.price * cartItem.quantity;
+    const priceInfo = calculateLinePrice(menuItem, cartItem.variantId, cartItem.addonOptionIds || []);
+    const lineTotal = priceInfo.unitPrice * cartItem.quantity;
     itemsPrice += lineTotal;
 
     orderItems.push({
       name: menuItem.name,
       qty: cartItem.quantity,
-      price: menuItem.price,
+      price: priceInfo.unitPrice,
       menuItem: menuItem._id,
+      variantId: priceInfo.variant?._id || null,
+      variantLabel: priceInfo.variant?.label || "",
+      addonOptions: priceInfo.addons.map((a) => ({
+        groupId: a.groupId,
+        groupName: a.groupName,
+        optionId: a.optionId,
+        name: a.name,
+        price: a.price,
+      })),
     });
   }
 

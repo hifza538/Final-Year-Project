@@ -2,7 +2,7 @@
 
 import { Link } from "react-router-dom";
 import { Star, Clock, UtensilsCrossed } from "lucide-react";
-
+import HorizontalScroller from "./HorizontalScroller";
 
 const MIN_REVIEWS_FOR_TOP_RATED = 3;
 
@@ -21,17 +21,22 @@ const TopRatedSection = ({ restaurants }) => {
 
   return (
     <div className="mb-10">
-      <div className="flex items-center gap-2 mb-4">
-        <Star size={18} className="fill-primary text-primary" />
-        <h2 className="text-lg font-bold text-secondary">Top Rated Near You</h2>
+      <div className="mb-5">
+        <div className="flex items-center gap-2">
+          <Star size={18} className="fill-primary text-primary" />
+          <h2 className="text-xl sm:text-2xl font-bold text-secondary tracking-tight">Top Rated Near You</h2>
+        </div>
+        <p className="text-sm text-gray-500 mt-1">
+          The highest-rated kitchens, based on real customer reviews.
+        </p>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1">
+      <HorizontalScroller>
         {topRated.map((restaurant) => (
           <Link
             key={restaurant._id}
             to={`/restaurant/${restaurant._id}`}
-            className="shrink-0 w-64 bg-white rounded-2xl border border-gray-100 shadow-sm
+            className="snap-start shrink-0 w-64 bg-white rounded-2xl border border-gray-100 shadow-sm
                        hover:shadow-md transition-shadow duration-200 overflow-hidden"
           >
             <div className="h-32 bg-gray-100 relative">
@@ -51,7 +56,7 @@ const TopRatedSection = ({ restaurants }) => {
             </div>
             <div className="p-3">
               <h3 className="font-semibold text-gray-900 truncate text-sm">{restaurant.shopName}</h3>
-              <p className="text-xs text-gray-500 truncate mt-0.5">{restaurant.cuisine}</p>
+              <p className="text-xs text-gray-500 truncate mt-0.5">{restaurant.cuisines?.join(", ") || restaurant.cuisine}</p>
               <div className="flex items-center gap-1 text-xs text-gray-400 mt-1.5">
                 <Clock size={12} />
                 {restaurant.minPrepTime}-{restaurant.maxPrepTime} min
@@ -59,7 +64,7 @@ const TopRatedSection = ({ restaurants }) => {
             </div>
           </Link>
         ))}
-      </div>
+      </HorizontalScroller>
     </div>
   );
 };
