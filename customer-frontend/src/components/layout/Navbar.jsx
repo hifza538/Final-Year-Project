@@ -98,7 +98,7 @@ const Navbar = () => {
   const dropdownRef = useRef(null);
   const { user, isAuthenticated, logout } = useAuth();
   const { cartCount } = useCart();
-  const { coordinates, locationLabel, setLocation } = useLocation();
+  const { coordinates, locationLabel, setLocation, clearLocation } = useLocation();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -119,6 +119,10 @@ const Navbar = () => {
   }, []);
 
   const locationText = coordinates ? (locationLabel || "Location set") : "Set delivery location";
+  const openLocationModal = () => {
+    setShowLocationModal(true);
+    setMobileMenuOpen(false);
+  };
 
   return (
     <nav className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
@@ -131,7 +135,7 @@ const Navbar = () => {
 
           {/* Location button — desktop only */}
           <button
-            onClick={() => setShowLocationModal(true)}
+            onClick={openLocationModal}
             className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium
                        text-gray-700 hover:bg-primary-light hover:text-primary transition-colors duration-200
                        shrink-0 max-w-[220px]"
@@ -242,7 +246,7 @@ const Navbar = () => {
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-3">
           <button
-            onClick={() => setShowLocationModal(true)}
+            onClick={openLocationModal}
             className="w-full flex items-center gap-2 px-2 py-2 text-gray-700"
           >
             <MapPin size={18} className={coordinates ? "text-primary" : ""} />
@@ -301,8 +305,11 @@ const Navbar = () => {
 
       {showLocationModal && (
         <LocationPickerModal
+          initialCoordinates={coordinates}
+          initialLabel={locationLabel}
           onClose={() => setShowLocationModal(false)}
           onConfirm={setLocation}
+          onClear={clearLocation}
         />
       )}
     </nav>

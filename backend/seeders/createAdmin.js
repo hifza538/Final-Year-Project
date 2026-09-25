@@ -17,10 +17,14 @@ const createAdmin = async () => {
       process.exit(0);
     }
 
+    if (!process.env.ADMIN_PASSWORD) {
+      throw new Error("ADMIN_PASSWORD must be set before creating an admin account");
+    }
+
     const admin = await User.create({
       fullName: "LocalBites Admin",
-      email: "admin@localbites.com",
-      password: "Admin123",
+      email: process.env.ADMIN_EMAIL || "admin@localbites.com",
+      password: process.env.ADMIN_PASSWORD,
       phone: "03000000000",
       role: "admin",
       isActive: true,

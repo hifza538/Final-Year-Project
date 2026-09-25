@@ -60,6 +60,8 @@ const Checkout = () => {
         const defaultAddr = data.addresses.find((a) => a.isDefault);
         if (defaultAddr) {
           setSelectedAddressId(defaultAddr._id);
+        } else if (data.addresses.length > 0) {
+          setSelectedAddressId(data.addresses[0]._id);
         } else if (data.addresses.length === 0) {
           setUseNewAddress(true);
         }
@@ -135,9 +137,11 @@ const Checkout = () => {
       const orderData = {
         vendorId: restaurantId,
         items: cartItems.map((item) => ({
-          _id: item._id,
+          _id: item.itemId || item._id,
           name: item.name,
           quantity: item.quantity,
+          variantId: item.variantId || "",
+          addonOptionIds: Array.isArray(item.addonOptionIds) ? item.addonOptionIds : [],
         })),
         deliveryAddress,
       };

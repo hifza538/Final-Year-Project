@@ -80,7 +80,7 @@ const Login = () => {
   return (
     <AuthLayout
       heading={<>Manage your<br />restaurant with ease.</>}
-      subtext="Track orders in real time, update your menu, and grow your business — all from one place."
+      subtext="Track orders in real time, update your menu, and grow your business, all from one place."
     >
       <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 sm:p-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-1">

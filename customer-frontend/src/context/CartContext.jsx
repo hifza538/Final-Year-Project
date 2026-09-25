@@ -24,6 +24,22 @@ export const CartProvider = ({ children }) => {
 
   // Add item to cart
   const addToCart = (item, itemRestaurantId) => {
+    const itemId = item?.itemId || item?._id || item?.id || "unknown-item";
+    const variantId = item?.variantId || "";
+    const addonIds = Array.isArray(item?.addonOptionIds) ? [...item.addonOptionIds].map(String).sort() : [];
+    const cartKey = `${itemId}:${variantId}:${addonIds.join("|")}`;
+
+    const normalizedItem = {
+      ...item,
+      _id: cartKey,
+      itemId,
+      variantId,
+      addonOptionIds: addonIds,
+      name: item?.name || item?.itemName || "Item",
+      price: Number(item?.price ?? item?.unitPriceEstimate ?? 0),
+      quantity: Number(item?.qty || item?.quantity || 1),
+    };
+
     // warn user if they are trying to add items from a different restaurant
     if (restaurantId && restaurantId !== itemRestaurantId && cartItems.length > 0) {
       showErrorToast("you already have items from another restaurant in your cart. please clear it first");
@@ -34,32 +50,33 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem("customerCartRestaurantId", itemRestaurantId);
 
     setCartItems((prev) => {
-      const existingItem = prev.find((i) => i._id === item._id);
+      const existingItem = prev.find((i) => (i._id || i.itemId) === normalizedItem._id);
       if (existingItem) {
-        // item already exists in cart, increase quantity
         return prev.map((i) =>
-          i._id === item._id ? { ...i, quantity: i.quantity + 1 } : i
+          (i._id || i.itemId) === normalizedItem._id
+            ? { ...i, quantity: Number(i.quantity || 0) + Number(normalizedItem.quantity || 1) }
+            : i
         );
       }
-      // new item, add to cart
-      return [...prev, { ...item, quantity: 1 }];
+
+      return [...prev, { ...normalizedItem, quantity: Number(normalizedItem.quantity || 1) }];
     });
 
-    showSuccessToast(`${item.name} added to cart`);
+    showSuccessToast(`${normalizedItem.name} added to cart`);
   };
 
   // update item quantity in cart
   const updateQuantity = (itemId, quantity) => {
     if (quantity < 1) return;
     setCartItems((prev) =>
-      prev.map((i) => (i._id === itemId ? { ...i, quantity } : i))
+      prev.map((i) => ((i._id || i.itemId) === itemId ? { ...i, quantity } : i))
     );
   };
 
   // remove item from cart
   const removeFromCart = (itemId) => {
     setCartItems((prev) => {
-      const updated = prev.filter((i) => i._id !== itemId);
+      const updated = prev.filter((i) => (i._id || i.itemId) !== itemId);
       if (updated.length === 0) {
         setRestaurantId(null);
         localStorage.removeItem("customerCartRestaurantId");

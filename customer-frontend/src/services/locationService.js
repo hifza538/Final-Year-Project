@@ -1,3 +1,20 @@
+export const searchLocation = async (query) => {
+  const response = await fetch(
+    `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=pk&q=${encodeURIComponent(query)}`,
+    { headers: { "Accept-Language": "en" } }
+  );
+
+  if (!response.ok) throw new Error("Location search failed");
+  const results = await response.json();
+  if (!results.length) throw new Error("Location not found");
+
+  return {
+    lat: Number(results[0].lat),
+    lng: Number(results[0].lon),
+    label: results[0].display_name,
+  };
+};
+
 export const reverseGeocode = async (lat, lng) => {
   try {
     const res = await fetch(

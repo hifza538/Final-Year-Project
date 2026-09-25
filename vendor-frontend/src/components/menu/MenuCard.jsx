@@ -2,6 +2,13 @@
 
 import { Pencil, Trash2, UtensilsCrossed, ToggleLeft, ToggleRight } from "lucide-react";
 
+const priceLabel = (variants) => {
+  const prices = variants.map((v) => v.price);
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+  return min === max ? `Rs ${min.toLocaleString()}` : `Rs ${min.toLocaleString()} - ${max.toLocaleString()}`;
+};
+
 const MenuCard = ({ item, onEdit, onDelete, onToggleStock }) => (
   <div className="bg-white rounded-xl border border-gray-100 shadow-sm 
     hover:shadow-md transition-shadow overflow-hidden">
@@ -30,7 +37,7 @@ const MenuCard = ({ item, onEdit, onDelete, onToggleStock }) => (
 
       <span className="absolute top-2 left-2 text-xs font-semibold 
         px-2 py-0.5 rounded-full bg-white/90 text-gray-700">
-        {item.category}
+        {item.category?.name || "Uncategorized"}
       </span>
     </div>
 
@@ -42,8 +49,16 @@ const MenuCard = ({ item, onEdit, onDelete, onToggleStock }) => (
         </p>
       )}
       <p className="text-lg font-bold text-primary mt-2">
-        Rs {item.price.toLocaleString()}
+        {priceLabel(item.variants)}
       </p>
+      {item.variants.length > 1 && (
+        <p className="text-xs text-gray-400 mt-0.5">{item.variants.length} sizes</p>
+      )}
+      {item.addonGroups?.length > 0 && (
+        <p className="text-xs text-gray-400 mt-0.5">
+          Add-ons: {item.addonGroups.map((g) => g.name).join(", ")}
+        </p>
+      )}
 
       <div className="flex items-center gap-2 mt-3">
         <button
