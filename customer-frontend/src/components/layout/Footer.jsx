@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import {
   FacebookIcon,
   InstagramIcon,
-  TwitterIcon,
 } from "../common/SocialIcons";
 import Logo from "../common/Logo";
 
@@ -26,25 +25,22 @@ const Footer = () => {
             </p>
             <div className="flex gap-3 mt-4">
               <a
-                href="#"
+                href="https://www.facebook.com/profile.php?id=61594408156951&mibextid=ZbWKwL"
                 aria-label="Facebook"
+                target="_blank"
+                rel="noreferrer"
                 className="p-2 bg-gray-800 rounded-full hover:bg-primary transition-colors duration-200"
               >
                 <FacebookIcon size={18} />
               </a>
               <a
-                href="#"
+                href="https://www.instagram.com/localbites29?stkn=OHhqanlpaHA2cDE0v"
                 aria-label="Instagram"
+                target="_blank"
+                rel="noreferrer"
                 className="p-2 bg-gray-800 rounded-full hover:bg-primary transition-colors duration-200"
               >
                 <InstagramIcon size={18} />
-              </a>
-              <a
-                href="#"
-                aria-label="Twitter"
-                className="p-2 bg-gray-800 rounded-full hover:bg-primary transition-colors duration-200"
-              >
-                <TwitterIcon size={18} />
               </a>
             </div>
           </div>

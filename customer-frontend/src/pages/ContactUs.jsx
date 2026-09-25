@@ -6,8 +6,8 @@ import { Mail, Phone, MapPin, Clock, Send } from "lucide-react";
 import api from "../services/api";
 
 const CONTACT_DETAILS = [
-  { icon: Mail, label: "Email", value: "support@localbites.com", href: "mailto:support@localbites.com" },
-  { icon: Phone, label: "Phone", value: "+92 3XX XXXXXXX", href: "tel:+923XXXXXXXXX" },
+  { icon: Mail, label: "Email", value: "localbites29@gmail.com", href: "mailto:localbites29@gmail.com" },
+  { icon: Phone, label: "Phone", value: "03260490057", href: "tel:+923260490057" },
   { icon: MapPin, label: "Address", value: "Gujranwala, Punjab, Pakistan" },
   { icon: Clock, label: "Support hours", value: "Every day, 10:00 AM – 11:00 PM" },
 ];

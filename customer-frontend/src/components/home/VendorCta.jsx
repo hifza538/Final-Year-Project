@@ -1,6 +1,5 @@
 // customer-frontend/src/components/home/VendorCta.jsx
 
-import { Link } from "react-router-dom";
 import { ChefHat, ArrowRight } from "lucide-react";
 
 const VendorCta = () => {
@@ -26,14 +25,16 @@ const VendorCta = () => {
             </div>
           </div>
 
-          <Link
-            to="/vendor/register"
+          <a
+            href="https://localbites-vendor-zeta.vercel.app/register"
+            target="_blank"
+            rel="noreferrer"
             className="group shrink-0 inline-flex items-center gap-2 justify-center bg-white text-primary font-semibold
               text-sm sm:text-base px-6 py-3.5 rounded-full hover:bg-orange-50 transition-colors shadow-lg shadow-black/10"
           >
             Register as a Vendor
             <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-0.5" />
-          </Link>
+          </a>
         </div>
       </div>
     </section>
