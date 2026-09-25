@@ -3,6 +3,7 @@
 import asyncHandler from "express-async-handler";
 import jwt from "jsonwebtoken";
 import User from "../../models/User.js";
+import Cuisine from "../../models/Cuisine.js";
 import { deleteFromCloudinary } from "../../config/cloudinary.js";
 import { sendVerificationEmail } from "../shared/verificationController.js";
 
@@ -45,6 +46,7 @@ export const registerVendor = asyncHandler(async (req, res) => {
     // Basic details
     shopName,
     cuisine,
+    cuisines,
     city,
     zone,
     shopAddress,
@@ -56,8 +58,6 @@ export const registerVendor = asyncHandler(async (req, res) => {
 
     // Legal
     cnicNumber,
-    ntnNumber,
-    hasFoodLicense,
   } = req.body;
 
   // parse coordinates if provided
@@ -98,7 +98,28 @@ export const registerVendor = asyncHandler(async (req, res) => {
   if (!password) await fail("Password is required");
   if (!phone?.trim()) await fail("Phone number is required");
   if (!shopName?.trim()) await fail("Shop name is required");
-  if (!cuisine?.trim()) await fail("Cuisine type is required");
+
+  let selectedCuisineNames = [];
+  try {
+    if (Array.isArray(cuisines)) {
+      selectedCuisineNames = cuisines;
+    } else if (typeof cuisines === "string" && cuisines.trim()) {
+      const parsed = JSON.parse(cuisines);
+      selectedCuisineNames = Array.isArray(parsed) ? parsed : [parsed];
+    } else if (cuisine?.trim()) {
+      selectedCuisineNames = [cuisine];
+    }
+  } catch (error) {
+    await fail("Please select valid cuisine options");
+  }
+
+  selectedCuisineNames = selectedCuisineNames
+    .map((item) => String(item).trim())
+    .filter(Boolean);
+
+  if (selectedCuisineNames.length === 0) await fail("Please select at least one cuisine");
+  if (selectedCuisineNames.length > 3) await fail("You can select up to 3 cuisines only");
+
   if (!city?.trim()) await fail("City is required");
   if (!zone?.trim()) await fail("Zone is required");
   if (!shopAddress?.trim()) await fail("Shop address is required");
@@ -129,6 +150,17 @@ export const registerVendor = asyncHandler(async (req, res) => {
     await fail("Please provide a complete address (minimum 10 characters)");
   if (!cnicRegex.test(cnicNumber.trim()))
     await fail("CNIC must be in format: XXXXX-XXXXXXX-X");
+
+  const cuisineDocs = await Cuisine.find({ isActive: true });
+  const cuisineMap = new Map(cuisineDocs.map((doc) => [doc.name.trim().toLowerCase(), doc]));
+
+  const selectedCuisines = selectedCuisineNames
+    .map((name) => cuisineMap.get(name.trim().toLowerCase()))
+    .filter(Boolean);
+
+  if (selectedCuisines.length !== selectedCuisineNames.length) {
+    await fail("Please select valid cuisines");
+  }
 
   // time validation for minPrepTime and maxPrepTime
   if (
@@ -175,7 +207,8 @@ export const registerVendor = asyncHandler(async (req, res) => {
       phone: phone.trim(),
       role: "vendor",
       shopName: shopName.trim(),
-      cuisine: cuisine.trim(),
+      cuisine: selectedCuisines[0].name,
+      cuisines: selectedCuisines.map((item) => item._id),
       city: city.trim(),
       zone: zone.trim(),
       shopAddress: shopAddress.trim(),

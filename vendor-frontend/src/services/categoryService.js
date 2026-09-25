@@ -3,6 +3,6 @@
 import api from "./api";
 
 export const getActiveCategories = async () => {
-  const { data } = await api.get("/categories");
-  return data;
+  const { data } = await api.get("/cuisines");
+  return { categories: data.cuisines };
 };

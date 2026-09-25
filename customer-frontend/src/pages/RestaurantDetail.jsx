@@ -15,12 +15,12 @@ const RestaurantDetail = () => {
   const { id } = useParams();
   const [restaurant, setRestaurant] = useState(null);
   const [reviews, setReviews] = useState([]);
-    const [showReviewsModal, setShowReviewsModal] = useState(false);
-  const [items, setItems] = useState([]);
+  const [showReviewsModal, setShowReviewsModal] = useState(false);
+  // menu is now an array of { _id, name, items } grouped by category, in vendor order
+  const [menu, setMenu] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeCategory, setActiveCategory] = useState("All");
-  
 
   const fetchMenu = useCallback(async () => {
     setIsLoading(true);
@@ -28,7 +28,7 @@ const RestaurantDetail = () => {
     try {
       const data = await getRestaurantMenu(id);
       setRestaurant(data.restaurant);
-      setItems(data.items);
+      setMenu(data.menu);
     } catch (err) {
       console.error("Menu fetch error:", err);
       setError(err.response?.data?.message || "Failed to load menu. Please try again.");
@@ -53,22 +53,18 @@ const RestaurantDetail = () => {
     fetchReviews();
   }, [id]);
 
-    const averageRating = useMemo(() => {
+  const averageRating = useMemo(() => {
     if (reviews.length === 0) return null;
     const sum = reviews.reduce((total, r) => total + r.rating, 0);
     return (sum / reviews.length).toFixed(1);
   }, [reviews]);
 
-  // Build the list of categories that actually have itemshow
-  const categories = useMemo(() => {
-    const unique = [...new Set(items.map((item) => item.category))];
-    return ["All", ...unique];
-  }, [items]);
+  const totalItems = useMemo(() => menu.reduce((sum, cat) => sum + cat.items.length, 0), [menu]);
 
-  const filteredItems = useMemo(() => {
-    if (activeCategory === "All") return items;
-    return items.filter((item) => item.category === activeCategory);
-  }, [items, activeCategory]);
+  const visibleCategories = useMemo(
+    () => (activeCategory === "All" ? menu : menu.filter((cat) => cat.name === activeCategory)),
+    [menu, activeCategory]
+  );
 
   if (isLoading) {
     return (
@@ -112,7 +108,7 @@ const RestaurantDetail = () => {
       </div>
 
       <h1 className="text-2xl font-bold text-gray-900">{restaurant.shopName}</h1>
-      <p className="text-gray-500 mt-1">{restaurant.cuisine}</p>
+      <p className="text-gray-500 mt-1">{restaurant.cuisines?.join(", ") || restaurant.cuisine}</p>
 
       <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
         <span className="flex items-center gap-1">
@@ -139,36 +135,52 @@ const RestaurantDetail = () => {
         </button>
       </div>
 
-      {/* Category filter tabs */}
-      {categories.length > 1 && (
+      {/* Category filter tabs - built from menu order, so it matches vendor's own sort */}
+      {menu.length > 1 && (
         <div className="flex gap-2 mt-6 overflow-x-auto pb-2">
-          {categories.map((cat) => (
+          <button
+            onClick={() => setActiveCategory("All")}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors duration-200
+              ${activeCategory === "All" ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+          >
+            All
+          </button>
+          {menu.map((cat) => (
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
+              key={cat._id}
+              onClick={() => setActiveCategory(cat.name)}
               className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors duration-200
-                ${activeCategory === cat
+                ${activeCategory === cat.name
                   ? "bg-primary text-white"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                 }`}
             >
-              {cat}
+              {cat.name}
             </button>
           ))}
         </div>
       )}
 
-      {/* Menu items */}
+      {/* Menu items, grouped under their category heading */}
       <div className="mt-6">
-        {items.length === 0 ? (
+        {totalItems === 0 ? (
           <EmptyState
             title="No menu items yet"
             message="This restaurant hasn't added any menu items yet. Check back soon."
           />
         ) : (
-          <div className="space-y-3">
-            {filteredItems.map((item) => (
-              <MenuItemCard key={item._id} item={item} restaurantId={restaurant._id} />
+          <div className="space-y-8">
+            {visibleCategories.map((cat) => (
+              <div key={cat._id}>
+                {activeCategory === "All" && (
+                  <h2 className="text-lg font-bold text-gray-900 mb-3">{cat.name}</h2>
+                )}
+                <div className="space-y-3">
+                  {cat.items.map((item) => (
+                    <MenuItemCard key={item._id} item={item} restaurantId={restaurant._id} />
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         )}

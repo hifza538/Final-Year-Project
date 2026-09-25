@@ -66,7 +66,7 @@ const ForgotPassword = () => {
   return (
     <AuthLayout
       heading={<>Forgot your<br />password?</>}
-      subtext="No worries — we'll send you a reset link to your registered email."
+      subtext="No worries, we'll send you a reset link to your registered email."
     >
       <h1 className="text-2xl font-bold text-gray-900 mb-1">Forgot Password</h1>
       <p className="text-gray-500 text-sm mb-8">

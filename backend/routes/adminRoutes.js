@@ -7,10 +7,12 @@ import { getPendingVendors, getAllVendors, getVendorById, approveVendor, rejectV
 import { getPendingRiders, getAllRiders, getRiderById, approveRider, rejectRider } from "../controllers/admin/deliveryController.js";
 import { getAllCustomers, getCustomerById, toggleCustomerBlock } from "../controllers/admin/customerController.js";
 import { getAllOrders, getOrderById, cancelOrder } from "../controllers/admin/orderController.js";
+import { getCuisines, createCuisine, updateCuisine, updateCuisineDetails, deleteCuisine } from "../controllers/admin/cuisineController.js";
 import { getAllCategories, createCategory, updateCategory, deleteCategory } from "../controllers/admin/categoryController.js";
 import { getReportsOverview } from "../controllers/admin/reportsController.js";
 import { getSettings, updateSettings } from "../controllers/admin/settingsController.js";
 import { updateProfile, changePassword } from "../controllers/admin/profileController.js";
+import { uploadCuisineImage } from "../config/cloudinary.js";
 
 const router = express.Router();
 
@@ -48,11 +50,18 @@ router.get("/orders", protect, adminOnly, getAllOrders);
 router.get("/orders/:id", protect, adminOnly, getOrderById);
 router.patch("/orders/:id/cancel", protect, adminOnly, cancelOrder);
 
-// Admin category management routes
+// Admin category management routes (menu-item categories - Pizza, Burgers...)
 router.get("/categories", protect, adminOnly, getAllCategories);
 router.post("/categories", protect, adminOnly, createCategory);
 router.patch("/categories/:id", protect, adminOnly, updateCategory);
 router.delete("/categories/:id", protect, adminOnly, deleteCategory);
+
+// Admin cuisine management routes (restaurant-level - Fast Food, Chinese...)
+router.get("/cuisines", protect, adminOnly, getCuisines);
+router.post("/cuisines", protect, adminOnly, uploadCuisineImage, createCuisine);
+router.patch("/cuisines/:id", protect, adminOnly, updateCuisine);
+router.patch("/cuisines/:id/details", protect, adminOnly, uploadCuisineImage, updateCuisineDetails);
+router.delete("/cuisines/:id", protect, adminOnly, deleteCuisine);
 
 // Admin reports route
 router.get("/reports/overview", protect, adminOnly, getReportsOverview);

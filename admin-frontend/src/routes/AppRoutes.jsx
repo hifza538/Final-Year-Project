@@ -14,6 +14,7 @@ import CustomerDetails from "../pages/CustomerDetails";
 import Orders from "../pages/Orders";
 import OrderDetails from "../pages/OrderDetails";
 import Categories from "../pages/Categories";
+import MenuCategories from "../pages/MenuCategories";
 import Reports from "../pages/Reports";
 import AppSettings from "../pages/AppSettings";
 import Profile from "../pages/Profile";
@@ -41,7 +42,8 @@ const AppRoutes = () => {
         <Route path="/customers/:id" element={<CustomerDetails />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/orders/:id" element={<OrderDetails />} />
-        <Route path="/categories" element={<Categories />} />
+        <Route path="/cuisines" element={<Categories />} />
+        <Route path="/categories" element={<MenuCategories />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/settings" element={<AppSettings />} />
         <Route path="/profile" element={<Profile />} />

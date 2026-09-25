@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import {
   FacebookIcon,
   InstagramIcon,
-  TwitterIcon,
 } from "../common/SocialIcons";
 import Logo from "../common/Logo";
 
@@ -24,6 +23,26 @@ const Footer = () => {
               Delicious food from your favorite local restaurants, delivered
               straight to your door.
             </p>
+            <div className="flex gap-3 mt-4">
+              <a
+                href="https://www.facebook.com/profile.php?id=61594408156951&mibextid=ZbWKwL"
+                aria-label="Facebook"
+                target="_blank"
+                rel="noreferrer"
+                className="p-2 bg-gray-800 rounded-full hover:bg-primary transition-colors duration-200"
+              >
+                <FacebookIcon size={18} />
+              </a>
+              <a
+                href="https://www.instagram.com/localbites29?stkn=OHhqanlpaHA2cDE0v"
+                aria-label="Instagram"
+                target="_blank"
+                rel="noreferrer"
+                className="p-2 bg-gray-800 rounded-full hover:bg-primary transition-colors duration-200"
+              >
+                <InstagramIcon size={18} />
+              </a>
+            </div>
           </div>
 
           {/* Company links */}
@@ -31,28 +50,41 @@ const Footer = () => {
             <h4 className="text-white font-semibold mb-3">Company</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link
-                  to="/about"
-                  className="hover:text-primary transition-colors"
-                >
+                <Link to="/about" className="hover:text-primary transition-colors">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/careers"
-                  className="hover:text-primary transition-colors"
-                >
-                  Careers
+                <Link to="/contact" className="hover:text-primary transition-colors">
+                  Contact Us
                 </Link>
               </li>
+            </ul>
+          </div>
+
+          {/* Partner links */}
+          <div>
+            <h4 className="text-white font-semibold mb-3">Partner With Us</h4>
+            <ul className="space-y-2 text-sm">
               <li>
-                <Link
-                  to="/blog"
+                <a
+                  href="https://localbites-vendor-zeta.vercel.app/"
+                  target="_blank"
+                  rel="noreferrer"
                   className="hover:text-primary transition-colors"
                 >
-                  Blog
-                </Link>
+                  Become a Vendor
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://localbites-rider.vercel.app/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hover:text-primary transition-colors"
+                >
+                  Become a Rider
+                </a>
               </li>
             </ul>
           </div>
@@ -62,63 +94,21 @@ const Footer = () => {
             <h4 className="text-white font-semibold mb-3">Support</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link
-                  to="/help"
-                  className="hover:text-primary transition-colors"
-                >
-                  Help Center
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/terms"
-                  className="hover:text-primary transition-colors"
-                >
+                <Link to="/terms" className="hover:text-primary transition-colors">
                   Terms of Service
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/privacy"
-                  className="hover:text-primary transition-colors"
-                >
+                <Link to="/privacy" className="hover:text-primary transition-colors">
                   Privacy Policy
                 </Link>
               </li>
             </ul>
           </div>
-
-          {/* Social */}
-          <div>
-            <h4 className="text-white font-semibold mb-3">Follow Us</h4>
-            <div className="flex gap-3">
-              <a
-                href="#"
-                aria-label="Facebook"
-                className="p-2 bg-gray-800 rounded-full hover:bg-primary transition-colors duration-200"
-              >
-                <FacebookIcon size={18} />
-              </a>
-              <a
-                href="#"
-                aria-label="Instagram"
-                className="p-2 bg-gray-800 rounded-full hover:bg-primary transition-colors duration-200"
-              >
-                <InstagramIcon size={18} />
-              </a>
-              <a
-                href="#"
-                aria-label="Twitter"
-                className="p-2 bg-gray-800 rounded-full hover:bg-primary transition-colors duration-200"
-              >
-                <TwitterIcon size={18} />
-              </a>
-            </div>
-          </div>
         </div>
 
         <div className="border-t border-gray-700 mt-10 pt-6 text-center text-sm text-gray-500">
-          © {currentYear} LocalBites for academic purposes only.
+          © {currentYear} LocalBites. All rights reserved.
         </div>
       </div>
     </footer>

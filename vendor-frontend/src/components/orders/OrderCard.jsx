@@ -161,10 +161,7 @@ const OrderCard = ({ order, onUpdateStatus, updating }) => {
         <div className="px-5 pb-5">
           <div className={`w-full py-2.5 rounded-lg text-sm font-medium 
             text-center ${config.color}`}>
-            {order.orderStatus === "Completed"
-              ? "✓ Order Completed"
-              : "✗ Order Rejected"
-            }
+            {config.label}
           </div>
         </div>
       )}

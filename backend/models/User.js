@@ -50,6 +50,11 @@ const userSchema = new mongoose.Schema(
     resetPasswordToken: { type: String, default: undefined },
     resetPasswordExpire: { type: Date, default: undefined },
 
+    // email verification fields
+    isEmailVerified: { type: Boolean, default: false },
+    emailVerificationToken: { type: String, default: undefined, select: false },
+    emailVerificationExpire: { type: Date, default: undefined, select: false },
+
     //delivery address for customers
     addresses: [
       {
@@ -72,7 +77,9 @@ const userSchema = new mongoose.Schema(
     shopAddress: { type: String, trim: true, default: "" },
     city: { type: String, trim: true, default: "" },
     zone: { type: String, trim: true, default: "" },
+    // Cuisine and Cuisines for vendors
     cuisine: { type: String, trim: true, default: "" },
+    cuisines: [{ type: mongoose.Schema.Types.ObjectId, ref: "Cuisine" }],
     
     deliveryRadius: {
       type: Number,
@@ -125,9 +132,7 @@ const userSchema = new mongoose.Schema(
 
     // legal & Verification Fields
     cnicNumber: { type: String, trim: true, default: "" },
-    ntnNumber: { type: String, trim: true, default: "" },
-    hasFoodLicense: { type: Boolean, default: false },
-
+    
     // cnic images
     cnicFront: {
       url: { type: String, default: "" },

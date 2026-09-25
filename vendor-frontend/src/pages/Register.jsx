@@ -5,6 +5,7 @@ import { useNavigate, Link } from "react-router-dom";
 import {
   ChefHat, Eye, EyeOff, Loader2, CheckCircle2,
   Store, User, ShieldCheck, Users, ClipboardList, Headset,
+  ChevronDown, X, Check,
 } from "lucide-react";
 import { registerVendor } from "../services/authService";
 import InputField from "../components/common/InputField";
@@ -134,6 +135,10 @@ const Register = () => {
   const [cuisinesOptions, setCuisinesOptions] = useState([]);
   const [activeSection, setActiveSection] = useState("basic");
 
+  // Cuisine dropdown open/close state + ref for outside-click detection
+  const [isCuisineOpen, setIsCuisineOpen] = useState(false);
+  const cuisineDropdownRef = useRef(null);
+
   const sectionRefs = {
     basic: useRef(null),
     owner: useRef(null),
@@ -150,6 +155,17 @@ const Register = () => {
       }
     };
     fetchCuisines();
+  }, []);
+
+  // Close the cuisine dropdown when clicking outside of it
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (cuisineDropdownRef.current && !cuisineDropdownRef.current.contains(e.target)) {
+        setIsCuisineOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Highlights the nav tab for whichever section is currently in view
@@ -186,7 +202,7 @@ const Register = () => {
 
     // Restaurant Info
     shopName: "",
-    cuisine: "",
+    cuisines: [],
     city: "",
     zone: "",
     coordinates: { lat: null, lng: null },
@@ -226,6 +242,36 @@ const Register = () => {
     setForm((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const toggleCuisine = (cuisineName) => {
+    setError("");
+    setFieldErrors((prev) => ({ ...prev, cuisine: "" }));
+
+    setForm((prev) => {
+      const selected = prev.cuisines || [];
+      const exists = selected.includes(cuisineName);
+
+      if (exists) {
+        return { ...prev, cuisines: selected.filter((item) => item !== cuisineName) };
+      }
+
+      if (selected.length >= 3) {
+        setFieldErrors((curr) => ({ ...curr, cuisine: "You can select up to 3 cuisines only" }));
+        return prev;
+      }
+
+      return { ...prev, cuisines: [...selected, cuisineName] };
+    });
+  };
+
+  const removeCuisine = (cuisineName) => {
+    setError("");
+    setFieldErrors((prev) => ({ ...prev, cuisine: "" }));
+    setForm((prev) => ({
+      ...prev,
+      cuisines: prev.cuisines.filter((item) => item !== cuisineName),
     }));
   };
 
@@ -292,7 +338,10 @@ const Register = () => {
     else if (form.shopName.trim().length < 3)
       errors.shopName = "Shop name must be at least 3 characters";
 
-    if (!form.cuisine.trim()) errors.cuisine = "Please select a cuisine type";
+    if (!Array.isArray(form.cuisines) || form.cuisines.length === 0)
+      errors.cuisine = "Please select at least one cuisine";
+    else if (form.cuisines.length > 3)
+      errors.cuisine = "You can select up to 3 cuisines only";
 
     if (!form.city.trim()) errors.city = "Please select a city";
 
@@ -379,14 +428,22 @@ const Register = () => {
       Object.entries(form).forEach(([key, val]) => {
         if (val === null || val === undefined) return;
 
-        // convert coordinates object to JSON string before appending
         if (key === "coordinates") {
+          fd.append(key, JSON.stringify(val));
+          return;
+        }
+
+        if (key === "cuisines") {
           fd.append(key, JSON.stringify(val));
           return;
         }
 
         fd.append(key, val);
       });
+
+      if (Array.isArray(form.cuisines) && form.cuisines.length > 0) {
+        fd.append("cuisine", form.cuisines[0]);
+      }
 
       await registerVendor(fd);
       setSuccess(true);
@@ -453,28 +510,83 @@ const Register = () => {
               error={fieldErrors.shopName}
             />
 
-            {/* Cuisine Dropdown */}
-            <div>
+            {/* Cuisine Selection - dropdown with checkboxes + selected chips */}
+            <div ref={cuisineDropdownRef} className="relative">
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                Cuisine Type <span className="text-red-500">*</span>
+                Cuisine Types <span className="text-red-500">*</span>
               </label>
-              <select
-                name="cuisine"
-                value={form.cuisine}
-                onChange={handleChange}
-                className={`w-full px-4 py-2.5 rounded-lg border text-sm bg-white
-                  focus:outline-none focus:ring-2 focus:ring-primary transition ${fieldErrors.cuisine
-                    ? "border-red-400 bg-red-50"
-                    : "border-gray-200"
+
+              <button
+                type="button"
+                onClick={() => setIsCuisineOpen((v) => !v)}
+                className={`w-full flex items-center justify-between gap-2 px-4 py-2.5 rounded-lg border text-sm bg-white
+                  focus:outline-none focus:ring-2 focus:ring-primary transition ${
+                    fieldErrors.cuisine ? "border-red-400 bg-red-50" : "border-gray-200"
                   }`}
               >
-                <option value="">Select Cuisine</option>
-                {cuisinesOptions.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
+                <span className={form.cuisines.length ? "text-gray-700" : "text-gray-400"}>
+                  {form.cuisines.length ? `${form.cuisines.length} selected` : "Select cuisines"}
+                </span>
+                <ChevronDown
+                  size={16}
+                  className={`text-gray-400 transition-transform ${isCuisineOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {/* Selected cuisines as removable chips */}
+              {form.cuisines.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {form.cuisines.map((c) => (
+                    <span
+                      key={c}
+                      className="inline-flex items-center gap-1 bg-primary-light text-primary text-xs font-medium px-2.5 py-1 rounded-full"
+                    >
+                      {c}
+                      <button
+                        type="button"
+                        onClick={() => removeCuisine(c)}
+                        className="hover:text-primary-dark"
+                        aria-label={`Remove ${c}`}
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Dropdown panel */}
+              {isCuisineOpen && (
+                <div className="absolute z-[9999] mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-56 overflow-y-auto">
+                  {cuisinesOptions.length === 0 ? (
+                    <p className="text-sm text-gray-400 px-4 py-3">No cuisines available</p>
+                  ) : (
+                    cuisinesOptions.map((c) => {
+                      const isSelected = form.cuisines.includes(c);
+                      const isDisabled = !isSelected && form.cuisines.length >= 3;
+                      return (
+                        <button
+                          type="button"
+                          key={c}
+                          onClick={() => !isDisabled && toggleCuisine(c)}
+                          disabled={isDisabled}
+                          className={`w-full flex items-center justify-between gap-2 px-4 py-2.5 text-sm text-left transition-colors
+                            ${isDisabled ? "text-gray-300 cursor-not-allowed" : "text-gray-700 hover:bg-gray-50"}`}
+                        >
+                          <span>{c}</span>
+                          {isSelected && (
+                            <span className="w-4 h-4 rounded bg-primary flex items-center justify-center">
+                              <Check size={12} className="text-white" />
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+
+              <p className="mt-2 text-[11px] text-gray-500">Select up to 3 cuisines.</p>
               {fieldErrors.cuisine && (
                 <p className="text-red-500 text-xs mt-1">
                   {fieldErrors.cuisine}
@@ -730,25 +842,6 @@ const Register = () => {
                 </p>
               )}
             </div>
-            <InputField
-              label="NTN Number (Optional)"
-              name="ntnNumber"
-              value={form.ntnNumber}
-              onChange={handleChange}
-              placeholder="NTN-XXXXXXX"
-            />
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                name="hasFoodLicense"
-                checked={form.hasFoodLicense}
-                onChange={handleChange}
-                className="w-4 h-4 accent-primary"
-              />
-              <span className="text-sm text-gray-700">
-                I have a valid food license
-              </span>
-            </label>
           </SectionCard>
 
           <button

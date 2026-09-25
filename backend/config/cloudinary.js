@@ -79,4 +79,38 @@ export const uploadMenuImage = multer({
   fileFilter: imageFileFilter,
 }).single("image");
 
+// Cuisine image storage
+const cuisineImageStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder:          "localbites/cuisines",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    transformation:  [{ width: 400, height: 400, crop: "fill", quality: "auto" }],
+  },
+});
+
+// cuisine image upload middleware
+export const uploadCuisineImage = multer({
+  storage: cuisineImageStorage,
+  limits:  { fileSize: 2 * 1024 * 1024 }, // 2MB
+  fileFilter: imageFileFilter,
+}).single("image");
+
+// menu category image storage
+const categoryImageStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder:          "localbites/categories",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
+    transformation:  [{ width: 400, height: 400, crop: "fill", quality: "auto" }],
+  },
+});
+
+// category image upload middleware
+export const uploadCategoryImage = multer({
+  storage: categoryImageStorage,
+  limits:  { fileSize: 2 * 1024 * 1024 }, // 2MB
+  fileFilter: imageFileFilter,
+}).single("image");
+
 export default cloudinary;

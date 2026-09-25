@@ -10,9 +10,11 @@ import { getMyPerformance } from "../controllers/vendor/performanceController.js
 import { getProfile, updateProfile, getShopStatus, updateShopStatus } from "../controllers/vendor/profileController.js";
 import { uploadRestaurant } from "../config/cloudinary.js";
 import { getMenuItems, addMenuItem, updateMenuItem, deleteMenuItem, toggleStock } from "../controllers/vendor/menuController.js";
+import { getAddonGroups, addAddonGroup, updateAddonGroup, deleteAddonGroup } from "../controllers/vendor/addonController.js";
 import { uploadMenuImage } from "../config/cloudinary.js";
 import { getVendorOrders, getOrderById, updateOrderStatus } from "../controllers/vendor/orderController.js";
 import { getMyReviews } from "../controllers/vendor/reviewController.js";
+
 const router = express.Router();
 
 router.post(
@@ -27,14 +29,14 @@ router.post("/login", loginUser);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
 
-//email verification routes
+// email verification routes
 router.get("/verify-email/:token", verifyEmail);
+router.post("/verify-email/:token", verifyEmail);
 router.post("/resend-verification", resendVerification);
 
-// All routes are protected - vendor only
+// All routes below are protected - vendor only
 router.use(protect, vendorOnly);
 router.get("/me", getMe);
-// Dashboard statistics route
 router.get("/dashboard-stats", getDashboardStats);
 router.get("/performance", getMyPerformance);
 
@@ -47,7 +49,13 @@ router.get("/profile/status", getShopStatus);
 router.put("/profile/status", updateShopStatus);
 router.patch("/profile/status", updateShopStatus);
 
-// Menu management routes
+// Vendor menu and add-on routes
+router.get("/addon-groups", getAddonGroups);
+router.post("/addon-groups", addAddonGroup);
+router.put("/addon-groups/:id", updateAddonGroup);
+router.delete("/addon-groups/:id", deleteAddonGroup);
+
+// Menu items
 router.get("/menu", getMenuItems);
 router.post("/menu", uploadMenuImage, addMenuItem);
 router.put("/menu/:id", uploadMenuImage, updateMenuItem);
