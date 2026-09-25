@@ -19,7 +19,11 @@ const sendEmail = async ({ to, subject, text, html }) => {
   };
 
   if (html) mail.html = html;
-  await transporter.sendMail(mail);
+
+  const info = await transporter.sendMail(mail);
+  console.log("EMAIL SENT:", info.response, "| accepted:", info.accepted, "| rejected:", info.rejected);
+
+  return info;
 };
 
 export const sendEmailSafe = async (options) => {

@@ -7,13 +7,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { showSuccessToast, showErrorToast } from "../utils/toast";
 import { signupSchema } from "../utils/validationSchemas";
 import { registerCustomer } from "../services/authService";
-import { useAuth } from "../context/AuthContext";
 import FormInput from "../components/common/FormInput";
 import AuthLayout from "../components/layout/AuthLayout";
 
 const Signup = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { login } = useAuth();
   const navigate = useNavigate();
 
   const {
@@ -27,11 +25,10 @@ const Signup = () => {
   const onSubmit = async (formData) => {
     setIsSubmitting(true);
     try {
-      const data = await registerCustomer(formData);
-      login(data.user, data.token); // Auto-login right after successful signup
-      showSuccessToast("Account created successfully!");
-      setTimeout(() => { navigate("/");
-         // Redirect to home after a short delay to allow toast to be seen
+      await registerCustomer(formData);
+      showSuccessToast("Account created! Please check your email to verify your account.");
+      setTimeout(() => {
+        navigate("/login");
       }, 1500);
     } catch (error) {
       const message = error.response?.data?.message || "Signup failed. Please try again.";

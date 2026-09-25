@@ -59,6 +59,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
     city,
     zone,
     cuisine,
+    cuisines,
     openingTime,
     closingTime,
     minPrepTime,
@@ -136,16 +137,50 @@ export const updateProfile = asyncHandler(async (req, res) => {
   if (shopAddress !== undefined) vendor.shopAddress = shopAddress.trim();
   if (city !== undefined) vendor.city = city.trim();
   if (zone !== undefined) vendor.zone = zone.trim();
-  if (cuisine !== undefined) {
-    const selectedCuisine = await Cuisine.findOne({
-      name: { $regex: `^${String(cuisine).trim()}$`, $options: "i" },
-      isActive: true,
-    });
-    if (!selectedCuisine) {
+  if (cuisine !== undefined || cuisines !== undefined) {
+    let selectedCuisineNames = [];
+
+    try {
+      if (Array.isArray(cuisines)) {
+        selectedCuisineNames = cuisines;
+      } else if (typeof cuisines === "string" && cuisines.trim()) {
+        const parsed = JSON.parse(cuisines);
+        selectedCuisineNames = Array.isArray(parsed) ? parsed : [parsed];
+      } else if (cuisine !== undefined) {
+        selectedCuisineNames = [cuisine];
+      }
+    } catch (error) {
       res.status(400);
-      throw new Error("Please select a valid cuisine");
+      throw new Error("Please select valid cuisine options");
     }
-    vendor.cuisines = [selectedCuisine._id];
+
+    selectedCuisineNames = selectedCuisineNames
+      .map((item) => String(item).trim())
+      .filter(Boolean);
+
+    if (selectedCuisineNames.length === 0) {
+      res.status(400);
+      throw new Error("Please select at least one cuisine");
+    }
+    if (selectedCuisineNames.length > 3) {
+      res.status(400);
+      throw new Error("You can select up to 3 cuisines only");
+    }
+
+    const cuisineDocs = await Cuisine.find({ isActive: true });
+    const cuisineMap = new Map(cuisineDocs.map((doc) => [doc.name.trim().toLowerCase(), doc]));
+
+    const selectedCuisines = selectedCuisineNames
+      .map((name) => cuisineMap.get(name.trim().toLowerCase()))
+      .filter(Boolean);
+
+    if (selectedCuisines.length !== selectedCuisineNames.length) {
+      res.status(400);
+      throw new Error("Please select valid cuisines");
+    }
+
+    vendor.cuisine = selectedCuisines[0].name;
+    vendor.cuisines = selectedCuisines.map((item) => item._id);
   }
   if (openingTime !== undefined) vendor.openingTime = openingTime;
   if (closingTime !== undefined) vendor.closingTime = closingTime;

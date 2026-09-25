@@ -132,9 +132,7 @@ const userSchema = new mongoose.Schema(
 
     // legal & Verification Fields
     cnicNumber: { type: String, trim: true, default: "" },
-    ntnNumber: { type: String, trim: true, default: "" },
-    hasFoodLicense: { type: Boolean, default: false },
-
+    
     // cnic images
     cnicFront: {
       url: { type: String, default: "" },

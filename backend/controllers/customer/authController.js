@@ -14,6 +14,7 @@ const customerResponse = (user) => ({
   phone: user.phone,
   role: user.role,
   isActive: user.isActive,
+  isEmailVerified: user.isEmailVerified,
 });
 
 /* @desc   Register a new customer
@@ -95,7 +96,6 @@ export const registerCustomer = asyncHandler(async (req, res) => {
   res.status(201).json({
     message: "Registration successful! Please check your email to verify your account.",
     user: customerResponse(customer),
-    token: generateToken(customer._id),
   });
 });
 
@@ -132,6 +132,12 @@ export const loginCustomer = asyncHandler(async (req, res) => {
   if (!isMatch) {
     res.status(401);
     throw new Error("Invalid email or password");
+  }
+
+  // Email verification check
+  if (!user.isEmailVerified) {
+    res.status(403);
+    throw new Error("Please verify your email before logging in. Check your inbox for the verification link.");
   }
 
   // Account active check
