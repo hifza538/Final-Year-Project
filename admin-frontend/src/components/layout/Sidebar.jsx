@@ -21,9 +21,8 @@ const Sidebar = ({ isMobileOpen, onMobileClose, isCollapsed, onToggleCollapse, p
   // Define the navigation items for the sidebar
   const navItems = [
     { to: "/", label: "Dashboard", icon: LayoutDashboard, end: true },
-    { to: "/vendors", label: "Vendors", icon: Store, badge: pendingCounts?.vendors },
+    { to: "/vendors-approval", label: "Vendors Approvals", icon: Store, badge: pendingCounts?.vendors },
     { to: "/delivery-approvals", label: "Delivery Approvals", icon: Bike, badge: pendingCounts?.riders },
-    { to: "/users", label: "Users", icon: Users },
     { to: "/customers", label: "Customers", icon: Users, badge: pendingCounts?.customers },
     { to: "/orders", label: "Orders", icon: Package, badge: pendingCounts?.orders },
     { to: "/cuisines", label: "Cuisines", icon: Tag, badge: pendingCounts?.cuisines },
