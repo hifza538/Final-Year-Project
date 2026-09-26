@@ -221,8 +221,6 @@ export const registerVendor = asyncHandler(async (req, res) => {
         lng: parsedCoordinates.lng,
       },
       cnicNumber: cnicNumber.trim(),
-      ntnNumber: ntnNumber || "",
-      hasFoodLicense: hasFoodLicense === "true" || hasFoodLicense === true,
       cnicFront: { url: cnicFrontFile.path, publicId: cnicFrontFile.filename },
       cnicBack: { url: cnicBackFile.path, publicId: cnicBackFile.filename },
       isApproved: false,
