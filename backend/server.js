@@ -32,7 +32,7 @@ const allowedOrigins = [
 
   "https://localbites-customer.vercel.app",
   "https://localbites-vendor-zeta.vercel.app",
-  "https://localbites-rider.vercel.app",
+  "https://locatbites-rider.vercel.app",
   "https://localbites-admin.vercel.app",
 ];
 
