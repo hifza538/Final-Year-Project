@@ -26,7 +26,7 @@ const VendorCta = () => {
           </div>
 
           <a
-            href="https://localbites-vendor-zeta.vercel.app/register"
+            href="https://localbites-vendor-zeta.vercel.app/"
             target="_blank"
             rel="noreferrer"
             className="group shrink-0 inline-flex items-center gap-2 justify-center bg-white text-primary font-semibold

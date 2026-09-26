@@ -68,7 +68,7 @@ const Footer = () => {
             <ul className="space-y-2 text-sm">
               <li>
                 <a
-                  href="https://localbites-vendor-zeta.vercel.app/register"
+                  href="https://localbites-vendor-zeta.vercel.app/"
                   target="_blank"
                   rel="noreferrer"
                   className="hover:text-primary transition-colors"
@@ -78,7 +78,7 @@ const Footer = () => {
               </li>
               <li>
                 <a
-                  href="https://localbites-delivery.vercel.app/signup"
+                  href="https://localbites-rider.vercel.app/"
                   target="_blank"
                   rel="noreferrer"
                   className="hover:text-primary transition-colors"
