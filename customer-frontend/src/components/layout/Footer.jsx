@@ -78,7 +78,7 @@ const Footer = () => {
               </li>
               <li>
                 <a
-                  href="https://localbites-rider.vercel.app/"
+                  href="https://locatbites-rider.vercel.app/"
                   target="_blank"
                   rel="noreferrer"
                   className="hover:text-primary transition-colors"
