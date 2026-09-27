@@ -1,29 +1,25 @@
 // backend/utils/sendEmail.js
 
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendEmail = async ({ to, subject, text, html }) => {
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
-
-  const mail = {
-    from: `"LocalBites" <${process.env.EMAIL_USER}>`,
+  const { data, error } = await resend.emails.send({
+    from: "LocalBites <onboarding@resend.dev>",
     to,
     subject,
     text,
-  };
+    ...(html && { html }),
+  });
 
-  if (html) mail.html = html;
+  if (error) {
+    console.error("EMAIL FAILED:", error);
+    throw new Error(error.message || "Failed to send email");
+  }
 
-  const info = await transporter.sendMail(mail);
-  console.log("EMAIL SENT:", info.response, "| accepted:", info.accepted, "| rejected:", info.rejected);
-
-  return info;
+  console.log("EMAIL SENT:", data?.id);
+  return data;
 };
 
 export const sendEmailSafe = async (options) => {
