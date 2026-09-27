@@ -10,10 +10,19 @@ const allowedOrigins = [
   "http://localhost:5174",
   "http://localhost:5175",
   "http://localhost:5176",
+
+  //vercel urls
   "https://localbites-customer.vercel.app",
   "https://localbites-vendor-zeta.vercel.app",
   "https://locatbites-rider.vercel.app",
   "https://localbites-admin.vercel.app",
+
+  //custom domain urls
+  "https://customer.localbites.shop",
+  "https://vendor.localbites.shop",
+  "https://rider.localbites.shop",
+  "https://admin.localbites.shop",
+
 ];
  
 let io;

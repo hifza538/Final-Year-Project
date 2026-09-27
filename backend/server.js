@@ -29,11 +29,17 @@ const allowedOrigins = [
   "http://localhost:5175", // delivery-frontend
   "http://localhost:5176", // admin-frontend
 
-
+// vercel urls
   "https://localbites-customer.vercel.app",
   "https://localbites-vendor-zeta.vercel.app",
   "https://locatbites-rider.vercel.app",
   "https://localbites-admin.vercel.app",
+
+  //custom domain urls
+  "https://customer.localbites.shop",
+  "https://vendor.localbites.shop",
+  "https://rider.localbites.shop",
+  "https://admin.localbites.shop",
 ];
 
 // CORS configuration
