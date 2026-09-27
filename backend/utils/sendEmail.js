@@ -6,7 +6,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendEmail = async ({ to, subject, text, html }) => {
   const { data, error } = await resend.emails.send({
-    from: "LocalBites <onboarding@resend.dev>",
+    from: "LocalBites <noreply@localbites.shop>",
     to,
     subject,
     text,
