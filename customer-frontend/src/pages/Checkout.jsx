@@ -26,9 +26,28 @@ const Checkout = () => {
   const [useNewAddress, setUseNewAddress] = useState(false);
 
   const [newAddressCoordinates, setNewAddressCoordinates] = useState({ lat: null, lng: null });
-
-
   const [locationError, setLocationError] = useState("");
+  const [deliveryCheck, setDeliveryCheck] = useState({
+    loading: false,
+    coordinatesKey: null,
+    available: null,
+    distanceKm: null,
+    deliveryRadius: null,
+    failed: false,
+  });
+
+  const selectedSavedAddress = savedAddresses.find((address) => address._id === selectedAddressId);
+  const activeAddressCoordinates = useNewAddress || savedAddresses.length === 0
+    ? newAddressCoordinates
+    : selectedSavedAddress?.coordinates;
+  const deliveryLat = activeAddressCoordinates?.lat;
+  const deliveryLng = activeAddressCoordinates?.lng;
+  const deliveryCoordinatesKey = deliveryLat == null || deliveryLng == null
+    ? ""
+    : `${restaurantId}:${deliveryLat},${deliveryLng}`;
+  const deliveryCheckIsCurrent =
+    deliveryCoordinatesKey !== "" && deliveryCheck.coordinatesKey === deliveryCoordinatesKey;
+  const isCheckingDelivery = deliveryCoordinatesKey !== "" && !deliveryCheckIsCurrent;
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -37,19 +56,69 @@ const Checkout = () => {
     }
   }, [isAuthenticated, navigate]);
 
+  // Load the restaurant's delivery fee as soon as checkout opens,
+  // so the total is correct even before a delivery location is pinned.
   useEffect(() => {
     if (!restaurantId) return;
-    const fetchFee = async () => {
+    let cancelled = false;
+    const fetchDeliveryFee = async () => {
       try {
         const data = await getRestaurantById(restaurantId);
-        setDeliveryFee(data.restaurant.deliveryFee ?? 50);
+        if (!cancelled) setDeliveryFee(data.restaurant.deliveryFee ?? 50);
       } catch (err) {
-        console.error("Failed to fetch delivery fee:", err);
-        setDeliveryFee(50);
+        console.error("Failed to load delivery fee:", err);
       }
     };
-    fetchFee();
+    fetchDeliveryFee();
+    return () => {
+      cancelled = true;
+    };
   }, [restaurantId]);
+
+  useEffect(() => {
+    if (!restaurantId) return;
+    const hasCoordinates =
+      deliveryLat != null && deliveryLng != null &&
+      Number.isFinite(Number(deliveryLat)) && Number.isFinite(Number(deliveryLng));
+
+    if (!hasCoordinates) {
+      return;
+    }
+
+    let cancelled = false;
+    const coordinatesKey = `${restaurantId}:${deliveryLat},${deliveryLng}`;
+    const checkDelivery = async () => {
+      try {
+        const data = await getRestaurantById(restaurantId, { lat: deliveryLat, lng: deliveryLng });
+        if (cancelled) return;
+        const restaurant = data.restaurant;
+        setDeliveryFee(restaurant.deliveryFee ?? 50);
+        setDeliveryCheck({
+          loading: false,
+          coordinatesKey,
+          available: restaurant.deliveryAvailable,
+          distanceKm: restaurant.distanceKm,
+          deliveryRadius: restaurant.deliveryRadius,
+          failed: false,
+        });
+      } catch (err) {
+        if (cancelled) return;
+        console.error("Failed to check delivery availability:", err);
+        setDeliveryCheck({
+          loading: false,
+          coordinatesKey,
+          available: null,
+          distanceKm: null,
+          deliveryRadius: null,
+          failed: true,
+        });
+      }
+    };
+    checkDelivery();
+    return () => {
+      cancelled = true;
+    };
+  }, [restaurantId, deliveryLat, deliveryLng]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -112,7 +181,7 @@ const Checkout = () => {
   const onSubmit = async (formData) => {
   
     if (useNewAddress || savedAddresses.length === 0) {
-      if (!newAddressCoordinates.lat || !newAddressCoordinates.lng) {
+      if (newAddressCoordinates.lat == null || newAddressCoordinates.lng == null) {
         setLocationError("Please pin your delivery location on the map.");
         return;
       }
@@ -316,9 +385,40 @@ const Checkout = () => {
           </div>
         </div>
 
+        {isCheckingDelivery && (
+          <p className="mb-3 text-sm text-gray-500" role="status">
+            Checking delivery availability for this address...
+          </p>
+        )}
+        {deliveryCheckIsCurrent && deliveryCheck.available === false && (
+          <p className="mb-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5" role="alert">
+            Sorry, this restaurant is too far from your delivery address, so you can't order from it. Please choose a nearby restaurant.
+          </p>
+        )}
+        {deliveryCheckIsCurrent && deliveryCheck.available === true && (
+          <p className="mb-3 text-sm text-green-700" role="status">
+            Delivery is available to this address ({deliveryCheck.distanceKm} km away).
+          </p>
+        )}
+        {deliveryCheckIsCurrent && deliveryCheck.available === null && !deliveryCheck.failed && (
+          <p className="mb-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5" role="alert">
+            Sorry, this restaurant is not available in your area. please change your delivery address.
+          </p>
+        )}
+        {deliveryCoordinatesKey === "" && (
+          <p className="mb-3 text-sm text-amber-700" role="status">
+            Select an address with a pinned location, or add a new address and pin it on the map to check delivery availability.
+          </p>
+        )}
+        {deliveryCheckIsCurrent && deliveryCheck.failed && (
+          <p className="mb-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5" role="alert">
+            Delivery availability could not be checked. Please reload checkout and try again.
+          </p>
+        )}
+
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isCheckingDelivery || !deliveryCheckIsCurrent || deliveryCheck.available !== true}
           className="w-full py-3 bg-primary text-white font-semibold rounded-full
                      hover:bg-primary-dark transition-colors duration-200
                      disabled:opacity-60 disabled:cursor-not-allowed"

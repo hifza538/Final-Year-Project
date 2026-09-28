@@ -7,6 +7,19 @@ import MenuItem from "../../models/MenuItem.js";
 import Review from "../../models/Review.js";
 import { getDistanceKm } from "../../utils/distance.js";
 
+// Default delivery radius (km) used when a vendor has not set one.
+// Keep this the same value used in orderController.js.
+const DEFAULT_DELIVERY_RADIUS_KM = 3;
+
+/* Safely convert a query-string value into a number.
+   Returns null for undefined, empty string or non-numeric values
+   (Number("") would otherwise become 0 and be treated as a real location). */
+const parseCoord = (value) => {
+  if (value === undefined || value === null || String(value).trim() === "") return null;
+  const num = Number(value);
+  return Number.isFinite(num) ? num : null;
+};
+
 // Helper function to format restaurant response for the customer frontend
 const restaurantResponse = (vendor, distanceKm = null) => {
   const cuisines = (vendor.cuisines || []).map((cuisine) =>
@@ -30,7 +43,7 @@ const restaurantResponse = (vendor, distanceKm = null) => {
   deliveryFee: vendor.deliveryFee,
   openingTime: vendor.openingTime,
   closingTime: vendor.closingTime,
-  deliveryRadius: vendor.deliveryRadius,
+  deliveryRadius: vendor.deliveryRadius ?? DEFAULT_DELIVERY_RADIUS_KM,
   distanceKm: distanceKm !== null ? Number(distanceKm.toFixed(1)) : null,
   };
 };
@@ -79,10 +92,9 @@ export const getAllRestaurants = asyncHandler(async (req, res) => {
     ratingMap[r._id.toString()] = { avgRating: r.avgRating.toFixed(1), count: r.count };
   });
 
-  const customerLat = lat !== undefined ? Number(lat) : null;
-  const customerLng = lng !== undefined ? Number(lng) : null;
-  const hasCustomerLocation =
-    customerLat !== null && customerLng !== null && !Number.isNaN(customerLat) && !Number.isNaN(customerLng);
+  const customerLat = parseCoord(lat);
+  const customerLng = parseCoord(lng);
+  const hasCustomerLocation = customerLat !== null && customerLng !== null;
 
   let restaurants = vendors.map((vendor) => {
     const ratingInfo = ratingMap[vendor._id.toString()];
@@ -99,7 +111,7 @@ export const getAllRestaurants = asyncHandler(async (req, res) => {
    if (hasCustomerLocation) {
     // Filter out restaurants that are beyond their delivery radius and sort by distance
     restaurants = restaurants
-      .filter((r) => r.distanceKm !== null && r.distanceKm <= (r.deliveryRadius ?? 3))
+      .filter((r) => r.distanceKm !== null && r.distanceKm <= r.deliveryRadius)
       .sort((a, b) => a.distanceKm - b.distanceKm);
   }
 
@@ -112,6 +124,7 @@ export const getAllRestaurants = asyncHandler(async (req, res) => {
 /* @desc   Get a single restaurant's public details (for the restaurant detail page)
   @route  GET /api/customer/restaurants/:id */
 export const getRestaurantById = asyncHandler(async (req, res) => {
+  const { lat, lng } = req.query;
   const vendor = await User.findOne({
     _id: req.params.id,
     role: "vendor",
@@ -129,7 +142,25 @@ export const getRestaurantById = asyncHandler(async (req, res) => {
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : null;
 
-  res.status(200).json({ restaurant: restaurantResponse(vendor), averageRating, reviewCount: reviews.length });
+  const customerLat = parseCoord(lat);
+  const customerLng = parseCoord(lng);
+  const hasCustomerCoordinates = customerLat !== null && customerLng !== null;
+
+  let distanceKm = null;
+  if (hasCustomerCoordinates && vendor.coordinates?.lat != null && vendor.coordinates?.lng != null) {
+    distanceKm = getDistanceKm(customerLat, customerLng, vendor.coordinates.lat, vendor.coordinates.lng);
+  }
+
+  const deliveryRadius = vendor.deliveryRadius ?? DEFAULT_DELIVERY_RADIUS_KM;
+
+  res.status(200).json({
+    restaurant: {
+      ...restaurantResponse(vendor, distanceKm),
+      deliveryAvailable: distanceKm === null ? null : distanceKm <= deliveryRadius,
+    },
+    averageRating,
+    reviewCount: reviews.length,
+  });
 });
 
 

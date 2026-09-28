@@ -7,6 +7,11 @@ import User from "../../models/User.js";
 import Review from "../../models/Review.js";
 import { notifyUser } from "../../socket.js";
 import { calculateLinePrice } from "../../utils/menuPricing.js";
+import { getDistanceKm } from "../../utils/distance.js";
+
+// Default delivery radius (km) used when a vendor has not set one.
+// Keep this the same value used in restaurantController.js.
+const DEFAULT_DELIVERY_RADIUS_KM = 3;
 
 /* @desc   Place a new order
 @route  POST /api/customer/orders*/
@@ -41,6 +46,37 @@ export const placeOrder = asyncHandler(async (req, res) => {
   if (!vendor.isOpen) {
     res.status(400);
     throw new Error("This restaurant is currently closed and not accepting orders");
+  }
+
+  const customerCoordinates = deliveryAddress.coordinates;
+  if (
+    customerCoordinates?.lat == null ||
+    customerCoordinates?.lng == null ||
+    !Number.isFinite(Number(customerCoordinates.lat)) ||
+    !Number.isFinite(Number(customerCoordinates.lng))
+  ) {
+    res.status(400);
+    throw new Error("Please pin your delivery location on the map to check delivery availability");
+  }
+
+  // Vendor has no saved location, so delivery range cannot be checked
+  if (vendor.coordinates?.lat == null || vendor.coordinates?.lng == null) {
+    res.status(400);
+    throw new Error("Sorry, this restaurant is not available in your area. Please choose a nearby restaurant.");
+  }
+
+  const distanceKm = getDistanceKm(
+    Number(customerCoordinates.lat),
+    Number(customerCoordinates.lng),
+    vendor.coordinates.lat,
+    vendor.coordinates.lng
+  );
+  const deliveryRadius = vendor.deliveryRadius ?? DEFAULT_DELIVERY_RADIUS_KM;
+  if (distanceKm > deliveryRadius) {
+    res.status(400);
+    throw new Error(
+      "Sorry, this restaurant is too far from your delivery address, so you can't order from it. Please choose a nearby restaurant."
+    );
   }
 
   /* Re-fetch each menu item from the database and recompute prices server-side
