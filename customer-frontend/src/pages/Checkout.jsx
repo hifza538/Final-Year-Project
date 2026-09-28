@@ -21,6 +21,8 @@ const Checkout = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deliveryFee, setDeliveryFee] = useState(0);
+  // City of the restaurant, used to make sure the customer's city matches it
+  const [restaurantCity, setRestaurantCity] = useState("");
   const [savedAddresses, setSavedAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [useNewAddress, setUseNewAddress] = useState(false);
@@ -56,7 +58,7 @@ const Checkout = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  // Load the restaurant's delivery fee as soon as checkout opens,
+  // Load the restaurant's delivery fee and city as soon as checkout opens,
   // so the total is correct even before a delivery location is pinned.
   useEffect(() => {
     if (!restaurantId) return;
@@ -64,7 +66,10 @@ const Checkout = () => {
     const fetchDeliveryFee = async () => {
       try {
         const data = await getRestaurantById(restaurantId);
-        if (!cancelled) setDeliveryFee(data.restaurant.deliveryFee ?? 50);
+        if (!cancelled) {
+          setDeliveryFee(data.restaurant.deliveryFee ?? 50);
+          setRestaurantCity(data.restaurant.city || "");
+        }
       } catch (err) {
         console.error("Failed to load delivery fee:", err);
       }
@@ -93,6 +98,7 @@ const Checkout = () => {
         if (cancelled) return;
         const restaurant = data.restaurant;
         setDeliveryFee(restaurant.deliveryFee ?? 50);
+        setRestaurantCity(restaurant.city || "");
         setDeliveryCheck({
           loading: false,
           coordinatesKey,
@@ -145,6 +151,7 @@ const Checkout = () => {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(checkoutSchema),
@@ -156,6 +163,15 @@ const Checkout = () => {
       notes: "",
     },
   });
+
+  // City the customer is currently ordering to (typed or from the saved address)
+  const enteredCity = useNewAddress || savedAddresses.length === 0
+    ? watch("city")
+    : selectedSavedAddress?.city;
+  const cityMismatch =
+    restaurantCity.trim() !== "" &&
+    !!enteredCity?.trim() &&
+    enteredCity.trim().toLowerCase() !== restaurantCity.trim().toLowerCase();
 
   const grandTotal = cartTotal + deliveryFee;
 
@@ -179,7 +195,11 @@ const Checkout = () => {
   }
 
   const onSubmit = async (formData) => {
-  
+    if (cityMismatch) {
+      showErrorToast(`This restaurant only delivers within ${restaurantCity}. Please enter the correct city.`);
+      return;
+    }
+
     if (useNewAddress || savedAddresses.length === 0) {
       if (newAddressCoordinates.lat == null || newAddressCoordinates.lng == null) {
         setLocationError("Please pin your delivery location on the map.");
@@ -324,7 +344,6 @@ const Checkout = () => {
                 required={false}
               />
 
-              
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Pin Location <span className="text-red-500">*</span>
@@ -337,7 +356,7 @@ const Checkout = () => {
                     setLocationError("");
                   }}
                 />
-              
+
                 {locationError && <p className="text-red-500 text-xs mt-1">{locationError}</p>}
               </div>
             </div>
@@ -402,7 +421,7 @@ const Checkout = () => {
         )}
         {deliveryCheckIsCurrent && deliveryCheck.available === null && !deliveryCheck.failed && (
           <p className="mb-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5" role="alert">
-            Sorry, this restaurant is not available in your area. please change your delivery address.
+            Sorry, this restaurant is not available in your area. Please choose a nearby restaurant.
           </p>
         )}
         {deliveryCoordinatesKey === "" && (
@@ -415,10 +434,21 @@ const Checkout = () => {
             Delivery availability could not be checked. Please reload checkout and try again.
           </p>
         )}
+        {cityMismatch && (
+          <p className="mb-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5" role="alert">
+            This restaurant only delivers within {restaurantCity}. Please enter the correct city.
+          </p>
+        )}
 
         <button
           type="submit"
-          disabled={isSubmitting || isCheckingDelivery || !deliveryCheckIsCurrent || deliveryCheck.available !== true}
+          disabled={
+            isSubmitting ||
+            isCheckingDelivery ||
+            !deliveryCheckIsCurrent ||
+            deliveryCheck.available !== true ||
+            cityMismatch
+          }
           className="w-full py-3 bg-primary text-white font-semibold rounded-full
                      hover:bg-primary-dark transition-colors duration-200
                      disabled:opacity-60 disabled:cursor-not-allowed"
