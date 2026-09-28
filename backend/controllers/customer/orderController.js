@@ -78,6 +78,14 @@ export const placeOrder = asyncHandler(async (req, res) => {
       "Sorry, this restaurant is too far from your delivery address, so you can't order from it. Please choose a nearby restaurant."
     );
   }
+    // City typed by the customer must match the restaurant's city
+  const normalizeText = (s) => String(s || "").trim().toLowerCase();
+  if (vendor.city && normalizeText(deliveryAddress.city) !== normalizeText(vendor.city)) {
+    res.status(400);
+    throw new Error(
+      `This restaurant only delivers within ${vendor.city}. Please enter the correct city in your delivery address.`
+    );
+  }
 
   /* Re-fetch each menu item from the database and recompute prices server-side
   to prevent tampering with the order data on the client side. */
