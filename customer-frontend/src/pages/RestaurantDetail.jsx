@@ -2,9 +2,11 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { Clock, MapPin, UtensilsCrossed, Star } from "lucide-react";
-import { getRestaurantMenu } from "../services/restaurantService";
+import { Clock, MapPin, UtensilsCrossed, Star, AlertCircle } from "lucide-react";
+import { getRestaurantMenu, getRestaurantById } from "../services/restaurantService";
 import { getRestaurantReviews } from "../services/reviewService";
+import { getAddresses } from "../services/addressService";
+import { useAuth } from "../context/AuthContext";
 import ReviewsModal from "../components/reviews/ReviewsModal";
 import MenuItemCard from "../components/restaurant/MenuItemCard";
 import MenuItemSkeleton from "../components/restaurant/MenuItemSkeleton";
@@ -13,6 +15,7 @@ import ErrorState from "../components/common/ErrorState";
 
 const RestaurantDetail = () => {
   const { id } = useParams();
+  const { isAuthenticated } = useAuth();
   const [restaurant, setRestaurant] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [showReviewsModal, setShowReviewsModal] = useState(false);
@@ -21,6 +24,8 @@ const RestaurantDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeCategory, setActiveCategory] = useState("All");
+  // Delivery range info based on the customer's default saved address (null = unknown)
+  const [deliveryInfo, setDeliveryInfo] = useState(null);
 
   const fetchMenu = useCallback(async () => {
     setIsLoading(true);
@@ -52,6 +57,39 @@ const RestaurantDetail = () => {
     };
     fetchReviews();
   }, [id]);
+
+  // Check whether this restaurant delivers to the customer's default saved address.
+  // Only runs for logged-in customers whose address has a pinned location.
+  useEffect(() => {
+    setDeliveryInfo(null);
+    if (!isAuthenticated) return;
+
+    let cancelled = false;
+    const checkDeliveryRange = async () => {
+      try {
+        const addressData = await getAddresses();
+        const address =
+          addressData.addresses.find((a) => a.isDefault) || addressData.addresses[0];
+        const lat = address?.coordinates?.lat;
+        const lng = address?.coordinates?.lng;
+        if (lat == null || lng == null) return;
+
+        const data = await getRestaurantById(id, { lat, lng });
+        if (cancelled) return;
+        setDeliveryInfo({
+          available: data.restaurant.deliveryAvailable,
+          distanceKm: data.restaurant.distanceKm,
+          deliveryRadius: data.restaurant.deliveryRadius,
+        });
+      } catch (err) {
+        console.error("Failed to check delivery range:", err);
+      }
+    };
+    checkDeliveryRange();
+    return () => {
+      cancelled = true;
+    };
+  }, [id, isAuthenticated]);
 
   const averageRating = useMemo(() => {
     if (reviews.length === 0) return null;
@@ -134,6 +172,19 @@ const RestaurantDetail = () => {
           )}
         </button>
       </div>
+
+      {/* Out of range warning - shown when the default saved address is outside this restaurant's delivery radius */}
+      {deliveryInfo?.available === false && (
+        <div
+          className="mt-4 flex items-start gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2.5"
+          role="alert"
+        >
+          <AlertCircle size={16} className="mt-0.5 shrink-0" />
+          <p>
+            This restaurant is too far from your saved address, so you can't order from it. Please choose a nearby restaurant.
+          </p>
+        </div>
+      )}
 
       {/* Category filter tabs - built from menu order, so it matches vendor's own sort */}
       {menu.length > 1 && (

@@ -9,8 +9,8 @@ export const getAllRestaurants = async (params = {}) => {
 };
 
 // Fetches a single restaurant's details (used by the upcoming restaurant detail page)
-export const getRestaurantById = async (id) => {
-  const response = await api.get(`/customer/restaurants/${id}`);
+export const getRestaurantById = async (id, params = {}) => {
+  const response = await api.get(`/customer/restaurants/${id}`, { params });
   return response.data;
 };
 
