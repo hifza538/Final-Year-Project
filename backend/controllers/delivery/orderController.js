@@ -1,8 +1,7 @@
-
-//backend/controllers/delivery/orderController.js
 import asyncHandler from "express-async-handler";
 import Order from "../../models/Order.js";
 import { notifyUser } from "../../socket.js";
+import { haversineDistanceKm } from "../../utils/distance.js";
 
 // Define the sequence of delivery stages for validation and progression
 const STAGE_SEQUENCE = ["Accepted", "ArrivedAtRestaurant", "PickedUp", "OnTheWay", "Delivered"];
@@ -26,7 +25,7 @@ const orderResponse = (order) => ({
   updatedAt: order.updatedAt,
 });
 
-// Get all available orders for delivery riders
+// Get all available orders for delivery riders within their delivery radius
 export const getAvailableOrders = asyncHandler(async (req, res) => {
   // Check if the rider is online before fetching available orders
   // This is important because we do not want offline riders to accept orders and then not deliver them
@@ -34,11 +33,39 @@ export const getAvailableOrders = asyncHandler(async (req, res) => {
     return res.status(200).json({ orders: [], isOnline: false });
   }
 
+  const rider = req.user;
+  const hasLocation = rider.currentLocation?.lat && rider.currentLocation?.lng && rider.deliveryRadius;
+
   const orders = await Order.find({ orderStatus: "Ready", deliveryRider: null })
-    .populate("vendor", "shopName phone shopAddress")
+    .populate("vendor", "shopName phone shopAddress shopCoordinates")
     .sort({ createdAt: 1 }); // oldest ready order first - fair pickup order
 
-  res.status(200).json({ orders: orders.map(orderResponse), isOnline: true });
+  let filtered = orders;
+
+  if (hasLocation) {
+    filtered = orders.filter((order) => {
+      const vendorCoords = order.vendor?.shopCoordinates;
+      
+      // If a particular vendor has no coordinates saved, don't hide their
+      // orders — fall back to showing them rather than silently excluding.
+      if (!vendorCoords?.lat || !vendorCoords?.lng) return true;
+
+      const distance = haversineDistanceKm(
+        rider.currentLocation.lat,
+        rider.currentLocation.lng,
+        vendorCoords.lat,
+        vendorCoords.lng
+      );
+      
+      return distance <= rider.deliveryRadius;
+    });
+  }
+
+  res.status(200).json({ 
+    orders: filtered.map(orderResponse), 
+    isOnline: true,
+    hasLocation: !!hasLocation,
+  });
 });
 
 // Accept an order for delivery
@@ -127,7 +154,7 @@ export const advanceOrderStatus = asyncHandler(async (req, res) => {
     OnTheWay: "Your order is on the way!",
     Delivered: "Your order has been delivered. Enjoy your meal!",
   };
- 
+
   notifyUser(order.customer, "orderUpdate", {
     orderId: order._id,
     status: order.orderStatus,
@@ -135,8 +162,7 @@ export const advanceOrderStatus = asyncHandler(async (req, res) => {
   });
 
   res.status(200).json({
-    message:
-      nextStage === "Delivered" ? "Order marked as delivered" : `Order status updated to ${nextStage}`,
+    message: nextStage === "Delivered" ? "Order marked as delivered" : `Order status updated to ${nextStage}`,
     order: orderResponse(order),
   });
 });
