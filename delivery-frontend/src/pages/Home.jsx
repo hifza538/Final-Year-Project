@@ -1,6 +1,7 @@
 // delivery-frontend/src/pages/Home.jsx
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
+import { Wallet } from "lucide-react";
 import toast from "react-hot-toast";
 import { UserCircle, Package, Clock, History as HistoryIcon, Bike, Bell } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
@@ -20,6 +21,9 @@ import EmptyState from "../components/common/EmptyState";
 import OnlineToggle from "../components/common/OnlineToggle";
 import PageBackground from "../components/common/PageBackground";
 import DeliveryMapModal from "../components/orders/DeliveryMapModal";
+import SlotSelector from "../components/common/SlotSelector";
+import RatingBadge from "../components/common/RatingBadge";
+import LocationPicker from "../components/common/LocationPicker";
 
 const TABS = [
   { key: "available", label: "Available", icon: Package },
@@ -190,6 +194,15 @@ const Home = () => {
                 <UserCircle size={18} />
                 <span className="hidden sm:inline">{user?.fullName?.split(" ")[0]}</span>
               </Link>
+              <RatingBadge />
+              
+              <Link
+                to="/earnings"
+                className="flex items-center gap-1.5 text-sm font-medium text-white/90 hover:text-white transition-colors"
+              >
+                <Wallet size={18} />
+                <span className="hidden sm:inline">Earnings</span>
+              </Link>
               <button
                 onClick={logout}
                 className="text-sm font-medium text-white/90 hover:text-white transition-colors"
@@ -207,6 +220,8 @@ const Home = () => {
             </div>
           ) : (
             <>
+              <SlotSelector />
+              <LocationPicker />
               <OnlineToggle />
 
               <div className="flex gap-1 mb-6 bg-white rounded-xl border border-gray-100 shadow-sm p-1">

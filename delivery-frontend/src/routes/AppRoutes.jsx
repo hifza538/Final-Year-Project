@@ -9,6 +9,7 @@ import PrivateRoute from "./PrivateRoute";
 import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 import VerifyEmail from "../pages/VerifyEmail";
+import Earnings from "../pages/Earnings";
 
 const AppRoutes = () => {
   return (
@@ -26,6 +27,14 @@ const AppRoutes = () => {
         element={
           <PrivateRoute>
             <Profile />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/earnings"
+        element={
+          <PrivateRoute>
+            <Earnings />
           </PrivateRoute>
         }
       />
