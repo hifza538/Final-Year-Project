@@ -10,6 +10,7 @@ import { forgotPassword, resetPassword } from "../controllers/shared/passwordCon
 import { verifyEmail, resendVerification } from "../controllers/shared/verificationController.js";
 import { protect, customerOnly } from "../middleware/authMiddleware.js";
 import { submitContactMessage } from "../controllers/public/contactController.js";
+import { submitRiderReview } from "../controllers/customer/riderReviewController.js";
 
 const router = express.Router();
 
@@ -49,5 +50,8 @@ router.patch("/orders/:id/cancel", protect, customerOnly, cancelMyOrder);
 // review routes
 router.post("/reviews", protect, customerOnly, addReview);
 router.get("/restaurants/:id/reviews", getRestaurantReviews);
+
+// Rider review routes
+router.post("/rider-reviews", protect, customerOnly, submitRiderReview);
 
 export default router;

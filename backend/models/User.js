@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required"],
       minlength: [6, "Password must be at least 6 characters"],
-      select: false, 
+      select: false,
     },
     phone: {
       type: String,
@@ -77,29 +77,45 @@ const userSchema = new mongoose.Schema(
     shopAddress: { type: String, trim: true, default: "" },
     city: { type: String, trim: true, default: "" },
     zone: { type: String, trim: true, default: "" },
+    
     // Cuisine and Cuisines for vendors
     cuisine: { type: String, trim: true, default: "" },
     cuisines: [{ type: mongoose.Schema.Types.ObjectId, ref: "Cuisine" }],
     
-    deliveryRadius: {
-      type: Number,
-      enum: [2, 3, 5],
-      default: 3,
-    },
-    
     // Delivery Specific Fields
-
     vehicleType: {
       type: String,
       enum: ["bike", "car", "bicycle", ""],
       default: "",
     },
     vehicleNumber: { type: String, trim: true, default: "" },
+    
     // rider's current online status
     isOnline: {
       type: Boolean,
       default: false,
     },
+
+    // --- Slot Booking ---
+    todaySlot: {
+      type: String,
+      enum: ["Morning", "Afternoon", "Night", null],
+      default: null,
+    },
+    todaySlotDate: { 
+      type: String, 
+      default: null 
+    }, // "YYYY-MM-DD" — resets daily
+
+    // --- Radius-Based Filtering ---
+    currentLocation: {
+      lat: { type: Number, default: null },
+      lng: { type: Number, default: null },
+    },
+    deliveryRadius: { 
+      type: Number, 
+      default: null 
+    }, // in km, max 20
 
     coverPhoto: {
       url: { type: String, default: "" },
@@ -132,7 +148,6 @@ const userSchema = new mongoose.Schema(
 
     // legal & Verification Fields
     cnicNumber: { type: String, trim: true, default: "" },
-    
     // cnic images
     cnicFront: {
       url: { type: String, default: "" },
@@ -146,7 +161,6 @@ const userSchema = new mongoose.Schema(
     // Account Status Fields
     isApproved: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
-
     rejectionReason: {
       type: String,
       default: null,
@@ -180,6 +194,7 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+
     // Warnings sent by admin (for poor order performance)
     warnings: [
       {
@@ -192,7 +207,7 @@ const userSchema = new mongoose.Schema(
 
     // Timestamps
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 // hash the password before saving the user document
